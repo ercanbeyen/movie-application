@@ -36,7 +36,22 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @Override
-    public MovieDto updateMovieRequest(Integer id, UpdateMovieRequest request) {
+    public List<MovieDto> getMovies() {
+        List<Movie> movies = movieRepository.findAll();
+        return movies.stream()
+                .map(movieDtoConverter::convert)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public MovieDto getMovie(Integer id) {
+        Movie movieInDb = movieRepository.findById(id)
+                .orElseThrow();
+        return movieDtoConverter.convert(movieInDb);
+    }
+
+    @Override
+    public MovieDto updateMovie(Integer id, UpdateMovieRequest request) {
         Movie movieInDb = movieRepository.findById(id)
                 .orElseThrow();
 
@@ -49,21 +64,6 @@ public class MovieServiceImpl implements MovieService {
                 .build();
 
         return movieDtoConverter.convert(movieRepository.save(movieInDb));
-    }
-
-    @Override
-    public MovieDto getMovie(Integer id) {
-        Movie movieInDb = movieRepository.findById(id)
-                .orElseThrow();
-        return movieDtoConverter.convert(movieInDb);
-    }
-
-    @Override
-    public List<MovieDto> getMovies() {
-        List<Movie> movies = movieRepository.findAll();
-        return movies.stream()
-                .map(movieDtoConverter::convert)
-                .collect(Collectors.toList());
     }
 
     @Override

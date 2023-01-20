@@ -21,7 +21,7 @@ public class DirectorServiceImpl implements DirectorService {
     private final DirectorDtoConverter directorDtoConverter;
     @Override
     public DirectorDto createDirector(CreateDirectorRequest request) {
-        Director director = Director.builder()
+        Director newDirector = Director.builder()
                 .name(request.getName())
                 .surname(request.getSurname())
                 .nationality(request.getNationality())
@@ -30,7 +30,25 @@ public class DirectorServiceImpl implements DirectorService {
                 .moviesDirected(new ArrayList<>())
                 .build();
 
-        return directorDtoConverter.convert(directorRepository.save(director));
+        return directorDtoConverter.convert(directorRepository.save(newDirector));
+    }
+
+    @Override
+    public List<DirectorDto> getDirectors() {
+        List<Director> directors = directorRepository.findAll();
+
+        return directors.stream()
+                .map(directorDtoConverter::convert)
+                .collect(Collectors.toList());
+    }
+
+
+    @Override
+    public DirectorDto getDirector(Integer id) {
+        Director directorInDb = directorRepository.findById(id)
+                .orElseThrow();
+
+        return directorDtoConverter.convert(directorInDb);
     }
 
     @Override
@@ -47,23 +65,6 @@ public class DirectorServiceImpl implements DirectorService {
                 .build();
 
         return directorDtoConverter.convert(directorRepository.save(directorInDb));
-    }
-
-    @Override
-    public DirectorDto getDirector(Integer id) {
-        Director directorInDb = directorRepository.findById(id)
-                .orElseThrow();
-
-        return directorDtoConverter.convert(directorInDb);
-    }
-
-    @Override
-    public List<DirectorDto> getDirectors() {
-        List<Director> directors = directorRepository.findAll();
-
-        return directors.stream()
-                .map(directorDtoConverter::convert)
-                .collect(Collectors.toList());
     }
 
     @Override

@@ -8,8 +8,8 @@ import java.util.List;
 
 public interface DirectorService {
     DirectorDto createDirector(CreateDirectorRequest request);
-    DirectorDto updateDirector(Integer id, UpdateDirectorRequest request);
-    DirectorDto getDirector(Integer id);
     List<DirectorDto> getDirectors();
+    DirectorDto getDirector(Integer id);
+    DirectorDto updateDirector(Integer id, UpdateDirectorRequest request);
     String deleteDirector(Integer id);
 }

@@ -2,6 +2,7 @@ package com.ercanbeyen.movieapplication.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.Hibernate;
 
 import java.util.HashSet;
@@ -9,7 +10,11 @@ import java.util.Objects;
 import java.util.Set;
 
 
-@Data
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@SuperBuilder(toBuilder = true)
 @Entity
 public class Actor extends Base {
     @Id

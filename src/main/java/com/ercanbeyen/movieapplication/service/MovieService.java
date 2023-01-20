@@ -8,8 +8,8 @@ import java.util.List;
 
 public interface MovieService {
     MovieDto createMovie(CreateMovieRequest request);
-    MovieDto updateMovieRequest(Integer id, UpdateMovieRequest request);
-    MovieDto getMovie(Integer id);
     List<MovieDto> getMovies();
+    MovieDto getMovie(Integer id);
+    MovieDto updateMovie(Integer id, UpdateMovieRequest request);
     String deleteMovie(Integer id);
 }

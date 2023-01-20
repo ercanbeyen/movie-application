@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DirectorDtoConverter {
     public DirectorDto convert(Director director) {
-        DirectorDto directorDto = DirectorDto.builder()
+        return DirectorDto.builder()
                 .name(director.getName())
                 .surname(director.getSurname())
                 .nationality(director.getNationality())
@@ -20,7 +20,5 @@ public class DirectorDtoConverter {
                                 .toList()
                 )
                 .build();
-
-        return directorDto;
     }
 }
