@@ -14,12 +14,4 @@ public class MovieApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(MovieApplication.class, args);
 	}
-
-	/*@Bean
-	CommandLineRunner run(MovieRepository movieRepository) {
-		return args -> {
-			//String title, String language, Integer releaseYear, Double rating, Genre genre, String summary
-			movieRepository.save(new Movie("Title 1", "English", 2017, 3.5, Genre.SCIENCE_FICTION, "Summary"));
-		};
-	}*/
 }

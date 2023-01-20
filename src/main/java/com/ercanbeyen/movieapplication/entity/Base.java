@@ -1,22 +1,25 @@
 package com.ercanbeyen.movieapplication.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.MappedSuperclass;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Date;
 
-@MappedSuperclass
-@Getter
 @Setter
-@ToString
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@SuperBuilder(toBuilder = true)
+@MappedSuperclass
 public class Base implements Serializable {
     private String name;
     private String surname;
     private String nationality;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthYear;
     private String biography;
 }
