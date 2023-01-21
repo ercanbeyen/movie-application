@@ -16,7 +16,7 @@ import java.util.Set;
 @Entity
 public class Movie implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String title;
     private String language;
@@ -31,4 +31,5 @@ public class Movie implements Serializable {
     @ManyToOne
     @JoinColumn(name = "director_id", referencedColumnName = "id")
     private Director director;
+    //private Integer director_id;
 }

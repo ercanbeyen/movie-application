@@ -18,7 +18,7 @@ import java.util.Set;
 @Entity
 public class Actor extends Base {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(

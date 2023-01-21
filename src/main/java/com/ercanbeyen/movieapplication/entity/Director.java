@@ -15,9 +15,10 @@ import java.util.List;
 @Entity
 public class Director extends Base {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @OneToMany(mappedBy = "director", cascade = CascadeType.ALL, orphanRemoval = true)
+    //@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Movie> moviesDirected;
 }

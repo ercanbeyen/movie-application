@@ -72,4 +72,10 @@ public class DirectorServiceImpl implements DirectorService {
         directorRepository.deleteById(id);
         return "Director " + id + " is successfully deleted";
     }
+
+    @Override
+    public Director getDirectorById(Integer id) {
+        return directorRepository.findById(id)
+                .orElseThrow();
+    }
 }
