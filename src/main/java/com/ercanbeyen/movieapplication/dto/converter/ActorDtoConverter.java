@@ -18,8 +18,7 @@ public class ActorDtoConverter {
                 .moviesPlayed(
                         actor.getMoviesPlayed().stream()
                                 .map(Movie::getId)
-                                .collect(Collectors.toSet())
-                )
+                                .collect(Collectors.toSet()))
                 .build();
     }
 }

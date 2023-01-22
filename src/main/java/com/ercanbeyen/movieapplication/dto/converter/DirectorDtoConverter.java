@@ -17,8 +17,7 @@ public class DirectorDtoConverter {
                 .moviesDirected(
                         director.getMoviesDirected().stream()
                                 .map(Movie::getId)
-                                .toList()
-                )
+                                .toList())
                 .build();
     }
 }

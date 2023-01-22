@@ -6,6 +6,7 @@ import com.ercanbeyen.movieapplication.dto.request.create.CreateMovieRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateMovieRequest;
 import com.ercanbeyen.movieapplication.entity.Director;
 import com.ercanbeyen.movieapplication.entity.Movie;
+import com.ercanbeyen.movieapplication.exception.EntityNotFound;
 import com.ercanbeyen.movieapplication.repository.MovieRepository;
 import com.ercanbeyen.movieapplication.service.DirectorService;
 import com.ercanbeyen.movieapplication.service.MovieService;
@@ -39,14 +40,12 @@ public class MovieServiceImpl implements MovieService {
                 .language(request.getLanguage())
                 .summary(request.getSummary())
                 .director(director)
-                //.director_id(request.getDirectorId())
                 .actors(new HashSet<>())
                 .build();
 
         Movie createdMovie = movieRepository.save(newMovie);
-        MovieDto movieDto = movieDtoConverter.convert(createdMovie);
 
-        return movieDto;
+        return movieDtoConverter.convert(createdMovie);
     }
 
     @Cacheable(value = "Movie")
@@ -61,8 +60,7 @@ public class MovieServiceImpl implements MovieService {
     @Cacheable(value = "Movie", key = "#id")
     @Override
     public MovieDto getMovie(Integer id) {
-        Movie movieInDb = movieRepository.findById(id)
-                .orElseThrow();
+        Movie movieInDb = getMovieById(id);
         return movieDtoConverter.convert(movieInDb);
     }
 
@@ -70,8 +68,7 @@ public class MovieServiceImpl implements MovieService {
     @CachePut(value = "Movie", key = "#id")
     @Override
     public MovieDto updateMovie(Integer id, UpdateMovieRequest request) {
-        Movie movieInDb = movieRepository.findById(id)
-                .orElseThrow();
+        Movie movieInDb = getMovieById(id);
 
         movieInDb.toBuilder()
                 .title(request.getTitle())
@@ -89,5 +86,10 @@ public class MovieServiceImpl implements MovieService {
     public String deleteMovie(Integer id) {
         movieRepository.deleteById(id);
         return "Movie " + id + " is successfully deleted";
+    }
+
+    private Movie getMovieById(Integer id) {
+        return movieRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFound("Movie " + id + " is not found"));
     }
 }

@@ -5,6 +5,7 @@ import com.ercanbeyen.movieapplication.dto.converter.DirectorDtoConverter;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateDirectorRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateDirectorRequest;
 import com.ercanbeyen.movieapplication.entity.Director;
+import com.ercanbeyen.movieapplication.exception.EntityNotFound;
 import com.ercanbeyen.movieapplication.repository.DirectorRepository;
 import com.ercanbeyen.movieapplication.service.DirectorService;
 import lombok.RequiredArgsConstructor;
@@ -45,16 +46,14 @@ public class DirectorServiceImpl implements DirectorService {
 
     @Override
     public DirectorDto getDirector(Integer id) {
-        Director directorInDb = directorRepository.findById(id)
-                .orElseThrow();
+        Director directorInDb = getDirectorById(id);
 
         return directorDtoConverter.convert(directorInDb);
     }
 
     @Override
     public DirectorDto updateDirector(Integer id, UpdateDirectorRequest request) {
-        Director directorInDb = directorRepository.findById(id)
-                .orElseThrow();
+        Director directorInDb = getDirectorById(id);
 
         directorInDb.toBuilder()
                 .name(request.getName())
@@ -76,6 +75,6 @@ public class DirectorServiceImpl implements DirectorService {
     @Override
     public Director getDirectorById(Integer id) {
         return directorRepository.findById(id)
-                .orElseThrow();
+                .orElseThrow(() -> new EntityNotFound("Director " + id + " is not found"));
     }
 }

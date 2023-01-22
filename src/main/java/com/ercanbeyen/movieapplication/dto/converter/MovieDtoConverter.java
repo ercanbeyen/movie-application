@@ -15,13 +15,6 @@ public class MovieDtoConverter {
                 .title(movie.getTitle())
                 .genre(movie.getGenre())
                 .directorId(movie.getDirector().getId())
-                //.directorId(movie.getDirectorId())
-                //.actors(movie.getActors())
-                /*
-                                        director.getMoviesDirected().stream()
-                                .map(Movie::getId)
-                                .toList()
-                 */
                 .actorsIds(
                         movie.getActors().stream()
                                 .map(Actor::getId)

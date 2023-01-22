@@ -5,7 +5,7 @@ import com.ercanbeyen.movieapplication.dto.converter.ActorDtoConverter;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateActorRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateActorRequest;
 import com.ercanbeyen.movieapplication.entity.Actor;
-import com.ercanbeyen.movieapplication.entity.Director;
+import com.ercanbeyen.movieapplication.exception.EntityNotFound;
 import com.ercanbeyen.movieapplication.repository.ActorRepository;
 import com.ercanbeyen.movieapplication.service.ActorService;
 import lombok.RequiredArgsConstructor;
@@ -44,15 +44,13 @@ public class ActorServiceImpl implements ActorService {
 
     @Override
     public ActorDto getActor(Integer id) {
-        Actor actorInDb = actorRepository.findById(id)
-                .orElseThrow();
+        Actor actorInDb = getActorById(id);
         return actorDtoConverter.convert(actorInDb);
     }
 
     @Override
     public ActorDto updateActor(Integer id, UpdateActorRequest request) {
-        Actor actorInDb = actorRepository.findById(id)
-                .orElseThrow();
+        Actor actorInDb = getActorById(id);
 
         actorInDb.toBuilder()
                 .name(request.getName())
@@ -69,5 +67,10 @@ public class ActorServiceImpl implements ActorService {
     public String deleteActor(Integer id) {
         actorRepository.deleteById(id);
         return "Actor " + id + " is successfully deleted";
+    }
+
+    private Actor getActorById(Integer id) {
+        return actorRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFound("Actor " + id + " is not found"));
     }
 }
