@@ -3,11 +3,14 @@ package com.ercanbeyen.movieapplication.controller;
 import com.ercanbeyen.movieapplication.dto.MovieDto;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateMovieRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateMovieRequest;
+import com.ercanbeyen.movieapplication.dto.response.ResponseHandler;
 import com.ercanbeyen.movieapplication.service.MovieService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/movies")
@@ -17,27 +20,31 @@ public class MovieController {
 
     @PostMapping
     public ResponseEntity<Object> createMovie(@RequestBody CreateMovieRequest request) {
-        MovieDto createdMovie = movieService.createMovie(request);
-        return new ResponseEntity<>(createdMovie, HttpStatus.CREATED);
+        MovieDto movieDto = movieService.createMovie(request);
+        return ResponseHandler.generateResponse(HttpStatus.CREATED, null, movieDto);
     }
 
     @GetMapping
     public ResponseEntity<Object> getMovies() {
-        return ResponseEntity.ok(movieService.getMovies());
+        List<MovieDto> movieDtos = movieService.getMovies();
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDtos);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Object> getMovie(@PathVariable("id") Integer id) {
-        return ResponseEntity.ok(movieService.getMovie(id));
+        MovieDto movieDto = movieService.getMovie(id);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDto);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Object> updateMovie(@PathVariable("id") Integer id, UpdateMovieRequest request) {
-        return ResponseEntity.ok(movieService.updateMovie(id, request));
+        MovieDto movieDto = movieService.updateMovie(id, request);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDto);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteMovie(@PathVariable("id") Integer id) {
-        return ResponseEntity.ok(movieService.deleteMovie(id));
+        String message = movieService.deleteMovie(id);
+        return ResponseHandler.generateResponse(HttpStatus.OK, message, null);
     }
 }

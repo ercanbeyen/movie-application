@@ -3,11 +3,14 @@ package com.ercanbeyen.movieapplication.controller;
 import com.ercanbeyen.movieapplication.dto.DirectorDto;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateDirectorRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateDirectorRequest;
+import com.ercanbeyen.movieapplication.dto.response.ResponseHandler;
 import com.ercanbeyen.movieapplication.service.DirectorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/directors")
@@ -17,27 +20,31 @@ public class DirectorController {
 
     @PostMapping
     public ResponseEntity<Object> createDirector(@RequestBody CreateDirectorRequest request) {
-        DirectorDto createdDirector = directorService.createDirector(request);
-        return new ResponseEntity<>(createdDirector, HttpStatus.CREATED);
+        DirectorDto directorDto = directorService.createDirector(request);
+        return ResponseHandler.generateResponse(HttpStatus.CREATED, null, directorDto);
     }
 
     @GetMapping
     public ResponseEntity<Object> getDirectors() {
-        return ResponseEntity.ok(directorService.getDirectors());
+        List<DirectorDto> directorDtos = directorService.getDirectors();
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, directorDtos);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Object> getDirector(@PathVariable("id") Integer id) {
-        return ResponseEntity.ok(directorService.getDirector(id));
+        DirectorDto directorDto = directorService.getDirector(id);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, directorDto);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Object> updateDirector(@PathVariable("id") Integer id, @RequestBody UpdateDirectorRequest request) {
-        return ResponseEntity.ok(directorService.updateDirector(id, request));
+        DirectorDto directorDto = directorService.updateDirector(id, request);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, directorDto);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteDirector(@PathVariable("id") Integer id) {
-        return ResponseEntity.ok(directorService.deleteDirector(id));
+        String message = directorService.deleteDirector(id);
+        return ResponseHandler.generateResponse(HttpStatus.OK, message, null);
     }
 }
