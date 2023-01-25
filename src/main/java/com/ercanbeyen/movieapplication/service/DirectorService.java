@@ -5,7 +5,6 @@ import com.ercanbeyen.movieapplication.dto.request.create.CreateDirectorRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateDirectorRequest;
 import com.ercanbeyen.movieapplication.entity.Director;
 
-import java.time.LocalDate;
 import java.util.List;
 
 public interface DirectorService {
@@ -14,5 +13,6 @@ public interface DirectorService {
     DirectorDto getDirector(Integer id);
     DirectorDto updateDirector(Integer id, UpdateDirectorRequest request);
     String deleteDirector(Integer id);
+    List<DirectorDto> searchDirectors(String fullName);
     Director getDirectorById(Integer id);
 }

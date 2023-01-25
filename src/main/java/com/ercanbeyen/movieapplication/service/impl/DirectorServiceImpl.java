@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -84,6 +83,14 @@ public class DirectorServiceImpl implements DirectorService {
     public String deleteDirector(Integer id) {
         directorRepository.deleteById(id);
         return "Director " + id + " is successfully deleted";
+    }
+
+    @Override
+    public List<DirectorDto> searchDirectors(String fullName) {
+        List<Director> directors = directorRepository.findByFullName(fullName);
+        return directors.stream()
+                .map(directorDtoConverter::convert)
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -57,4 +57,10 @@ public class MovieController {
         List<MovieDto> movieDtos = movieService.getLatestMovies();
         return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDtos);
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<Object> searchMovies(@RequestParam(required = false) String title) {
+        List<MovieDto> movieDtos = movieService.searchMovies(title);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDtos);
+    }
 }

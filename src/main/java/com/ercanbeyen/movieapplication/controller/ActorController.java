@@ -51,4 +51,10 @@ public class ActorController {
         return ResponseHandler.generateResponse(HttpStatus.OK, message, null);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<Object> searchActors(@RequestParam String fullName) {
+        List<ActorDto> actorDtos = actorService.searchActors(fullName);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, actorDtos);
+    }
+
 }

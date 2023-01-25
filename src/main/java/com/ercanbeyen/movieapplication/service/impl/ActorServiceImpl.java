@@ -94,6 +94,14 @@ public class ActorServiceImpl implements ActorService {
         return "Actor " + id + " is successfully deleted";
     }
 
+    @Override
+    public List<ActorDto> searchActors(String fullName) {
+        List<Actor> actors = actorRepository.findByFullName(fullName);
+        return actors.stream()
+                .map(actorDtoConverter::convert)
+                .collect(Collectors.toList());
+    }
+
     private Actor getActorById(Integer id) {
         return actorRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFound("Actor " + id + " is not found"));

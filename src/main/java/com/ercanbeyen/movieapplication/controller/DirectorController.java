@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -50,5 +49,11 @@ public class DirectorController {
     public ResponseEntity<Object> deleteDirector(@PathVariable("id") Integer id) {
         String message = directorService.deleteDirector(id);
         return ResponseHandler.generateResponse(HttpStatus.OK, message, null);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Object> searchDirectors(@RequestParam String fullName) {
+        List<DirectorDto> directorDtos = directorService.searchDirectors(fullName);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, directorDtos);
     }
 }

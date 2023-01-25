@@ -14,8 +14,7 @@ public interface MovieService {
     MovieDto getMovie(Integer id);
     MovieDto updateMovie(Integer id, UpdateMovieRequest request);
     String deleteMovie(Integer id);
-    //List<MovieDto> getLatestMovies(Integer year);
     List<MovieDto> getLatestMovies();
+    List<MovieDto> searchMovies(String title);
     Movie getMovieById(Integer id);
-
 }

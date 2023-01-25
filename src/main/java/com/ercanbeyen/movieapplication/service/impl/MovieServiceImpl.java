@@ -20,6 +20,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -134,6 +135,20 @@ public class MovieServiceImpl implements MovieService {
         List<Movie> movies = movieRepository.findAll();
         return movies.stream()
                 .filter(movie -> movie.getReleaseYear() >= 2020)
+                .map(movieDtoConverter::convert)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<MovieDto> searchMovies(String title) {
+        boolean isTitleFilled = StringUtils.isNotBlank(title);
+        List<Movie> movies = new ArrayList<>();
+
+        if (isTitleFilled) {
+            movies = movieRepository.findByTitleStartingWith(title);
+        }
+
+        return movies.stream()
                 .map(movieDtoConverter::convert)
                 .collect(Collectors.toList());
     }
