@@ -4,6 +4,7 @@ import com.ercanbeyen.movieapplication.dto.MovieDto;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateMovieRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateMovieRequest;
 import com.ercanbeyen.movieapplication.dto.response.ResponseHandler;
+import com.ercanbeyen.movieapplication.entity.enums.Genre;
 import com.ercanbeyen.movieapplication.service.MovieService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,8 +26,11 @@ public class MovieController {
     }
 
     @GetMapping
-    public ResponseEntity<Object> getMovies() {
-        List<MovieDto> movieDtos = movieService.getMovies();
+    public ResponseEntity<Object> getMovies(
+            @RequestParam(required = false) String language,
+            @RequestParam(required = false) Genre genre,
+            @RequestParam(required = false) Integer year) {
+        List<MovieDto> movieDtos = movieService.getMovies(language, genre, year);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDtos);
     }
 
@@ -46,5 +50,11 @@ public class MovieController {
     public ResponseEntity<Object> deleteMovie(@PathVariable("id") Integer id) {
         String message = movieService.deleteMovie(id);
         return ResponseHandler.generateResponse(HttpStatus.OK, message, null);
+    }
+
+    @GetMapping("/latest")
+    public ResponseEntity<Object> getLatestMovies() {
+        List<MovieDto> movieDtos = movieService.getLatestMovies();
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDtos);
     }
 }

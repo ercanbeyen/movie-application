@@ -9,8 +9,10 @@ import com.ercanbeyen.movieapplication.exception.EntityNotFound;
 import com.ercanbeyen.movieapplication.repository.DirectorRepository;
 import com.ercanbeyen.movieapplication.service.DirectorService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,8 +37,20 @@ public class DirectorServiceImpl implements DirectorService {
     }
 
     @Override
-    public List<DirectorDto> getDirectors() {
+    public List<DirectorDto> getDirectors(String nationality, Integer year) {
         List<Director> directors = directorRepository.findAll();
+
+        if (!StringUtils.isBlank(nationality)) {
+            directors = directors.stream()
+                    .filter(director -> director.getNationality().equals(nationality))
+                    .collect(Collectors.toList());
+        }
+
+        if (year != null) {
+            directors = directors.stream()
+                    .filter(director -> director.getBirthYear().getYear() == year)
+                    .collect(Collectors.toList());
+        }
 
         return directors.stream()
                 .map(directorDtoConverter::convert)

@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -25,8 +26,11 @@ public class DirectorController {
     }
 
     @GetMapping
-    public ResponseEntity<Object> getDirectors() {
-        List<DirectorDto> directorDtos = directorService.getDirectors();
+    public ResponseEntity<Object> getDirectors(
+            @RequestParam(required = false) String nationality,
+            @RequestParam(required = false) Integer year
+    ) {
+        List<DirectorDto> directorDtos = directorService.getDirectors(nationality, year);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, directorDtos);
     }
 

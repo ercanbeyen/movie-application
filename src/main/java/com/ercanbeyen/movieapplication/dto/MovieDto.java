@@ -14,7 +14,7 @@ public class MovieDto implements Serializable {
     private Integer id;
     private String title;
     private String language;
-    private Integer releaseYear;
+    private int releaseYear;
     private Double rating;
     private Genre genre;
     private String summary;

@@ -14,14 +14,15 @@ public class MovieDtoConverter {
                 .id(movie.getId())
                 .title(movie.getTitle())
                 .genre(movie.getGenre())
+                .rating(movie.getRating())
+                .language(movie.getLanguage())
+                .releaseYear(movie.getReleaseYear())
+                .summary(movie.getSummary())
                 .directorId(movie.getDirector().getId())
                 .actorsIds(
                         movie.getActors().stream()
                                 .map(Actor::getId)
-                                .collect(Collectors.toSet())
-                )
-                .language(movie.getLanguage())
-                .releaseYear(movie.getReleaseYear())
+                                .collect(Collectors.toSet()))
                 .build();
     }
 }

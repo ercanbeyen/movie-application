@@ -25,8 +25,11 @@ public class ActorController {
     }
 
     @GetMapping
-    public ResponseEntity<Object> getActors() {
-        List<ActorDto> actorDtos = actorService.getActors();
+    public ResponseEntity<Object> getActors(
+            @RequestParam(required = false) String nationality,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer movieId) {
+        List<ActorDto> actorDtos = actorService.getActors(nationality, year, movieId);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, actorDtos);
     }
 
