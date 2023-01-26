@@ -5,6 +5,7 @@ import com.ercanbeyen.movieapplication.dto.request.create.CreateActorRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateActorRequest;
 import com.ercanbeyen.movieapplication.dto.response.ResponseHandler;
 import com.ercanbeyen.movieapplication.service.ActorService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ public class ActorController {
     private final ActorService actorService;
 
     @PostMapping
-    public ResponseEntity<Object> createActor(@RequestBody CreateActorRequest request) {
+    public ResponseEntity<Object> createActor(@Valid @RequestBody CreateActorRequest request) {
         ActorDto createdActor = actorService.createActor(request);
         return ResponseHandler.generateResponse(HttpStatus.CREATED, null, createdActor);
     }
@@ -40,7 +41,7 @@ public class ActorController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> updateActor(@PathVariable("id") Integer id, @RequestBody UpdateActorRequest request) {
+    public ResponseEntity<Object> updateActor(@PathVariable("id") Integer id, @Valid @RequestBody UpdateActorRequest request) {
         ActorDto actorDto = actorService.updateActor(id, request);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, actorDto);
     }

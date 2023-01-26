@@ -33,16 +33,6 @@ public class MovieServiceImpl implements MovieService {
     private final MovieDtoConverter movieDtoConverter;
     private final DirectorService directorService;
 
-    //@CachePut(value = "Movie", key = "#id")
-    /*@Caching(
-            evict = {
-                    @CacheEvict(value = "movies", allEntries = true)
-            },
-            put = {
-                    @CachePut(value = "movie", key = "#p0.directorId")
-            }
-    )*/
-    //@CacheEvict(value = "movies", allEntries = true)
     @Override
     public MovieDto createMovie(CreateMovieRequest request) {
         Director director = directorService.getDirectorById(request.getDirectorId());
@@ -63,8 +53,7 @@ public class MovieServiceImpl implements MovieService {
         return movieDtoConverter.convert(createdMovie);
     }
 
-    //@Cacheable(value = "movie", unless = "#result.releaseYear < 2021")
-    //@Cacheable(value = "movies")
+    @CacheEvict(value = "movies", allEntries = true)
     @Override
     public List<MovieDto> getMovies(String language, Genre genre, Integer year) {
         log.info("Fetch movies from database");
@@ -101,25 +90,23 @@ public class MovieServiceImpl implements MovieService {
         return movieDtoConverter.convert(movieInDb);
     }
 
-    //@CacheEvict(value = "Movie", allEntries = true)
-    @CachePut(value = "movie", key = "#id", unless = "#result.releaseYear < 2020")
+    @CachePut(value = "movies", key = "#id", unless = "#result.releaseYear < 2020")
     @Override
     public MovieDto updateMovie(Integer id, UpdateMovieRequest request) {
         log.info("Update movie from database");
         Movie movieInDb = getMovieById(id);
 
-        movieInDb.toBuilder()
-                .title(request.getTitle())
-                .genre(request.getGenre())
-                .language(request.getLanguage())
-                .rating(request.getRating())
-                .summary(request.getSummary())
-                .build();
+        movieInDb.setTitle(request.getTitle());
+        movieInDb.setGenre(request.getGenre());
+        movieInDb.setLanguage(request.getLanguage());
+        movieInDb.setReleaseYear(request.getReleaseYear());
+        movieInDb.setRating(request.getRating());
+        movieInDb.setSummary(request.getSummary());
 
         return movieDtoConverter.convert(movieRepository.save(movieInDb));
     }
 
-    @CacheEvict(value = "movies", allEntries = true)
+    @CacheEvict(value = "movies", key = "#id")
     @Override
     public String deleteMovie(Integer id) {
         log.info("Delete movie from database");
@@ -127,11 +114,12 @@ public class MovieServiceImpl implements MovieService {
         return "Movie " + id + " is successfully deleted";
     }
 
-    //@Cacheable(value = "movie", unless = "#result.releaseYear < 2020")
+    //@Cacheable(value = "movies", unless = "#result.releaseYear < 2020")
     @Cacheable(value = "movies")
     //@Cacheable(value = "movies", unless = "#result.getReleaseYear() < 2020")
     @Override
     public List<MovieDto> getLatestMovies() {
+        log.info("Fetch latest movies from database");
         List<Movie> movies = movieRepository.findAll();
         return movies.stream()
                 .filter(movie -> movie.getReleaseYear() >= 2020)

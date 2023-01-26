@@ -5,6 +5,7 @@ import com.ercanbeyen.movieapplication.dto.request.create.CreateDirectorRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateDirectorRequest;
 import com.ercanbeyen.movieapplication.dto.response.ResponseHandler;
 import com.ercanbeyen.movieapplication.service.DirectorService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ public class DirectorController {
     private final DirectorService directorService;
 
     @PostMapping
-    public ResponseEntity<Object> createDirector(@RequestBody CreateDirectorRequest request) {
+    public ResponseEntity<Object> createDirector(@Valid @RequestBody CreateDirectorRequest request) {
         DirectorDto directorDto = directorService.createDirector(request);
         return ResponseHandler.generateResponse(HttpStatus.CREATED, null, directorDto);
     }
@@ -40,7 +41,7 @@ public class DirectorController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> updateDirector(@PathVariable("id") Integer id, @RequestBody UpdateDirectorRequest request) {
+    public ResponseEntity<Object> updateDirector(@PathVariable("id") Integer id, @Valid @RequestBody UpdateDirectorRequest request) {
         DirectorDto directorDto = directorService.updateDirector(id, request);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, directorDto);
     }

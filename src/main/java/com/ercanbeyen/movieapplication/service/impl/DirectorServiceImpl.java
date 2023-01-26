@@ -68,13 +68,11 @@ public class DirectorServiceImpl implements DirectorService {
     public DirectorDto updateDirector(Integer id, UpdateDirectorRequest request) {
         Director directorInDb = getDirectorById(id);
 
-        directorInDb.toBuilder()
-                .name(request.getName())
-                .surname(request.getSurname())
-                .nationality(request.getNationality())
-                .birthYear(request.getBirthYear())
-                .biography(request.getBiography())
-                .build();
+        directorInDb.setName(request.getName());
+        directorInDb.setSurname(request.getSurname());
+        directorInDb.setNationality(request.getNationality());
+        directorInDb.setBirthYear(request.getBirthYear());
+        directorInDb.setBiography(request.getBiography());
 
         return directorDtoConverter.convert(directorRepository.save(directorInDb));
     }

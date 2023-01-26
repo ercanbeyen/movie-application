@@ -77,13 +77,11 @@ public class ActorServiceImpl implements ActorService {
     public ActorDto updateActor(Integer id, UpdateActorRequest request) {
         Actor actorInDb = getActorById(id);
 
-        actorInDb.toBuilder()
-                .name(request.getName())
-                .surname(request.getSurname())
-                .nationality(request.getNationality())
-                .birthYear(request.getBirthYear())
-                .biography(request.getBiography())
-                .build();
+        actorInDb.setName(request.getName());
+        actorInDb.setSurname(request.getSurname());
+        actorInDb.setNationality(request.getNationality());
+        actorInDb.setBirthYear(request.getBirthYear());
+        actorInDb.setBiography(request.getBiography());
 
         return actorDtoConverter.convert(actorRepository.save(actorInDb));
     }

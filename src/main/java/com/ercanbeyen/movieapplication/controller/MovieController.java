@@ -6,6 +6,7 @@ import com.ercanbeyen.movieapplication.dto.request.update.UpdateMovieRequest;
 import com.ercanbeyen.movieapplication.dto.response.ResponseHandler;
 import com.ercanbeyen.movieapplication.entity.enums.Genre;
 import com.ercanbeyen.movieapplication.service.MovieService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,7 @@ public class MovieController {
     private final MovieService movieService;
 
     @PostMapping
-    public ResponseEntity<Object> createMovie(@RequestBody CreateMovieRequest request) {
+    public ResponseEntity<Object> createMovie(@Valid @RequestBody CreateMovieRequest request) {
         MovieDto movieDto = movieService.createMovie(request);
         return ResponseHandler.generateResponse(HttpStatus.CREATED, null, movieDto);
     }
@@ -41,7 +42,7 @@ public class MovieController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> updateMovie(@PathVariable("id") Integer id, UpdateMovieRequest request) {
+    public ResponseEntity<Object> updateMovie(@PathVariable("id") Integer id, @Valid @RequestBody UpdateMovieRequest request) {
         MovieDto movieDto = movieService.updateMovie(id, request);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDto);
     }
