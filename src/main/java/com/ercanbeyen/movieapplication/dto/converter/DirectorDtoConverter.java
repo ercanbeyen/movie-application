@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 public class DirectorDtoConverter {
     public DirectorDto convert(Director director) {
         return DirectorDto.builder()
+                .id(director.getId())
                 .name(director.getName())
                 .surname(director.getSurname())
                 .nationality(director.getNationality())

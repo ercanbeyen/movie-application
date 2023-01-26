@@ -12,5 +12,6 @@ public interface ActorService {
     ActorDto getActor(Integer id);
     ActorDto updateActor(Integer id, UpdateActorRequest request);
     String deleteActor(Integer id);
+    List<ActorDto> getMostPopularActors();
     List<ActorDto> searchActors(String fullName);
 }

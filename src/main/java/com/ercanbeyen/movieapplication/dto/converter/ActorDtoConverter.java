@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 public class ActorDtoConverter {
     public ActorDto convert(Actor actor) {
         return ActorDto.builder()
+                .id(actor.getId())
                 .name(actor.getName())
                 .surname(actor.getSurname())
                 .nationality(actor.getNationality())

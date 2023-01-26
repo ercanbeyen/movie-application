@@ -13,6 +13,7 @@ public interface DirectorService {
     DirectorDto getDirector(Integer id);
     DirectorDto updateDirector(Integer id, UpdateDirectorRequest request);
     String deleteDirector(Integer id);
+    List<DirectorDto> getMostPopularDirector();
     List<DirectorDto> searchDirectors(String fullName);
     Director getDirectorById(Integer id);
 }

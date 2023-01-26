@@ -11,7 +11,10 @@ import com.ercanbeyen.movieapplication.repository.ActorRepository;
 import com.ercanbeyen.movieapplication.service.ActorService;
 import com.ercanbeyen.movieapplication.service.MovieService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -20,6 +23,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ActorServiceImpl implements ActorService {
     private final ActorRepository actorRepository;
     private final ActorDtoConverter actorDtoConverter;
@@ -67,14 +71,18 @@ public class ActorServiceImpl implements ActorService {
                 .collect(Collectors.toList());
     }
 
+    @Cacheable(value = "actors", key = "#id", unless = "#result.moviesPlayed.size() < 2")
     @Override
     public ActorDto getActor(Integer id) {
+        log.info("Fetch actor from database");
         Actor actorInDb = getActorById(id);
         return actorDtoConverter.convert(actorInDb);
     }
 
+    @CacheEvict(value = "actors", allEntries = true)
     @Override
     public ActorDto updateActor(Integer id, UpdateActorRequest request) {
+        log.info("Update actor operation is starting");
         Actor actorInDb = getActorById(id);
 
         actorInDb.setName(request.getName());
@@ -86,10 +94,25 @@ public class ActorServiceImpl implements ActorService {
         return actorDtoConverter.convert(actorRepository.save(actorInDb));
     }
 
+    @CacheEvict(value = "actors", key = "#id")
     @Override
     public String deleteActor(Integer id) {
+        log.info("Delete actor operation is starting");
         actorRepository.deleteById(id);
         return "Actor " + id + " is successfully deleted";
+    }
+
+    @Cacheable(value = "actors")
+    @Override
+    public List<ActorDto> getMostPopularActors() {
+        log.info("Fetch actors from database");
+        List<Actor> actors = actorRepository.findAll();
+        int numberOfMovies = 2;
+
+        return actors.stream()
+                .filter(actor -> actor.getMoviesPlayed().size() >= numberOfMovies)
+                .map(actorDtoConverter::convert)
+                .collect(Collectors.toList());
     }
 
     @Override

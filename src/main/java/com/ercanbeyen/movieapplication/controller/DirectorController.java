@@ -52,9 +52,16 @@ public class DirectorController {
         return ResponseHandler.generateResponse(HttpStatus.OK, message, null);
     }
 
+    @GetMapping("/popular")
+    public ResponseEntity<Object> getMostPopularDirectors() {
+        List<DirectorDto> directorDtos = directorService.getMostPopularDirector();
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, directorDtos);
+    }
+
     @GetMapping("/search")
     public ResponseEntity<Object> searchDirectors(@RequestParam String fullName) {
         List<DirectorDto> directorDtos = directorService.searchDirectors(fullName);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, directorDtos);
     }
+
 }

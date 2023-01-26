@@ -52,6 +52,12 @@ public class ActorController {
         return ResponseHandler.generateResponse(HttpStatus.OK, message, null);
     }
 
+    @GetMapping("/popular")
+    public ResponseEntity<Object> getMostPopularActors() {
+        List<ActorDto> actorDtos = actorService.getMostPopularActors();
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, actorDtos);
+    }
+
     @GetMapping("/search")
     public ResponseEntity<Object> searchActors(@RequestParam String fullName) {
         List<ActorDto> actorDtos = actorService.searchActors(fullName);

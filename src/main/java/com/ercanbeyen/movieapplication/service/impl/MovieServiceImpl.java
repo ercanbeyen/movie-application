@@ -17,7 +17,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -33,6 +32,7 @@ public class MovieServiceImpl implements MovieService {
     private final MovieDtoConverter movieDtoConverter;
     private final DirectorService directorService;
 
+    @CachePut(value = "movies", key = "#result.id")
     @Override
     public MovieDto createMovie(CreateMovieRequest request) {
         Director director = directorService.getDirectorById(request.getDirectorId());
@@ -90,7 +90,8 @@ public class MovieServiceImpl implements MovieService {
         return movieDtoConverter.convert(movieInDb);
     }
 
-    @CachePut(value = "movies", key = "#id", unless = "#result.releaseYear < 2020")
+    //@CachePut(value = "movies", key = "#id")
+    @CacheEvict(value = "movies", allEntries = true)
     @Override
     public MovieDto updateMovie(Integer id, UpdateMovieRequest request) {
         log.info("Update movie from database");
@@ -114,15 +115,15 @@ public class MovieServiceImpl implements MovieService {
         return "Movie " + id + " is successfully deleted";
     }
 
-    //@Cacheable(value = "movies", unless = "#result.releaseYear < 2020")
     @Cacheable(value = "movies")
-    //@Cacheable(value = "movies", unless = "#result.getReleaseYear() < 2020")
     @Override
     public List<MovieDto> getLatestMovies() {
         log.info("Fetch latest movies from database");
         List<Movie> movies = movieRepository.findAll();
+        int year = 2020;
+
         return movies.stream()
-                .filter(movie -> movie.getReleaseYear() >= 2020)
+                .filter(movie -> movie.getReleaseYear() >= year)
                 .map(movieDtoConverter::convert)
                 .collect(Collectors.toList());
     }
