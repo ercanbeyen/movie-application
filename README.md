@@ -25,8 +25,15 @@ There are 3 entities in this project
 - Spring Data JPA
 - PostgreSQL
 - Redis
+- OpenAPI Documentation
 
 
 ### Prerequisties
 ---
 - Maven
+
+### Api Documentation
+---
+
+You may use swagger-ui with the port of the application to access the project's api documentation.<br/>
+`http://localhost:${PORT}/swagger-ui.html`
