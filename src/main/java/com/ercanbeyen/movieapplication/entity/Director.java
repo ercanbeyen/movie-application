@@ -19,6 +19,5 @@ public class Director extends Base {
     private Integer id;
 
     @OneToMany(mappedBy = "director", cascade = CascadeType.ALL, orphanRemoval = true)
-    //@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Movie> moviesDirected;
 }

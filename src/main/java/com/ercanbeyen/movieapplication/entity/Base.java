@@ -15,7 +15,7 @@ import java.util.Date;
 @AllArgsConstructor
 @SuperBuilder(toBuilder = true)
 @MappedSuperclass
-public class Base implements Serializable {
+public abstract class Base implements Serializable {
     private String name;
     private String surname;
     private String nationality;
