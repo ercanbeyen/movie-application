@@ -13,7 +13,7 @@ import java.util.Date;
 @Getter
 @Setter
 @MappedSuperclass
-public class BaseDirectorRequest {
+public abstract class BaseDirectorRequest {
     @NotBlank(message = "name should not be blank")
     private String name;
     @NotBlank(message = "surname should not be blank")

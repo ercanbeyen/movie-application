@@ -8,9 +8,11 @@ import io.swagger.v3.oas.annotations.info.License;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 
 @SpringBootApplication
 @EnableCaching
+//@EnableElasticsearchRepositories(basePackages = "com.ercanbeyen.movieapplication.repository")
 @OpenAPIDefinition(
 		info = @Info(
 				title = "Blogging Platform",

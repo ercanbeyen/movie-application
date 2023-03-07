@@ -11,7 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @MappedSuperclass
-public class BaseMovieRequest {
+public abstract class BaseMovieRequest {
     @NotBlank(message = "title should not be blank")
     private String title;
     @NotBlank(message = "language should not be blank")
