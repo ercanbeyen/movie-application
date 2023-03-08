@@ -6,11 +6,15 @@
 
 ### Summary
 
-There are 3 entities in this project
+There are 3 entities and 1 document in this project
+
+Entities:
 - Movie
 - Director
 - Actor
 
+ Documents:
+ - Cinema
 
 ### Requirements
 
@@ -25,6 +29,7 @@ There are 3 entities in this project
 - Spring Data JPA
 - PostgreSQL
 - Redis
+- Elasticsearch
 - OpenAPI Documentation
 
 
