@@ -1,5 +1,6 @@
 package com.ercanbeyen.movieapplication.controller;
 
+import com.ercanbeyen.movieapplication.document.Cinema;
 import com.ercanbeyen.movieapplication.dto.CinemaDto;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateCinemaRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateCinemaRequest;
@@ -7,6 +8,7 @@ import com.ercanbeyen.movieapplication.dto.response.ResponseHandler;
 import com.ercanbeyen.movieapplication.service.CinemaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -48,4 +50,11 @@ public class CinemaController {
         String message = cinemaService.deleteCinema(id);
         return ResponseHandler.generateResponse(HttpStatus.OK, message, null);
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<Object> getCinemasByName(@RequestParam String name) {
+        List<SearchHit<Cinema>> cinemas = cinemaService.getCinemasByName(name);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemas);
+    }
+
 }

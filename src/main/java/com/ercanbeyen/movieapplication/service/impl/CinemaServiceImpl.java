@@ -10,6 +10,7 @@ import com.ercanbeyen.movieapplication.repository.CinemaRepository;
 import com.ercanbeyen.movieapplication.service.CinemaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -88,4 +89,11 @@ public class CinemaServiceImpl implements CinemaService {
         cinemaRepository.deleteById(id);
         return "Cinema " + id + " is successfully deleted";
     }
+
+    @Override
+    public List<SearchHit<Cinema>> getCinemasByName(String name) {
+        return cinemaRepository.searchByName(name).getSearchHits();
+    }
+
+
 }
