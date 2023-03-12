@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface CinemaService {
     CinemaDto createCinema(CreateCinemaRequest request);
-    List<CinemaDto> getCinemas();
+    List<CinemaDto> getCinemas(boolean reservation_with_phone, boolean threeD_animation, boolean parking_place, boolean air_conditioning, boolean cafe_food);
     CinemaDto getCinema(String id);
     CinemaDto updateCinema(String id, UpdateCinemaRequest request);
     String deleteCinema(String id);

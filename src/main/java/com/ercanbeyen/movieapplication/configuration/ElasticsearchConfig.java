@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter;
 @Configuration
 @Slf4j
 @EnableElasticsearchRepositories(basePackages = "com.ercanbeyen.movieapplication.repository")
-public class ElasticConfig extends ElasticsearchConfiguration {
+public class ElasticsearchConfig extends ElasticsearchConfiguration {
     @Override
     public ClientConfiguration clientConfiguration() {
         ClientConfiguration clientConfiguration = ClientConfiguration.builder()

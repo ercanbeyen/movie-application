@@ -28,8 +28,13 @@ public class CinemaController {
     }
 
     @GetMapping
-    public ResponseEntity<Object> getCinemas() {
-        List<CinemaDto> cinemaDtos = cinemaService.getCinemas();
+    public ResponseEntity<Object> getCinemas(
+            @RequestParam("reservation") boolean reservation_with_phone,
+            @RequestParam("three-D") boolean threeD_animation,
+            @RequestParam("parking") boolean parking_place,
+            @RequestParam("air-conditioning") boolean air_conditioning,
+            @RequestParam("cafe") boolean cafe_food) {
+        List<CinemaDto> cinemaDtos = cinemaService.getCinemas(reservation_with_phone, threeD_animation, parking_place, air_conditioning, cafe_food);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemaDtos);
     }
 
@@ -51,9 +56,9 @@ public class CinemaController {
         return ResponseHandler.generateResponse(HttpStatus.OK, message, null);
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<Object> getCinemasByName(@RequestParam String name) {
-        List<SearchHit<Cinema>> cinemas = cinemaService.getCinemasByName(name);
+    @GetMapping("/full-search")
+    public ResponseEntity<Object> getCinemasByName(@RequestParam("search") String searchTerm) {
+        List<SearchHit<Cinema>> cinemas = cinemaService.getCinemasByName(searchTerm);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemas);
     }
 

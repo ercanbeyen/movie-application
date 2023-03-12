@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
@@ -44,13 +43,8 @@ public class CinemaServiceImpl implements CinemaService {
     }
 
     @Override
-    public List<CinemaDto> getCinemas() {
-        Iterable<Cinema> iterable_cinemas = cinemaRepository.findAll();
-        List<Cinema> cinemas = StreamSupport.stream(
-                iterable_cinemas.spliterator(),
-                        false)
-                .toList();
-
+    public List<CinemaDto> getCinemas(boolean reservation_with_phone, boolean threeD_animation, boolean parking_place, boolean air_conditioning, boolean cafe_food) {
+        List<Cinema> cinemas = cinemaRepository.findByStatuses(reservation_with_phone, threeD_animation, parking_place, air_conditioning, cafe_food);
         return cinemas.stream()
                 .map(cinemaDtoConverter::convert)
                 .collect(Collectors.toList());
@@ -91,9 +85,8 @@ public class CinemaServiceImpl implements CinemaService {
     }
 
     @Override
-    public List<SearchHit<Cinema>> getCinemasByName(String name) {
-        return cinemaRepository.searchByName(name).getSearchHits();
+    public List<SearchHit<Cinema>> getCinemasByName(String searchTerm) {
+        return cinemaRepository.findByName(searchTerm).getSearchHits();
     }
-
 
 }
