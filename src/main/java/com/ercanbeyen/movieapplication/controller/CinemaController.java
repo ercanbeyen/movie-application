@@ -27,7 +27,7 @@ public class CinemaController {
         return ResponseHandler.generateResponse(HttpStatus.CREATED, null, cinemaDto);
     }
 
-    @GetMapping
+    @GetMapping("/filter")
     public ResponseEntity<Object> getCinemas(
             @RequestParam("reservation") boolean reservation_with_phone,
             @RequestParam("three-D") boolean threeD_animation,
@@ -56,9 +56,15 @@ public class CinemaController {
         return ResponseHandler.generateResponse(HttpStatus.OK, message, null);
     }
 
-    @GetMapping("/full-search")
+    @GetMapping("/name")
     public ResponseEntity<Object> getCinemasByName(@RequestParam("search") String searchTerm) {
         List<SearchHit<Cinema>> cinemas = cinemaService.getCinemasByName(searchTerm);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemas);
+    }
+
+    @GetMapping("/address")
+    public ResponseEntity<Object> getCinemasByAddress(@RequestParam("full-search") String searchTerm) {
+        List<SearchHit<Cinema>> cinemas = cinemaService.getCinemasByAddressLike(searchTerm);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemas);
     }
 

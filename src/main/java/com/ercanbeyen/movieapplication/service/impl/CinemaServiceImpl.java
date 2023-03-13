@@ -10,7 +10,11 @@ import com.ercanbeyen.movieapplication.repository.CinemaRepository;
 import com.ercanbeyen.movieapplication.service.CinemaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
+import org.springframework.data.elasticsearch.core.query.Criteria;
+import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,6 +26,8 @@ import java.util.stream.Collectors;
 public class CinemaServiceImpl implements CinemaService {
     private final CinemaRepository cinemaRepository;
     private final CinemaDtoConverter cinemaDtoConverter;
+    private final ElasticsearchOperations elasticsearchOperations;
+    private static final String CINEMA_INDEX = "cinema";
 
     @Override
     public CinemaDto createCinema(CreateCinemaRequest request) {
@@ -87,6 +93,15 @@ public class CinemaServiceImpl implements CinemaService {
     @Override
     public List<SearchHit<Cinema>> getCinemasByName(String searchTerm) {
         return cinemaRepository.findByName(searchTerm).getSearchHits();
+    }
+
+    @Override
+    public List<SearchHit<Cinema>> getCinemasByAddressLike(String searchTerm) {
+        Criteria criteria = new Criteria("address").expression("*" + searchTerm + "*");
+        CriteriaQuery criteriaQuery = new CriteriaQuery(criteria);
+        return elasticsearchOperations
+                .search(criteriaQuery, Cinema.class, IndexCoordinates.of(CINEMA_INDEX))
+                .getSearchHits();
     }
 
 }

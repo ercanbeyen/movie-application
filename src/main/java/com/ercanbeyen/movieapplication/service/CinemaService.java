@@ -14,5 +14,6 @@ public interface CinemaService {
     CinemaDto getCinema(String id);
     CinemaDto updateCinema(String id, UpdateCinemaRequest request);
     String deleteCinema(String id);
-    List<SearchHit<Cinema>> getCinemasByName(String name);
+    List<SearchHit<Cinema>> getCinemasByName(String searchTerm);
+    List<SearchHit<Cinema>> getCinemasByAddressLike(String searchTerm);
 }
