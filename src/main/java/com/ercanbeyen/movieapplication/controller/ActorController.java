@@ -29,8 +29,11 @@ public class ActorController {
     public ResponseEntity<Object> getActors(
             @RequestParam(required = false) String nationality,
             @RequestParam(required = false) Integer year,
-            @RequestParam(required = false) Integer movieId) {
-        List<ActorDto> actorDtos = actorService.getActors(nationality, year, movieId);
+            @RequestParam(required = false) Integer movieId,
+            @RequestParam(required = false) Boolean sort,
+            @RequestParam(value = "desc", required = false) Boolean descending,
+            @RequestParam(required = false) Integer limit) {
+        List<ActorDto> actorDtos = actorService.getActors(nationality, year, movieId, sort, descending, limit);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, actorDtos);
     }
 

@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface ActorService {
     ActorDto createActor(CreateActorRequest request);
-    List<ActorDto> getActors(String nationality, Integer year, Integer movieId);
+    List<ActorDto> getActors(String nationality, Integer year, Integer movieId, Boolean sort, Boolean descending, Integer limit);
     ActorDto getActor(Integer id);
     ActorDto updateActor(Integer id, UpdateActorRequest request);
     String deleteActor(Integer id);

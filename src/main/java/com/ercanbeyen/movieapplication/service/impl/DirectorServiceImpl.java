@@ -48,14 +48,14 @@ public class DirectorServiceImpl implements DirectorService {
             directors = directors.stream()
                     .filter(director -> director.getNationality().equals(nationality))
                     .collect(Collectors.toList());
-            log.info("Director is filtered by nationality");
+            log.info("Directors are filtered by nationality");
         }
 
         if (year != null) {
             directors = directors.stream()
                     .filter(director -> director.getBirthYear().getYear() == year)
                     .collect(Collectors.toList());
-            log.info("Director is filtered year");
+            log.info("Directors are filtered by year");
         }
 
         if (sort != null && sort) {
@@ -63,7 +63,8 @@ public class DirectorServiceImpl implements DirectorService {
                     .sorted((director1, director2) -> {
                         int numberOfMoviesDirected1 = director1.getMoviesDirected().size();
                         int numberOfMoviesDirected2 = director2.getMoviesDirected().size();
-                        if (descending) {
+
+                        if (descending != null && descending) {
                             return Integer.compare(numberOfMoviesDirected2, numberOfMoviesDirected1);
                         } else {
                             return Integer.compare(numberOfMoviesDirected1, numberOfMoviesDirected2);
@@ -71,13 +72,13 @@ public class DirectorServiceImpl implements DirectorService {
                     })
                     .toList();
 
-            log.info("Director is sorted by number of movies directed");
+            log.info("Directors are sorted by number of movies directed");
 
             if (limit != null) {
                 directors = directors.stream()
                         .limit(limit)
                         .toList();
-                log.info("Directors with top {} number", limit);
+                log.info("Top {} directors are selected", limit);
             }
         }
 

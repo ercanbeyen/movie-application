@@ -44,7 +44,7 @@ public class ActorServiceImpl implements ActorService {
     }
 
     @Override
-    public List<ActorDto> getActors(String nationality, Integer year, Integer movieId) {
+    public List<ActorDto> getActors(String nationality, Integer year, Integer movieId, Boolean sort, Boolean descending, Integer limit) {
         List<Actor> actors = actorRepository.findAll();
 
         if (!StringUtils.isBlank(nationality)) {
@@ -64,6 +64,31 @@ public class ActorServiceImpl implements ActorService {
             actors = actors.stream()
                     .filter(actor -> actor.getMoviesPlayed().contains(movie))
                     .collect(Collectors.toList());
+        }
+
+        if (sort != null && sort) {
+            actors = actors.stream()
+                    .sorted((actor1, actor2) -> {
+                        int numberOfMoviesPlayed1 = actor1.getMoviesPlayed().size();
+                        int numberOfMoviesPlayed2 = actor2.getMoviesPlayed().size();
+
+                        if (descending != null && descending) {
+                            return Integer.compare(numberOfMoviesPlayed2, numberOfMoviesPlayed1);
+                        } else {
+                            return Integer.compare(numberOfMoviesPlayed1, numberOfMoviesPlayed2);
+                        }
+                    })
+                    .toList();
+
+            log.info("Actors are sorted by number of movies played");
+
+            if (limit != null) {
+                actors = actors.stream()
+                        .limit(limit)
+                        .toList();
+            }
+
+            log.info("Top {} actors are selected", limit);
         }
 
         return actors.stream()

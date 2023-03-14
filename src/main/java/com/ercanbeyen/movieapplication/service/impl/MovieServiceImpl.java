@@ -55,7 +55,7 @@ public class MovieServiceImpl implements MovieService {
 
     @CacheEvict(value = "movies", allEntries = true)
     @Override
-    public List<MovieDto> getMovies(String language, Genre genre, Integer year) {
+    public List<MovieDto> getMovies(String language, Genre genre, Integer year,  Boolean sort, Boolean descending, Integer limit) {
         log.info("Fetch movies from database");
         List<Movie> movies = movieRepository.findAll();
 
@@ -63,18 +63,46 @@ public class MovieServiceImpl implements MovieService {
             movies = movies.stream()
                     .filter(movie -> movie.getLanguage().equals(language))
                     .collect(Collectors.toList());
+            log.info("Movies are filtered by language");
         }
 
         if (genre != null) {
             movies = movies.stream()
                     .filter(movie -> movie.getGenre() == genre)
                     .collect(Collectors.toList());
+            log.info("Movies are filtered by genre");
         }
 
         if (year != null) {
             movies = movies.stream()
                     .filter(movie -> movie.getReleaseYear() == year)
                     .collect(Collectors.toList());
+            log.info("Movies are filtered by release year");
+        }
+
+        if (sort != null && sort) {
+            movies = movies.stream()
+                    .sorted((movie1, movie2) -> {
+                        Double rating1 = movie1.getRating();
+                        Double rating2 = movie2.getRating();
+
+                        if (descending != null && descending) {
+                            return Double.compare(rating2, rating1);
+                        } else {
+                            return Double.compare(rating1, rating2);
+                        }
+                    })
+                    .toList();
+
+            log.info("Movies are sorted by rating");
+
+            if (limit != null) {
+                movies = movies.stream()
+                        .limit(limit)
+                        .toList();
+            }
+
+            log.info("Top {} movies are selected", limit);
         }
 
         return movies.stream()
@@ -90,7 +118,6 @@ public class MovieServiceImpl implements MovieService {
         return movieDtoConverter.convert(movieInDb);
     }
 
-    //@CachePut(value = "movies", key = "#id")
     @CacheEvict(value = "movies", allEntries = true)
     @Override
     public MovieDto updateMovie(Integer id, UpdateMovieRequest request) {

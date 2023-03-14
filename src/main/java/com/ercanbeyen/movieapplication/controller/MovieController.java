@@ -30,8 +30,11 @@ public class MovieController {
     public ResponseEntity<Object> getMovies(
             @RequestParam(required = false) String language,
             @RequestParam(required = false) Genre genre,
-            @RequestParam(required = false) Integer year) {
-        List<MovieDto> movieDtos = movieService.getMovies(language, genre, year);
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Boolean sort,
+            @RequestParam(value = "desc" ,required = false) Boolean descending,
+            @RequestParam(required = false) Integer limit) {
+        List<MovieDto> movieDtos = movieService.getMovies(language, genre, year, sort, descending, limit);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDtos);
     }
 

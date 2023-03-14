@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface MovieService {
     MovieDto createMovie(CreateMovieRequest request);
-    List<MovieDto> getMovies(String language, Genre genre, Integer year);
+    List<MovieDto> getMovies(String language, Genre genre, Integer year,  Boolean sort, Boolean descending, Integer limit);
     MovieDto getMovie(Integer id);
     MovieDto updateMovie(Integer id, UpdateMovieRequest request);
     String deleteMovie(Integer id);
