@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface DirectorService {
     DirectorDto createDirector(CreateDirectorRequest request);
-    List<DirectorDto> getDirectors(String nationality, Integer year);
+    List<DirectorDto> getDirectors(String nationality, Integer year, Boolean sort, Boolean descending, Integer limit);
     DirectorDto getDirector(Integer id);
     DirectorDto updateDirector(Integer id, UpdateDirectorRequest request);
     String deleteDirector(Integer id);

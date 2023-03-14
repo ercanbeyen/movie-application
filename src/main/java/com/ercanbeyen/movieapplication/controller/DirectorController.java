@@ -28,9 +28,11 @@ public class DirectorController {
     @GetMapping
     public ResponseEntity<Object> getDirectors(
             @RequestParam(required = false) String nationality,
-            @RequestParam(required = false) Integer year
-    ) {
-        List<DirectorDto> directorDtos = directorService.getDirectors(nationality, year);
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Boolean sort,
+            @RequestParam(value = "desc", required = false) Boolean descending,
+            @RequestParam(required = false) Integer limit) {
+        List<DirectorDto> directorDtos = directorService.getDirectors(nationality, year, sort, descending, limit);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, directorDtos);
     }
 

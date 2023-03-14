@@ -41,19 +41,44 @@ public class DirectorServiceImpl implements DirectorService {
     }
 
     @Override
-    public List<DirectorDto> getDirectors(String nationality, Integer year) {
+    public List<DirectorDto> getDirectors(String nationality, Integer year, Boolean sort, Boolean descending, Integer limit) {
         List<Director> directors = directorRepository.findAll();
 
         if (!StringUtils.isBlank(nationality)) {
             directors = directors.stream()
                     .filter(director -> director.getNationality().equals(nationality))
                     .collect(Collectors.toList());
+            log.info("Director is filtered by nationality");
         }
 
         if (year != null) {
             directors = directors.stream()
                     .filter(director -> director.getBirthYear().getYear() == year)
                     .collect(Collectors.toList());
+            log.info("Director is filtered year");
+        }
+
+        if (sort != null && sort) {
+            directors = directors.stream()
+                    .sorted((director1, director2) -> {
+                        int numberOfMoviesDirected1 = director1.getMoviesDirected().size();
+                        int numberOfMoviesDirected2 = director2.getMoviesDirected().size();
+                        if (descending) {
+                            return Integer.compare(numberOfMoviesDirected2, numberOfMoviesDirected1);
+                        } else {
+                            return Integer.compare(numberOfMoviesDirected1, numberOfMoviesDirected2);
+                        }
+                    })
+                    .toList();
+
+            log.info("Director is sorted by number of movies directed");
+
+            if (limit != null) {
+                directors = directors.stream()
+                        .limit(limit)
+                        .toList();
+                log.info("Directors with top {} number", limit);
+            }
         }
 
         return directors.stream()
