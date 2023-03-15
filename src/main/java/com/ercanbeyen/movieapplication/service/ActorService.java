@@ -3,6 +3,9 @@ package com.ercanbeyen.movieapplication.service;
 import com.ercanbeyen.movieapplication.dto.ActorDto;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateActorRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateActorRequest;
+import com.ercanbeyen.movieapplication.entity.Actor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -14,4 +17,5 @@ public interface ActorService {
     String deleteActor(Integer id);
     List<ActorDto> getMostPopularActors();
     List<ActorDto> searchActors(String fullName);
+    Page<Actor> getActors(Pageable pageable);
 }

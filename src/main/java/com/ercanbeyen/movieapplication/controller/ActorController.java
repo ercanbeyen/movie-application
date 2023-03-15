@@ -4,9 +4,12 @@ import com.ercanbeyen.movieapplication.dto.ActorDto;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateActorRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateActorRequest;
 import com.ercanbeyen.movieapplication.dto.response.ResponseHandler;
+import com.ercanbeyen.movieapplication.entity.Actor;
 import com.ercanbeyen.movieapplication.service.ActorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +28,7 @@ public class ActorController {
         return ResponseHandler.generateResponse(HttpStatus.CREATED, null, createdActor);
     }
 
-    @GetMapping
+    @GetMapping("/filter")
     public ResponseEntity<Object> getActors(
             @RequestParam(required = false) String nationality,
             @RequestParam(required = false) Integer year,
@@ -65,6 +68,12 @@ public class ActorController {
     public ResponseEntity<Object> searchActors(@RequestParam String fullName) {
         List<ActorDto> actorDtos = actorService.searchActors(fullName);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, actorDtos);
+    }
+
+    @GetMapping
+    public ResponseEntity<Object> getActors(Pageable pageable) {
+        Page<Actor> actorPage = actorService.getActors(pageable);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, actorPage);
     }
 
 }

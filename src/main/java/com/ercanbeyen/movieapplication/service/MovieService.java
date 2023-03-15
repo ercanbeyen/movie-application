@@ -5,6 +5,8 @@ import com.ercanbeyen.movieapplication.dto.request.create.CreateMovieRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateMovieRequest;
 import com.ercanbeyen.movieapplication.entity.Movie;
 import com.ercanbeyen.movieapplication.entity.enums.Genre;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -17,4 +19,5 @@ public interface MovieService {
     List<MovieDto> getLatestMovies();
     List<MovieDto> searchMovies(String title);
     Movie getMovieById(Integer id);
+    Page<Movie> getMovies(Pageable pageable);
 }

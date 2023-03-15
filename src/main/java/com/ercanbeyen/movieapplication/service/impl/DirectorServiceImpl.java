@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -143,5 +145,10 @@ public class DirectorServiceImpl implements DirectorService {
     public Director getDirectorById(Integer id) {
         return directorRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFound("Director " + id + " is not found"));
+    }
+
+    @Override
+    public Page<Director> getDirectors(Pageable pageable) {
+        return directorRepository.findAll(pageable);
     }
 }

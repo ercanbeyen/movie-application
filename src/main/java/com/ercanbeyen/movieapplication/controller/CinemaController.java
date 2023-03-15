@@ -8,6 +8,8 @@ import com.ercanbeyen.movieapplication.dto.response.ResponseHandler;
 import com.ercanbeyen.movieapplication.service.CinemaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +29,7 @@ public class CinemaController {
         return ResponseHandler.generateResponse(HttpStatus.CREATED, null, cinemaDto);
     }
 
-    @GetMapping("/filter")
+    @GetMapping("/filterByStatus")
     public ResponseEntity<Object> getCinemas(
             @RequestParam("reservation") boolean reservation_with_phone,
             @RequestParam("three-D") boolean threeD_animation,
@@ -66,6 +68,12 @@ public class CinemaController {
     public ResponseEntity<Object> getCinemasByAddress(@RequestParam("full-search") String searchTerm) {
         List<SearchHit<Cinema>> cinemas = cinemaService.getCinemasByAddressLike(searchTerm);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemas);
+    }
+
+    @GetMapping
+    public ResponseEntity<Object> getCinemas(Pageable pageable) {
+        Page<Cinema> cinemaPage = cinemaService.getCinemas(pageable);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemaPage);
     }
 
 }

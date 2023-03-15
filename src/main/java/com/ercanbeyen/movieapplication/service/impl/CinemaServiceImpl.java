@@ -10,6 +10,8 @@ import com.ercanbeyen.movieapplication.repository.CinemaRepository;
 import com.ercanbeyen.movieapplication.service.CinemaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
@@ -51,6 +53,7 @@ public class CinemaServiceImpl implements CinemaService {
     @Override
     public List<CinemaDto> getCinemas(boolean reservation_with_phone, boolean threeD_animation, boolean parking_place, boolean air_conditioning, boolean cafe_food) {
         List<Cinema> cinemas = cinemaRepository.findByStatuses(reservation_with_phone, threeD_animation, parking_place, air_conditioning, cafe_food);
+
         return cinemas.stream()
                 .map(cinemaDtoConverter::convert)
                 .collect(Collectors.toList());
@@ -99,9 +102,16 @@ public class CinemaServiceImpl implements CinemaService {
     public List<SearchHit<Cinema>> getCinemasByAddressLike(String searchTerm) {
         Criteria criteria = new Criteria("address").expression("*" + searchTerm + "*");
         CriteriaQuery criteriaQuery = new CriteriaQuery(criteria);
+
         return elasticsearchOperations
                 .search(criteriaQuery, Cinema.class, IndexCoordinates.of(CINEMA_INDEX))
                 .getSearchHits();
     }
+
+    @Override
+    public Page<Cinema> getCinemas(Pageable pageable) {
+        return cinemaRepository.findAll(pageable);
+    }
+
 
 }

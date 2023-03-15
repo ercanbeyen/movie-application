@@ -17,6 +17,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -173,5 +175,10 @@ public class MovieServiceImpl implements MovieService {
     public Movie getMovieById(Integer id) {
         return movieRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFound("Movie " + id + " is not found"));
+    }
+
+    @Override
+    public Page<Movie> getMovies(Pageable pageable) {
+        return movieRepository.findAll(pageable);
     }
 }
