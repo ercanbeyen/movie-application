@@ -1,8 +1,6 @@
 package com.ercanbeyen.movieapplication.repository;
 
 import com.ercanbeyen.movieapplication.document.Cinema;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.annotations.Query;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
@@ -20,8 +18,4 @@ public interface CinemaRepository extends ElasticsearchRepository<Cinema, String
              "{\"match\": {\"cafe_food\": \"?4\"}}]}}")
      List<Cinema> findByStatuses(boolean reservation_with_phone, boolean threeD_animation,
              boolean parking_place, boolean air_conditioning, boolean cafe_food);
-     //@Query("{\"bool\" : {\"must\" : {\"field\" : {\"city\" : \"?0\"}}}}")
-     //Page<Cinema> findByCity(String city, Pageable pageable);
-     //Page<Cinema> findAllOrderByNumberOfHalls(Pageable pageable); --> Not Working
-     //Page<Cinema> findAllByOrderByNumberOfHallsDesc(Pageable pageable); --> Problematic
 }

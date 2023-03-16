@@ -8,6 +8,8 @@ import com.ercanbeyen.movieapplication.document.Cinema;
 import com.ercanbeyen.movieapplication.exception.EntityNotFound;
 import com.ercanbeyen.movieapplication.repository.CinemaRepository;
 import com.ercanbeyen.movieapplication.service.CinemaService;
+import com.ercanbeyen.movieapplication.util.CustomPage;
+import com.ercanbeyen.movieapplication.util.CustomSearchHit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -19,6 +21,7 @@ import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -94,24 +97,48 @@ public class CinemaServiceImpl implements CinemaService {
     }
 
     @Override
-    public List<SearchHit<Cinema>> getCinemasByName(String searchTerm) {
-        return cinemaRepository.findByName(searchTerm).getSearchHits();
+    public List<CustomSearchHit<CinemaDto, Cinema>> getCinemasByName(String searchTerm) {
+        List<SearchHit<Cinema>> searchHits = cinemaRepository.findByName(searchTerm)
+                .getSearchHits();
+
+        return convertSearchHitList(searchHits);
     }
 
     @Override
-    public List<SearchHit<Cinema>> getCinemasByAddressLike(String searchTerm) {
+    public List<CustomSearchHit<CinemaDto, Cinema>> getCinemasByAddressLike(String searchTerm) {
         Criteria criteria = new Criteria("address").expression("*" + searchTerm + "*");
         CriteriaQuery criteriaQuery = new CriteriaQuery(criteria);
 
-        return elasticsearchOperations
+        List<SearchHit<Cinema>> searchHits = elasticsearchOperations
                 .search(criteriaQuery, Cinema.class, IndexCoordinates.of(CINEMA_INDEX))
                 .getSearchHits();
+
+        return convertSearchHitList(searchHits);
     }
 
     @Override
-    public Page<Cinema> getCinemas(Pageable pageable) {
-        return cinemaRepository.findAll(pageable);
+    public CustomPage<CinemaDto, Cinema> getCinemas(Pageable pageable) {
+        Page<Cinema> page = cinemaRepository.findAll(pageable);
+
+        List<CinemaDto> cinemaDtos = page.getContent().stream()
+                .map(cinemaDtoConverter::convert)
+                .toList();
+
+        return new CustomPage<>(page, cinemaDtos);
     }
 
 
+    public List<CustomSearchHit<CinemaDto, Cinema>> convertSearchHitList(List<SearchHit<Cinema>> searchHits) {
+        List<CustomSearchHit<CinemaDto, Cinema>> customSearchHits = new ArrayList<>();
+
+        searchHits.forEach(
+                searchHit -> {
+                    CinemaDto cinemaDto = cinemaDtoConverter.convert(searchHit.getContent());
+                    CustomSearchHit<CinemaDto, Cinema> customSearchHit = new CustomSearchHit<>(searchHit, cinemaDto);
+                    customSearchHits.add(customSearchHit);
+                }
+        );
+
+        return customSearchHits;
+    }
 }

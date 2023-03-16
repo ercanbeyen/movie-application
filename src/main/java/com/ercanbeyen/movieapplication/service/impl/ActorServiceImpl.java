@@ -10,6 +10,7 @@ import com.ercanbeyen.movieapplication.exception.EntityNotFound;
 import com.ercanbeyen.movieapplication.repository.ActorRepository;
 import com.ercanbeyen.movieapplication.service.ActorService;
 import com.ercanbeyen.movieapplication.service.MovieService;
+import com.ercanbeyen.movieapplication.util.CustomPage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -147,12 +148,18 @@ public class ActorServiceImpl implements ActorService {
         List<Actor> actors = actorRepository.findByFullName(fullName);
         return actors.stream()
                 .map(actorDtoConverter::convert)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
-    public Page<Actor> getActors(Pageable pageable) {
-        return actorRepository.findAll(pageable);
+    public CustomPage<ActorDto, Actor> getActors(Pageable pageable) {
+                Page<Actor> page = actorRepository.findAll(pageable);
+        List<ActorDto> actorDtos = page.getContent().stream()
+                .map(actorDtoConverter::convert)
+                .toList();
+
+        return new CustomPage<>(page, actorDtos);
+
     }
 
     private Actor getActorById(Integer id) {

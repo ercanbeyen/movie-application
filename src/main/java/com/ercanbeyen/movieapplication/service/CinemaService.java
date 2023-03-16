@@ -4,7 +4,8 @@ import com.ercanbeyen.movieapplication.document.Cinema;
 import com.ercanbeyen.movieapplication.dto.CinemaDto;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateCinemaRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateCinemaRequest;
-import org.springframework.data.domain.Page;
+import com.ercanbeyen.movieapplication.util.CustomPage;
+import com.ercanbeyen.movieapplication.util.CustomSearchHit;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.SearchHit;
 
@@ -16,7 +17,7 @@ public interface CinemaService {
     CinemaDto getCinema(String id);
     CinemaDto updateCinema(String id, UpdateCinemaRequest request);
     String deleteCinema(String id);
-    List<SearchHit<Cinema>> getCinemasByName(String searchTerm);
-    List<SearchHit<Cinema>> getCinemasByAddressLike(String searchTerm);
-    Page<Cinema> getCinemas(Pageable pageable);
+    List<CustomSearchHit<CinemaDto, Cinema>> getCinemasByName(String searchTerm);
+    List<CustomSearchHit<CinemaDto, Cinema>> getCinemasByAddressLike(String searchTerm);
+    CustomPage<CinemaDto, Cinema> getCinemas(Pageable pageable);
 }

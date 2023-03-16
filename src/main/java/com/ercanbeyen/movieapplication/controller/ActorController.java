@@ -3,12 +3,12 @@ package com.ercanbeyen.movieapplication.controller;
 import com.ercanbeyen.movieapplication.dto.ActorDto;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateActorRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateActorRequest;
-import com.ercanbeyen.movieapplication.dto.response.ResponseHandler;
+import com.ercanbeyen.movieapplication.util.ResponseHandler;
 import com.ercanbeyen.movieapplication.entity.Actor;
 import com.ercanbeyen.movieapplication.service.ActorService;
+import com.ercanbeyen.movieapplication.util.CustomPage;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -72,7 +72,7 @@ public class ActorController {
 
     @GetMapping
     public ResponseEntity<Object> getActors(Pageable pageable) {
-        Page<Actor> actorPage = actorService.getActors(pageable);
+        CustomPage<ActorDto, Actor> actorPage = actorService.getActors(pageable);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, actorPage);
     }
 

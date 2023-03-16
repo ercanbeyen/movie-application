@@ -1,5 +1,7 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
+import com.ercanbeyen.movieapplication.document.Cinema;
+import com.ercanbeyen.movieapplication.dto.CinemaDto;
 import com.ercanbeyen.movieapplication.dto.MovieDto;
 import com.ercanbeyen.movieapplication.dto.converter.MovieDtoConverter;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateMovieRequest;
@@ -11,6 +13,7 @@ import com.ercanbeyen.movieapplication.exception.EntityNotFound;
 import com.ercanbeyen.movieapplication.repository.MovieRepository;
 import com.ercanbeyen.movieapplication.service.DirectorService;
 import com.ercanbeyen.movieapplication.service.MovieService;
+import com.ercanbeyen.movieapplication.util.CustomPage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -178,7 +181,12 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @Override
-    public Page<Movie> getMovies(Pageable pageable) {
-        return movieRepository.findAll(pageable);
+    public CustomPage<MovieDto, Movie> getMovies(Pageable pageable) {
+        Page<Movie> page = movieRepository.findAll(pageable);
+        List<MovieDto> movieDtos = page.getContent().stream()
+                .map(movieDtoConverter::convert)
+                .toList();
+
+        return new CustomPage<>(page, movieDtos);
     }
 }

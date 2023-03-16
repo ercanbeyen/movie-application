@@ -1,6 +1,6 @@
 package com.ercanbeyen.movieapplication.exception.advice;
 
-import com.ercanbeyen.movieapplication.dto.response.ResponseHandler;
+import com.ercanbeyen.movieapplication.util.ResponseHandler;
 import com.ercanbeyen.movieapplication.exception.EntityNotFound;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

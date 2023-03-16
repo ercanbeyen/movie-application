@@ -1,5 +1,6 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
+import com.ercanbeyen.movieapplication.dto.CinemaDto;
 import com.ercanbeyen.movieapplication.dto.DirectorDto;
 import com.ercanbeyen.movieapplication.dto.converter.DirectorDtoConverter;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateDirectorRequest;
@@ -8,6 +9,7 @@ import com.ercanbeyen.movieapplication.entity.Director;
 import com.ercanbeyen.movieapplication.exception.EntityNotFound;
 import com.ercanbeyen.movieapplication.repository.DirectorRepository;
 import com.ercanbeyen.movieapplication.service.DirectorService;
+import com.ercanbeyen.movieapplication.util.CustomPage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -148,7 +150,12 @@ public class DirectorServiceImpl implements DirectorService {
     }
 
     @Override
-    public Page<Director> getDirectors(Pageable pageable) {
-        return directorRepository.findAll(pageable);
+    public CustomPage<DirectorDto, Director> getDirectors(Pageable pageable) {
+        Page<Director> page = directorRepository.findAll(pageable);
+        List<DirectorDto> directors = page.getContent().stream()
+                .map(directorDtoConverter::convert)
+                .toList();
+
+        return new CustomPage<>(page, directors);
     }
 }

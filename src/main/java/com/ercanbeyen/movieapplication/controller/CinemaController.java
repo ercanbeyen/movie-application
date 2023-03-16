@@ -4,11 +4,12 @@ import com.ercanbeyen.movieapplication.document.Cinema;
 import com.ercanbeyen.movieapplication.dto.CinemaDto;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateCinemaRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateCinemaRequest;
-import com.ercanbeyen.movieapplication.dto.response.ResponseHandler;
+import com.ercanbeyen.movieapplication.util.ResponseHandler;
 import com.ercanbeyen.movieapplication.service.CinemaService;
+import com.ercanbeyen.movieapplication.util.CustomPage;
+import com.ercanbeyen.movieapplication.util.CustomSearchHit;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.http.HttpStatus;
@@ -60,19 +61,19 @@ public class CinemaController {
 
     @GetMapping("/name")
     public ResponseEntity<Object> getCinemasByName(@RequestParam("search") String searchTerm) {
-        List<SearchHit<Cinema>> cinemas = cinemaService.getCinemasByName(searchTerm);
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemas);
+        List<CustomSearchHit<CinemaDto, Cinema>> searchHits = cinemaService.getCinemasByName(searchTerm);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, searchHits);
     }
 
     @GetMapping("/address")
     public ResponseEntity<Object> getCinemasByAddress(@RequestParam("full-search") String searchTerm) {
-        List<SearchHit<Cinema>> cinemas = cinemaService.getCinemasByAddressLike(searchTerm);
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemas);
+        List<CustomSearchHit<CinemaDto, Cinema>> searchHits = cinemaService.getCinemasByAddressLike(searchTerm);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, searchHits);
     }
 
     @GetMapping
     public ResponseEntity<Object> getCinemas(Pageable pageable) {
-        Page<Cinema> cinemaPage = cinemaService.getCinemas(pageable);
+        CustomPage<CinemaDto, Cinema> cinemaPage = cinemaService.getCinemas(pageable);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemaPage);
     }
 

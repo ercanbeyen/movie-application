@@ -4,7 +4,7 @@ import com.ercanbeyen.movieapplication.dto.DirectorDto;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateDirectorRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateDirectorRequest;
 import com.ercanbeyen.movieapplication.entity.Director;
-import org.springframework.data.domain.Page;
+import com.ercanbeyen.movieapplication.util.CustomPage;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -18,5 +18,5 @@ public interface DirectorService {
     List<DirectorDto> getMostPopularDirector();
     List<DirectorDto> searchDirectors(String fullName);
     Director getDirectorById(Integer id);
-    Page<Director> getDirectors(Pageable pageable);
+    CustomPage<DirectorDto, Director> getDirectors(Pageable pageable);
 }
