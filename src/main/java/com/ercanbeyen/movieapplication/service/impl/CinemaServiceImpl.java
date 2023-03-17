@@ -127,6 +127,59 @@ public class CinemaServiceImpl implements CinemaService {
         return new CustomPage<>(page, cinemaDtos);
     }
 
+    @Override
+    public List<CinemaDto> getCinemas(String country, String city, Boolean reservation_with_phone, Boolean threeD_animation, Boolean parking_place, Boolean air_conditioning, Boolean cafe_food) {
+        Iterable<Cinema> cinemaIterables = cinemaRepository.findAll();
+        List<Cinema> cinemas = new ArrayList<>();
+        cinemaIterables.forEach(cinemas::add);
+
+        if (country != null) {
+            cinemas = cinemas.stream()
+                    .filter(cinema -> cinema.getCountry().equals(country))
+                    .collect(Collectors.toList());
+        }
+
+        if (city != null) {
+            cinemas = cinemas.stream()
+                    .filter(cinema -> cinema.getCity().equals(city))
+                    .collect(Collectors.toList());
+        }
+
+        if (reservation_with_phone != null) {
+            cinemas = cinemas.stream()
+                    .filter(cinema -> cinema.isReservation_with_phone() == reservation_with_phone)
+                    .collect(Collectors.toList());
+        }
+
+        if (threeD_animation != null) {
+            cinemas = cinemas.stream()
+                    .filter(cinema -> cinema.isThreeD_animation() == threeD_animation)
+                    .collect(Collectors.toList());
+        }
+
+        if (parking_place != null) {
+            cinemas = cinemas.stream()
+                    .filter(cinema -> cinema.isParking_place() == parking_place)
+                    .collect(Collectors.toList());
+        }
+
+        if (air_conditioning != null) {
+            cinemas = cinemas.stream()
+                    .filter(cinema -> cinema.isAir_conditioning() == air_conditioning)
+                    .collect(Collectors.toList());
+        }
+
+        if (cafe_food != null) {
+            cinemas = cinemas.stream()
+                    .filter(cinema -> cinema.isCafe_food() == cafe_food)
+                    .collect(Collectors.toList());
+        }
+
+        return cinemas.stream()
+                .map(cinemaDtoConverter::convert)
+                .collect(Collectors.toList());
+    }
+
 
     public List<CustomSearchHit<CinemaDto, Cinema>> convertSearchHitList(List<SearchHit<Cinema>> searchHits) {
         List<CustomSearchHit<CinemaDto, Cinema>> customSearchHits = new ArrayList<>();

@@ -7,7 +7,6 @@ import com.ercanbeyen.movieapplication.dto.request.update.UpdateCinemaRequest;
 import com.ercanbeyen.movieapplication.util.CustomPage;
 import com.ercanbeyen.movieapplication.util.CustomSearchHit;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.elasticsearch.core.SearchHit;
 
 import java.util.List;
 
@@ -20,4 +19,5 @@ public interface CinemaService {
     List<CustomSearchHit<CinemaDto, Cinema>> getCinemasByName(String searchTerm);
     List<CustomSearchHit<CinemaDto, Cinema>> getCinemasByAddressLike(String searchTerm);
     CustomPage<CinemaDto, Cinema> getCinemas(Pageable pageable);
+    List<CinemaDto> getCinemas(String country, String city, Boolean reservation_with_phone, Boolean threeD_animation, Boolean parking_place, Boolean air_conditioning, Boolean cafe_food);
 }

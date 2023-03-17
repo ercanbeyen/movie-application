@@ -77,4 +77,17 @@ public class CinemaController {
         return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemaPage);
     }
 
+    @GetMapping("/filter")
+    public ResponseEntity<Object> getCinemas(
+            @RequestParam(required = false) String country,
+            @RequestParam(required = false) String city,
+            @RequestParam(value = "reservation", required = false) boolean reservation_with_phone,
+            @RequestParam(value = "three-D", required = false) boolean threeD_animation,
+            @RequestParam(value = "parking", required = false) boolean parking_place,
+            @RequestParam(value = "air-conditioning", required = false) boolean air_conditioning,
+            @RequestParam(value = "cafe", required = false) boolean cafe_food) {
+        List<CinemaDto> cinemaDtos = cinemaService.getCinemas(country, city, reservation_with_phone, threeD_animation, parking_place, air_conditioning, cafe_food);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemaDtos);
+    }
+
 }

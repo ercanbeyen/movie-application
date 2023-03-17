@@ -17,7 +17,7 @@ import java.time.format.DateTimeFormatter;
 public class ElasticsearchConfig extends ElasticsearchConfiguration {
     @Override
     public ClientConfiguration clientConfiguration() {
-        ClientConfiguration clientConfiguration = ClientConfiguration.builder()
+        return ClientConfiguration.builder()
                 .connectedTo("127.0.0.1")
                 .usingSsl()
                 .withConnectTimeout(Duration.ofSeconds(5))
@@ -29,6 +29,5 @@ public class ElasticsearchConfig extends ElasticsearchConfiguration {
                     return headers;
                 })
                 .build();
-        return clientConfiguration;
     }
 }
