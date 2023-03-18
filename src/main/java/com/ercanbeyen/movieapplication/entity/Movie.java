@@ -27,9 +27,7 @@ public class Movie implements Serializable {
     private String summary;
     @ManyToMany(mappedBy = "moviesPlayed", cascade = CascadeType.ALL)
     private Set<Actor> actors = new HashSet<>();
-
     @ManyToOne
     @JoinColumn(name = "director_id", referencedColumnName = "id")
     private Director director;
-    //private Integer director_id;
 }

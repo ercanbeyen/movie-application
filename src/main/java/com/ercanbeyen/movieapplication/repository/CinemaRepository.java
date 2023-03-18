@@ -18,4 +18,7 @@ public interface CinemaRepository extends ElasticsearchRepository<Cinema, String
              "{\"match\": {\"cafe_food\": \"?4\"}}]}}")
      List<Cinema> findByStatuses(boolean reservation_with_phone, boolean threeD_animation,
              boolean parking_place, boolean air_conditioning, boolean cafe_food);
+     List<Cinema> findByNumberOfHallsBetween(int lower, int higher);
+     List<Cinema> findByNumberOfHallsLessThanEqual(int threshold);
+     List<Cinema> findByNumberOfHallsGreaterThanEqual(int threshold);
 }

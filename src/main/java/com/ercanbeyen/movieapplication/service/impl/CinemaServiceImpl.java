@@ -129,9 +129,9 @@ public class CinemaServiceImpl implements CinemaService {
 
     @Override
     public List<CinemaDto> getCinemas(String country, String city, Boolean reservation_with_phone, Boolean threeD_animation, Boolean parking_place, Boolean air_conditioning, Boolean cafe_food) {
-        Iterable<Cinema> cinemaIterables = cinemaRepository.findAll();
+        Iterable<Cinema> cinemaIterable = cinemaRepository.findAll();
         List<Cinema> cinemas = new ArrayList<>();
-        cinemaIterables.forEach(cinemas::add);
+        cinemaIterable.forEach(cinemas::add);
 
         if (country != null) {
             cinemas = cinemas.stream()
@@ -173,6 +173,25 @@ public class CinemaServiceImpl implements CinemaService {
             cinemas = cinemas.stream()
                     .filter(cinema -> cinema.isCafe_food() == cafe_food)
                     .collect(Collectors.toList());
+        }
+
+        return cinemas.stream()
+                .map(cinemaDtoConverter::convert)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CinemaDto> getCinemas(Integer lower, Integer higher) {
+        List<Cinema> cinemas = new ArrayList<>();
+        if (lower != null && higher != null) {
+            cinemas = cinemaRepository.findByNumberOfHallsBetween(lower, higher);
+        } else if (lower != null) {
+            cinemas = cinemaRepository.findByNumberOfHallsGreaterThanEqual(lower);
+        } else if (higher != null) {
+            cinemas = cinemaRepository.findByNumberOfHallsLessThanEqual(higher);
+        } else {
+            Iterable<Cinema> cinemaIterable = cinemaRepository.findAll();
+            cinemaIterable.forEach(cinemas::add);
         }
 
         return cinemas.stream()

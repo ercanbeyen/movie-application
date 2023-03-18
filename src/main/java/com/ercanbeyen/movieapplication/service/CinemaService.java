@@ -20,4 +20,5 @@ public interface CinemaService {
     List<CustomSearchHit<CinemaDto, Cinema>> getCinemasByAddressLike(String searchTerm);
     CustomPage<CinemaDto, Cinema> getCinemas(Pageable pageable);
     List<CinemaDto> getCinemas(String country, String city, Boolean reservation_with_phone, Boolean threeD_animation, Boolean parking_place, Boolean air_conditioning, Boolean cafe_food);
+    List<CinemaDto> getCinemas(Integer lower, Integer higher);
 }

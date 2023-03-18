@@ -90,4 +90,11 @@ public class CinemaController {
         return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemaDtos);
     }
 
+    @GetMapping("/halls")
+    public ResponseEntity<Object> getCinemas(
+            @RequestParam(required = false) Integer lower,
+            @RequestParam(required = false) Integer higher) {
+        List<CinemaDto> cinemaDtos = cinemaService.getCinemas(lower, higher);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemaDtos);
+    }
 }
