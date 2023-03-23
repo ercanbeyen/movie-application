@@ -14,11 +14,10 @@ public class MovieDto implements Serializable {
     private Integer id;
     private String title;
     private String language;
-    private int releaseYear;
+    private Integer releaseYear;
     private Double rating;
     private Genre genre;
     private String summary;
     private Set<Integer> actorsIds;
-    //private Director director;
-    private int directorId;
+    private Integer directorId;
 }

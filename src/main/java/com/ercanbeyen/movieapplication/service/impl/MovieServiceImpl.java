@@ -41,6 +41,7 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public MovieDto createMovie(CreateMovieRequest request) {
         Director director = directorService.getDirectorById(request.getDirectorId());
+        log.info("Director is found");
 
         Movie newMovie = Movie.builder()
                 .title(request.getTitle())
@@ -52,8 +53,10 @@ public class MovieServiceImpl implements MovieService {
                 .director(director)
                 .actors(new HashSet<>())
                 .build();
+        log.info("Movie is created");
 
         Movie createdMovie = movieRepository.save(newMovie);
+        log.info("Movie is saved");
 
         return movieDtoConverter.convert(createdMovie);
     }
@@ -127,7 +130,9 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public MovieDto updateMovie(Integer id, UpdateMovieRequest request) {
         log.info("Update movie from database");
+
         Movie movieInDb = getMovieById(id);
+        log.info("Movie is found");
 
         movieInDb.setTitle(request.getTitle());
         movieInDb.setGenre(request.getGenre());
@@ -135,8 +140,12 @@ public class MovieServiceImpl implements MovieService {
         movieInDb.setReleaseYear(request.getReleaseYear());
         movieInDb.setRating(request.getRating());
         movieInDb.setSummary(request.getSummary());
+        log.info("Fields are set");
 
-        return movieDtoConverter.convert(movieRepository.save(movieInDb));
+        Movie updatedMovie = movieRepository.save(movieInDb);
+        log.info("Movie is updated");
+
+        return movieDtoConverter.convert(updatedMovie);
     }
 
     @CacheEvict(value = "movies", key = "#id")

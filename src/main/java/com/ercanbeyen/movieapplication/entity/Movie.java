@@ -20,7 +20,7 @@ public class Movie implements Serializable {
     private Integer id;
     private String title;
     private String language;
-    private int releaseYear;
+    private Integer releaseYear;
     private Double rating;
     @Enumerated(EnumType.STRING)
     private Genre genre;
