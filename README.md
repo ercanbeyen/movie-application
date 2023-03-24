@@ -27,6 +27,7 @@ Entities:
 - Java 18
 - Spring Boot
 - Spring Data JPA
+- JUnit 5
 - PostgreSQL
 - Redis
 - Elasticsearch
