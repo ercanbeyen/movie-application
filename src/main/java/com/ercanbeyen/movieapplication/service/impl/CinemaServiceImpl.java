@@ -2,6 +2,8 @@ package com.ercanbeyen.movieapplication.service.impl;
 
 import com.ercanbeyen.movieapplication.dto.CinemaDto;
 import com.ercanbeyen.movieapplication.dto.converter.CinemaDtoConverter;
+import com.ercanbeyen.movieapplication.dto.option.filter.CinemaFilteringOptions;
+import com.ercanbeyen.movieapplication.dto.option.search.CinemaSearchOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateCinemaRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateCinemaRequest;
 import com.ercanbeyen.movieapplication.document.Cinema;
@@ -54,8 +56,14 @@ public class CinemaServiceImpl implements CinemaService {
     }
 
     @Override
-    public List<CinemaDto> getCinemas(boolean reservation_with_phone, boolean threeD_animation, boolean parking_place, boolean air_conditioning, boolean cafe_food) {
-        List<Cinema> cinemas = cinemaRepository.findByStatuses(reservation_with_phone, threeD_animation, parking_place, air_conditioning, cafe_food);
+    public List<CinemaDto> searchCinemasByStatus(CinemaSearchOptions searchOptions) {
+        List<Cinema> cinemas = cinemaRepository
+                .findByStatuses(
+                        searchOptions.getReservation_with_phone(),
+                        searchOptions.getThreeD_animation(),
+                        searchOptions.getParking_place(),
+                        searchOptions.getAir_conditioning(),
+                        searchOptions.getCafe_food());
 
         return cinemas.stream()
                 .map(cinemaDtoConverter::convert)
@@ -117,7 +125,7 @@ public class CinemaServiceImpl implements CinemaService {
     }
 
     @Override
-    public CustomPage<CinemaDto, Cinema> getCinemas(Pageable pageable) {
+    public CustomPage<CinemaDto, Cinema> pagination(Pageable pageable) {
         Page<Cinema> page = cinemaRepository.findAll(pageable);
 
         List<CinemaDto> cinemaDtos = page.getContent().stream()
@@ -128,50 +136,50 @@ public class CinemaServiceImpl implements CinemaService {
     }
 
     @Override
-    public List<CinemaDto> getCinemas(String country, String city, Boolean reservation_with_phone, Boolean threeD_animation, Boolean parking_place, Boolean air_conditioning, Boolean cafe_food) {
+    public List<CinemaDto> filterCinemas(CinemaFilteringOptions filteringOptions) {
         Iterable<Cinema> cinemaIterable = cinemaRepository.findAll();
         List<Cinema> cinemas = new ArrayList<>();
         cinemaIterable.forEach(cinemas::add);
 
-        if (country != null) {
+        if (filteringOptions.getCountry() != null) {
             cinemas = cinemas.stream()
-                    .filter(cinema -> cinema.getCountry().equals(country))
+                    .filter(cinema -> cinema.getCountry().equals(filteringOptions.getCountry()))
                     .collect(Collectors.toList());
         }
 
-        if (city != null) {
+        if (filteringOptions.getCity() != null) {
             cinemas = cinemas.stream()
-                    .filter(cinema -> cinema.getCity().equals(city))
+                    .filter(cinema -> cinema.getCity().equals(filteringOptions.getCity()))
                     .collect(Collectors.toList());
         }
 
-        if (reservation_with_phone != null) {
+        if (filteringOptions.getReservation_with_phone() != null) {
             cinemas = cinemas.stream()
-                    .filter(cinema -> cinema.isReservation_with_phone() == reservation_with_phone)
+                    .filter(cinema -> cinema.isReservation_with_phone() == filteringOptions.getReservation_with_phone())
                     .collect(Collectors.toList());
         }
 
-        if (threeD_animation != null) {
+        if (filteringOptions.getThreeD_animation() != null) {
             cinemas = cinemas.stream()
-                    .filter(cinema -> cinema.isThreeD_animation() == threeD_animation)
+                    .filter(cinema -> cinema.isThreeD_animation() == filteringOptions.getThreeD_animation())
                     .collect(Collectors.toList());
         }
 
-        if (parking_place != null) {
+        if (filteringOptions.getParking_place() != null) {
             cinemas = cinemas.stream()
-                    .filter(cinema -> cinema.isParking_place() == parking_place)
+                    .filter(cinema -> cinema.isParking_place() == filteringOptions.getParking_place())
                     .collect(Collectors.toList());
         }
 
-        if (air_conditioning != null) {
+        if (filteringOptions.getAir_conditioning() != null) {
             cinemas = cinemas.stream()
-                    .filter(cinema -> cinema.isAir_conditioning() == air_conditioning)
+                    .filter(cinema -> cinema.isAir_conditioning() == filteringOptions.getAir_conditioning())
                     .collect(Collectors.toList());
         }
 
-        if (cafe_food != null) {
+        if (filteringOptions.getCafe_food() != null) {
             cinemas = cinemas.stream()
-                    .filter(cinema -> cinema.isCafe_food() == cafe_food)
+                    .filter(cinema -> cinema.isCafe_food() == filteringOptions.getCafe_food())
                     .collect(Collectors.toList());
         }
 
@@ -181,8 +189,9 @@ public class CinemaServiceImpl implements CinemaService {
     }
 
     @Override
-    public List<CinemaDto> getCinemas(Integer lower, Integer higher) {
+    public List<CinemaDto> findCinemasByHallRange(Integer lower, Integer higher) {
         List<Cinema> cinemas = new ArrayList<>();
+
         if (lower != null && higher != null) {
             cinemas = cinemaRepository.findByNumberOfHallsBetween(lower, higher);
         } else if (lower != null) {

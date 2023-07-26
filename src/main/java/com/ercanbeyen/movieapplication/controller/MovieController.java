@@ -1,11 +1,12 @@
 package com.ercanbeyen.movieapplication.controller;
 
+import com.ercanbeyen.movieapplication.constant.OrderBy;
 import com.ercanbeyen.movieapplication.dto.MovieDto;
+import com.ercanbeyen.movieapplication.dto.option.filter.MovieFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateMovieRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateMovieRequest;
 import com.ercanbeyen.movieapplication.util.ResponseHandler;
 import com.ercanbeyen.movieapplication.entity.Movie;
-import com.ercanbeyen.movieapplication.entity.enums.Genre;
 import com.ercanbeyen.movieapplication.service.MovieService;
 import com.ercanbeyen.movieapplication.util.CustomPage;
 import jakarta.validation.Valid;
@@ -24,21 +25,15 @@ public class MovieController {
     private final MovieService movieService;
 
     @PostMapping
-    public ResponseEntity<Object> createMovie(@Valid @RequestBody CreateMovieRequest request) {
+    public ResponseEntity<Object> createMovie(@RequestBody @Valid CreateMovieRequest request) {
         MovieDto movieDto = movieService.createMovie(request);
         return ResponseHandler.generateResponse(HttpStatus.CREATED, null, movieDto);
     }
 
     @GetMapping("/filter")
-    public ResponseEntity<Object> getMovies(
-            @RequestParam(required = false) String language,
-            @RequestParam(required = false) Genre genre,
-            @RequestParam(required = false) Integer year,
-            @RequestParam(required = false) Boolean sort,
-            @RequestParam(value = "desc" ,required = false) Boolean descending,
-            @RequestParam(required = false) Integer limit) {
-        List<MovieDto> movieDtos = movieService.getMovies(language, genre, year, sort, descending, limit);
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDtos);
+    public ResponseEntity<Object> getMovies(MovieFilteringOptions movieFilteringOptions, @RequestParam(required = false) OrderBy orderBy) {
+        List<MovieDto> movieDtoList = movieService.getMovies(movieFilteringOptions, orderBy);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDtoList);
     }
 
     @GetMapping("/{id}")
@@ -48,7 +43,7 @@ public class MovieController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> updateMovie(@PathVariable("id") Integer id, @Valid @RequestBody UpdateMovieRequest request) {
+    public ResponseEntity<Object> updateMovie(@PathVariable("id") Integer id, @RequestBody @Valid UpdateMovieRequest request) {
         MovieDto movieDto = movieService.updateMovie(id, request);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDto);
     }
@@ -61,14 +56,15 @@ public class MovieController {
 
     @GetMapping("/latest")
     public ResponseEntity<Object> getLatestMovies() {
-        List<MovieDto> movieDtos = movieService.getLatestMovies();
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDtos);
+        List<MovieDto> movieDtoList = movieService.getLatestMovies();
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDtoList);
+
     }
 
     @GetMapping("/search")
     public ResponseEntity<Object> searchMovies(@RequestParam(required = false) String title) {
-        List<MovieDto> movieDtos = movieService.searchMovies(title);
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDtos);
+        List<MovieDto> movieDtoList = movieService.searchMovies(title);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDtoList);
     }
 
     @GetMapping

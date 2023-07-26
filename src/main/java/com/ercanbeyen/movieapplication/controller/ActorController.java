@@ -1,6 +1,8 @@
 package com.ercanbeyen.movieapplication.controller;
 
+import com.ercanbeyen.movieapplication.constant.OrderBy;
 import com.ercanbeyen.movieapplication.dto.ActorDto;
+import com.ercanbeyen.movieapplication.dto.option.filter.ActorFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateActorRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateActorRequest;
 import com.ercanbeyen.movieapplication.util.ResponseHandler;
@@ -23,21 +25,15 @@ public class ActorController {
     private final ActorService actorService;
 
     @PostMapping
-    public ResponseEntity<Object> createActor(@Valid @RequestBody CreateActorRequest request) {
+    public ResponseEntity<Object> createActor(@RequestBody @Valid CreateActorRequest request) {
         ActorDto createdActor = actorService.createActor(request);
         return ResponseHandler.generateResponse(HttpStatus.CREATED, null, createdActor);
     }
 
     @GetMapping("/filter")
-    public ResponseEntity<Object> getActors(
-            @RequestParam(required = false) String nationality,
-            @RequestParam(required = false) Integer year,
-            @RequestParam(required = false) Integer movieId,
-            @RequestParam(required = false) Boolean sort,
-            @RequestParam(value = "desc", required = false) Boolean descending,
-            @RequestParam(required = false) Integer limit) {
-        List<ActorDto> actorDtos = actorService.getActors(nationality, year, movieId, sort, descending, limit);
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, actorDtos);
+    public ResponseEntity<Object> getActors(ActorFilteringOptions actorFilteringOptions, @RequestParam(required = false) OrderBy orderBy) {
+        List<ActorDto> actorDtoList = actorService.getActors(actorFilteringOptions, orderBy);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, actorDtoList);
     }
 
     @GetMapping("/{id}")
@@ -47,7 +43,7 @@ public class ActorController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> updateActor(@PathVariable("id") Integer id, @Valid @RequestBody UpdateActorRequest request) {
+    public ResponseEntity<Object> updateActor(@PathVariable("id") Integer id, @RequestBody @Valid UpdateActorRequest request) {
         ActorDto actorDto = actorService.updateActor(id, request);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, actorDto);
     }
@@ -60,14 +56,14 @@ public class ActorController {
 
     @GetMapping("/popular")
     public ResponseEntity<Object> getMostPopularActors() {
-        List<ActorDto> actorDtos = actorService.getMostPopularActors();
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, actorDtos);
+        List<ActorDto> actorDtoList = actorService.getMostPopularActors();
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, actorDtoList);
     }
 
     @GetMapping("/search")
     public ResponseEntity<Object> searchActors(@RequestParam String fullName) {
-        List<ActorDto> actorDtos = actorService.searchActors(fullName);
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, actorDtos);
+        List<ActorDto> actorDtoList = actorService.searchActors(fullName);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, actorDtoList);
     }
 
     @GetMapping

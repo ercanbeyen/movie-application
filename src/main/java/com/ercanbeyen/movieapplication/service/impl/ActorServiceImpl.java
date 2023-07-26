@@ -1,7 +1,9 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
+import com.ercanbeyen.movieapplication.constant.OrderBy;
 import com.ercanbeyen.movieapplication.dto.ActorDto;
 import com.ercanbeyen.movieapplication.dto.converter.ActorDtoConverter;
+import com.ercanbeyen.movieapplication.dto.option.filter.ActorFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateActorRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateActorRequest;
 import com.ercanbeyen.movieapplication.entity.Actor;
@@ -47,35 +49,39 @@ public class ActorServiceImpl implements ActorService {
     }
 
     @Override
-    public List<ActorDto> getActors(String nationality, Integer year, Integer movieId, Boolean sort, Boolean descending, Integer limit) {
+    public List<ActorDto> getActors(ActorFilteringOptions filteringOptions, OrderBy orderBy) {
         List<Actor> actors = actorRepository.findAll();
 
-        if (!StringUtils.isBlank(nationality)) {
+        if (!StringUtils.isBlank(filteringOptions.getNationality())) {
             actors = actors.stream()
-                    .filter(actor -> actor.getNationality().equals(nationality))
+                    .filter(actor -> actor.getNationality().equals(filteringOptions.getNationality()))
                     .collect(Collectors.toList());
         }
 
-        if (year != null) {
+        if (filteringOptions.getYear() != null) {
             actors = actors.stream()
-                    .filter(actor ->  actor.getBirthYear().getYear() == year)
+                    .filter(actor ->  actor.getBirthYear().getYear() == filteringOptions.getYear())
                     .collect(Collectors.toList());
         }
 
-        if (movieId != null) {
-            Movie movie = movieService.getMovieById(movieId);
-            actors = actors.stream()
-                    .filter(actor -> actor.getMoviesPlayed().contains(movie))
-                    .collect(Collectors.toList());
+        if (filteringOptions.getMovieId() != null) {
+
+            actors = actors
+                    .stream()
+                    .filter(actor -> actor.getMoviesPlayed()
+                            .stream()
+                            .map(Movie::getId)
+                            .anyMatch(id -> filteringOptions.getMovieId().intValue() == id.intValue()))
+                    .toList();
         }
 
-        if (sort != null && sort) {
+        if (orderBy != null) {
             actors = actors.stream()
                     .sorted((actor1, actor2) -> {
                         int numberOfMoviesPlayed1 = actor1.getMoviesPlayed().size();
                         int numberOfMoviesPlayed2 = actor2.getMoviesPlayed().size();
 
-                        if (descending != null && descending) {
+                        if (orderBy == OrderBy.DESC) {
                             return Integer.compare(numberOfMoviesPlayed2, numberOfMoviesPlayed1);
                         } else {
                             return Integer.compare(numberOfMoviesPlayed1, numberOfMoviesPlayed2);
@@ -85,13 +91,12 @@ public class ActorServiceImpl implements ActorService {
 
             log.info("Actors are sorted by number of movies played");
 
-            if (limit != null) {
+            if (filteringOptions.getLimit() != null) {
                 actors = actors.stream()
-                        .limit(limit)
+                        .limit(filteringOptions.getLimit())
                         .toList();
+                log.info("Top {} actors are selected", filteringOptions.getLimit());
             }
-
-            log.info("Top {} actors are selected", limit);
         }
 
         return actors.stream()

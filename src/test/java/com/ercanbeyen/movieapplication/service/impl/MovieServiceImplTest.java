@@ -1,7 +1,9 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
+import com.ercanbeyen.movieapplication.constant.OrderBy;
 import com.ercanbeyen.movieapplication.dto.MovieDto;
 import com.ercanbeyen.movieapplication.dto.converter.MovieDtoConverter;
+import com.ercanbeyen.movieapplication.dto.option.filter.MovieFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateMovieRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateMovieRequest;
 import com.ercanbeyen.movieapplication.entity.Actor;
@@ -9,9 +11,6 @@ import com.ercanbeyen.movieapplication.entity.Director;
 import com.ercanbeyen.movieapplication.entity.Movie;
 import com.ercanbeyen.movieapplication.entity.enums.Genre;
 import com.ercanbeyen.movieapplication.repository.MovieRepository;
-import com.ercanbeyen.movieapplication.service.DirectorService;
-import com.ercanbeyen.movieapplication.service.MovieService;
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -192,7 +191,10 @@ public class MovieServiceImplTest {
 
         Mockito.when(movieRepository.findAll()).thenReturn(movies);
 
-        List<MovieDto> result = movieService.getMovies(language, null, null, null, null, null);
+        MovieFilteringOptions movieFilteringOptions = new MovieFilteringOptions();
+        movieFilteringOptions.setLanguage(language);
+
+        List<MovieDto> result = movieService.getMovies(movieFilteringOptions, OrderBy.ASC);
 
         assertEquals(movieDtos, result);
 

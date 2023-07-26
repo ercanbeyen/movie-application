@@ -1,6 +1,8 @@
 package com.ercanbeyen.movieapplication.service;
 
+import com.ercanbeyen.movieapplication.constant.OrderBy;
 import com.ercanbeyen.movieapplication.dto.DirectorDto;
+import com.ercanbeyen.movieapplication.dto.option.filter.DirectorFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateDirectorRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateDirectorRequest;
 import com.ercanbeyen.movieapplication.entity.Director;
@@ -11,7 +13,7 @@ import java.util.List;
 
 public interface DirectorService {
     DirectorDto createDirector(CreateDirectorRequest request);
-    List<DirectorDto> getDirectors(String nationality, Integer year, Boolean sort, Boolean descending, Integer limit);
+    List<DirectorDto> getDirectors(DirectorFilteringOptions filteringOptions, OrderBy orderBy);
     DirectorDto getDirector(Integer id);
     DirectorDto updateDirector(Integer id, UpdateDirectorRequest request);
     String deleteDirector(Integer id);

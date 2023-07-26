@@ -21,6 +21,6 @@ public class CustomPage<T, V> {
         this.pageSize = page.getSize();
         this.sort = page.getSort();
         this.totalPage = page.getTotalPages();
-        this.totalPage = page.getTotalPages();
+        this.totalElements = page.getTotalElements();
     }
 }

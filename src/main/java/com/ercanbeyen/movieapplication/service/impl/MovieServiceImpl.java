@@ -1,14 +1,13 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
-import com.ercanbeyen.movieapplication.document.Cinema;
-import com.ercanbeyen.movieapplication.dto.CinemaDto;
+import com.ercanbeyen.movieapplication.constant.OrderBy;
 import com.ercanbeyen.movieapplication.dto.MovieDto;
 import com.ercanbeyen.movieapplication.dto.converter.MovieDtoConverter;
+import com.ercanbeyen.movieapplication.dto.option.filter.MovieFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateMovieRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateMovieRequest;
 import com.ercanbeyen.movieapplication.entity.Director;
 import com.ercanbeyen.movieapplication.entity.Movie;
-import com.ercanbeyen.movieapplication.entity.enums.Genre;
 import com.ercanbeyen.movieapplication.exception.EntityNotFound;
 import com.ercanbeyen.movieapplication.repository.MovieRepository;
 import com.ercanbeyen.movieapplication.service.DirectorService;
@@ -63,38 +62,38 @@ public class MovieServiceImpl implements MovieService {
 
     @CacheEvict(value = "movies", allEntries = true)
     @Override
-    public List<MovieDto> getMovies(String language, Genre genre, Integer year,  Boolean sort, Boolean descending, Integer limit) {
+    public List<MovieDto> getMovies(MovieFilteringOptions filteringOptions, OrderBy orderBy) {
         log.info("Fetch movies from database");
         List<Movie> movies = movieRepository.findAll();
 
-        if (!StringUtils.isBlank(language)) {
+        if (!StringUtils.isBlank(filteringOptions.getLanguage())) {
             movies = movies.stream()
-                    .filter(movie -> movie.getLanguage().equals(language))
+                    .filter(movie -> movie.getLanguage().equals(filteringOptions.getLanguage()))
                     .collect(Collectors.toList());
             log.info("Movies are filtered by language");
         }
 
-        if (genre != null) {
+        if (filteringOptions.getGenre() != null) {
             movies = movies.stream()
-                    .filter(movie -> movie.getGenre() == genre)
+                    .filter(movie -> movie.getGenre() == filteringOptions.getGenre())
                     .collect(Collectors.toList());
             log.info("Movies are filtered by genre");
         }
 
-        if (year != null) {
+        if (filteringOptions.getYear() != null) {
             movies = movies.stream()
-                    .filter(movie -> movie.getReleaseYear() == year)
+                    .filter(movie -> movie.getReleaseYear().intValue() == filteringOptions.getYear().intValue())
                     .collect(Collectors.toList());
             log.info("Movies are filtered by release year");
         }
 
-        if (sort != null && sort) {
+        if (orderBy != null) {
             movies = movies.stream()
                     .sorted((movie1, movie2) -> {
                         Double rating1 = movie1.getRating();
                         Double rating2 = movie2.getRating();
 
-                        if (descending != null && descending) {
+                        if (orderBy == OrderBy.DESC) {
                             return Double.compare(rating2, rating1);
                         } else {
                             return Double.compare(rating1, rating2);
@@ -104,13 +103,12 @@ public class MovieServiceImpl implements MovieService {
 
             log.info("Movies are sorted by rating");
 
-            if (limit != null) {
+            if (filteringOptions.getLimit() != null) {
                 movies = movies.stream()
-                        .limit(limit)
+                        .limit(filteringOptions.getLimit())
                         .toList();
+                log.info("Top {} movies are selected", filteringOptions.getLimit());
             }
-
-            log.info("Top {} movies are selected", limit);
         }
 
         return movies.stream()

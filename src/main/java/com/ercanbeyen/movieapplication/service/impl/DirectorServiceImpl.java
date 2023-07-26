@@ -1,8 +1,9 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
-import com.ercanbeyen.movieapplication.dto.CinemaDto;
+import com.ercanbeyen.movieapplication.constant.OrderBy;
 import com.ercanbeyen.movieapplication.dto.DirectorDto;
 import com.ercanbeyen.movieapplication.dto.converter.DirectorDtoConverter;
+import com.ercanbeyen.movieapplication.dto.option.filter.DirectorFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateDirectorRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateDirectorRequest;
 import com.ercanbeyen.movieapplication.entity.Director;
@@ -45,30 +46,30 @@ public class DirectorServiceImpl implements DirectorService {
     }
 
     @Override
-    public List<DirectorDto> getDirectors(String nationality, Integer year, Boolean sort, Boolean descending, Integer limit) {
+    public List<DirectorDto> getDirectors(DirectorFilteringOptions filteringOptions, OrderBy orderBy) {
         List<Director> directors = directorRepository.findAll();
 
-        if (!StringUtils.isBlank(nationality)) {
+        if (!StringUtils.isBlank(filteringOptions.getNationality())) {
             directors = directors.stream()
-                    .filter(director -> director.getNationality().equals(nationality))
+                    .filter(director -> director.getNationality().equals(filteringOptions.getNationality()))
                     .collect(Collectors.toList());
             log.info("Directors are filtered by nationality");
         }
 
-        if (year != null) {
+        if (filteringOptions.getYear() != null) {
             directors = directors.stream()
-                    .filter(director -> director.getBirthYear().getYear() == year)
+                    .filter(director -> director.getBirthYear().getYear() == filteringOptions.getYear())
                     .collect(Collectors.toList());
             log.info("Directors are filtered by year");
         }
 
-        if (sort != null && sort) {
+        if (orderBy != null) {
             directors = directors.stream()
                     .sorted((director1, director2) -> {
                         int numberOfMoviesDirected1 = director1.getMoviesDirected().size();
                         int numberOfMoviesDirected2 = director2.getMoviesDirected().size();
 
-                        if (descending != null && descending) {
+                        if (orderBy == OrderBy.DESC) {
                             return Integer.compare(numberOfMoviesDirected2, numberOfMoviesDirected1);
                         } else {
                             return Integer.compare(numberOfMoviesDirected1, numberOfMoviesDirected2);
@@ -78,11 +79,11 @@ public class DirectorServiceImpl implements DirectorService {
 
             log.info("Directors are sorted by number of movies directed");
 
-            if (limit != null) {
+            if (filteringOptions.getLimit() != null) {
                 directors = directors.stream()
-                        .limit(limit)
+                        .limit(filteringOptions.getLimit())
                         .toList();
-                log.info("Top {} directors are selected", limit);
+                log.info("Top {} directors are selected", filteringOptions.getLimit());
             }
         }
 

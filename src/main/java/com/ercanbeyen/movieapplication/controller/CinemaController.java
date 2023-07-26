@@ -2,6 +2,8 @@ package com.ercanbeyen.movieapplication.controller;
 
 import com.ercanbeyen.movieapplication.document.Cinema;
 import com.ercanbeyen.movieapplication.dto.CinemaDto;
+import com.ercanbeyen.movieapplication.dto.option.filter.CinemaFilteringOptions;
+import com.ercanbeyen.movieapplication.dto.option.search.CinemaSearchOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateCinemaRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateCinemaRequest;
 import com.ercanbeyen.movieapplication.util.ResponseHandler;
@@ -11,7 +13,6 @@ import com.ercanbeyen.movieapplication.util.CustomSearchHit;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,20 +26,15 @@ public class CinemaController {
     private final CinemaService cinemaService;
 
     @PostMapping
-    public ResponseEntity<Object> createCinema(@Valid @RequestBody CreateCinemaRequest request) {
+    public ResponseEntity<Object> createCinema(@RequestBody @Valid CreateCinemaRequest request) {
         CinemaDto cinemaDto = cinemaService.createCinema(request);
         return ResponseHandler.generateResponse(HttpStatus.CREATED, null, cinemaDto);
     }
 
-    @GetMapping("/filterByStatus")
-    public ResponseEntity<Object> getCinemas(
-            @RequestParam("reservation") boolean reservation_with_phone,
-            @RequestParam("three-D") boolean threeD_animation,
-            @RequestParam("parking") boolean parking_place,
-            @RequestParam("air-conditioning") boolean air_conditioning,
-            @RequestParam("cafe") boolean cafe_food) {
-        List<CinemaDto> cinemaDtos = cinemaService.getCinemas(reservation_with_phone, threeD_animation, parking_place, air_conditioning, cafe_food);
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemaDtos);
+    @GetMapping("/filter")
+    public ResponseEntity<Object> getCinemas(CinemaFilteringOptions filteringOptions) {
+        List<CinemaDto> cinemaDtoList = cinemaService.filterCinemas(filteringOptions);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemaDtoList);
     }
 
     @GetMapping("/{id}")
@@ -48,7 +44,7 @@ public class CinemaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> updateCinema(@PathVariable("id") String id, @Valid @RequestBody UpdateCinemaRequest request) {
+    public ResponseEntity<Object> updateCinema(@PathVariable("id") String id, @RequestBody @Valid UpdateCinemaRequest request) {
         CinemaDto cinemaDto = cinemaService.updateCinema(id, request);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemaDto);
     }
@@ -73,28 +69,21 @@ public class CinemaController {
 
     @GetMapping
     public ResponseEntity<Object> getCinemas(Pageable pageable) {
-        CustomPage<CinemaDto, Cinema> cinemaPage = cinemaService.getCinemas(pageable);
+        CustomPage<CinemaDto, Cinema> cinemaPage = cinemaService.pagination(pageable);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemaPage);
     }
 
-    @GetMapping("/filter")
-    public ResponseEntity<Object> getCinemas(
-            @RequestParam(required = false) String country,
-            @RequestParam(required = false) String city,
-            @RequestParam(value = "reservation", required = false) boolean reservation_with_phone,
-            @RequestParam(value = "three-D", required = false) boolean threeD_animation,
-            @RequestParam(value = "parking", required = false) boolean parking_place,
-            @RequestParam(value = "air-conditioning", required = false) boolean air_conditioning,
-            @RequestParam(value = "cafe", required = false) boolean cafe_food) {
-        List<CinemaDto> cinemaDtos = cinemaService.getCinemas(country, city, reservation_with_phone, threeD_animation, parking_place, air_conditioning, cafe_food);
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemaDtos);
+    @GetMapping("/search")
+    public ResponseEntity<Object> getCinemas(@Valid CinemaSearchOptions searchOptions) {
+        List<CinemaDto> cinemaDtoList = cinemaService.searchCinemasByStatus(searchOptions);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemaDtoList);
     }
 
     @GetMapping("/halls")
     public ResponseEntity<Object> getCinemas(
             @RequestParam(required = false) Integer lower,
             @RequestParam(required = false) Integer higher) {
-        List<CinemaDto> cinemaDtos = cinemaService.getCinemas(lower, higher);
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemaDtos);
+        List<CinemaDto> cinemaDtoList = cinemaService.findCinemasByHallRange(lower, higher);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemaDtoList);
     }
 }

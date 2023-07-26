@@ -1,6 +1,8 @@
 package com.ercanbeyen.movieapplication.controller;
 
+import com.ercanbeyen.movieapplication.constant.OrderBy;
 import com.ercanbeyen.movieapplication.dto.DirectorDto;
+import com.ercanbeyen.movieapplication.dto.option.filter.DirectorFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateDirectorRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateDirectorRequest;
 import com.ercanbeyen.movieapplication.util.ResponseHandler;
@@ -23,20 +25,15 @@ public class DirectorController {
     private final DirectorService directorService;
 
     @PostMapping
-    public ResponseEntity<Object> createDirector(@Valid @RequestBody CreateDirectorRequest request) {
+    public ResponseEntity<Object> createDirector(@RequestBody @Valid CreateDirectorRequest request) {
         DirectorDto directorDto = directorService.createDirector(request);
         return ResponseHandler.generateResponse(HttpStatus.CREATED, null, directorDto);
     }
 
     @GetMapping("/filter")
-    public ResponseEntity<Object> getDirectors(
-            @RequestParam(required = false) String nationality,
-            @RequestParam(required = false) Integer year,
-            @RequestParam(required = false) Boolean sort,
-            @RequestParam(value = "desc", required = false) Boolean descending,
-            @RequestParam(required = false) Integer limit) {
-        List<DirectorDto> directorDtos = directorService.getDirectors(nationality, year, sort, descending, limit);
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, directorDtos);
+    public ResponseEntity<Object> getDirectors(DirectorFilteringOptions filteringOptions, @RequestParam(required = false) OrderBy orderBy) {
+        List<DirectorDto> directorDtoList = directorService.getDirectors(filteringOptions, orderBy);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, directorDtoList);
     }
 
     @GetMapping("/{id}")
@@ -46,7 +43,7 @@ public class DirectorController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> updateDirector(@PathVariable("id") Integer id, @Valid @RequestBody UpdateDirectorRequest request) {
+    public ResponseEntity<Object> updateDirector(@PathVariable("id") Integer id, @RequestBody @Valid UpdateDirectorRequest request) {
         DirectorDto directorDto = directorService.updateDirector(id, request);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, directorDto);
     }
@@ -59,14 +56,14 @@ public class DirectorController {
 
     @GetMapping("/popular")
     public ResponseEntity<Object> getMostPopularDirectors() {
-        List<DirectorDto> directorDtos = directorService.getMostPopularDirector();
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, directorDtos);
+        List<DirectorDto> directorDtoList = directorService.getMostPopularDirector();
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, directorDtoList);
     }
 
     @GetMapping("/search")
     public ResponseEntity<Object> searchDirectors(@RequestParam String fullName) {
-        List<DirectorDto> directorDtos = directorService.searchDirectors(fullName);
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, directorDtos);
+        List<DirectorDto> directorDtoList = directorService.searchDirectors(fullName);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, directorDtoList);
     }
 
     @GetMapping
