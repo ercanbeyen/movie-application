@@ -11,12 +11,13 @@ import com.ercanbeyen.movieapplication.entity.Director;
 import com.ercanbeyen.movieapplication.entity.Movie;
 import com.ercanbeyen.movieapplication.entity.enums.Genre;
 import com.ercanbeyen.movieapplication.repository.MovieRepository;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -25,10 +26,10 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
-//@RequiredArgsConstructor
 public class MovieServiceImplTest {
     @InjectMocks
     private MovieServiceImpl movieService;
@@ -38,6 +39,8 @@ public class MovieServiceImplTest {
     private MovieDtoConverter movieDtoConverter;
     @Mock
     private DirectorServiceImpl directorService;
+    private List<Movie> movieList;
+    private List<MovieDto> movieDtoList;
 
     private Director getMockDirector() {
         return Director.builder()
@@ -51,44 +54,7 @@ public class MovieServiceImplTest {
                 .build();
     }
 
-    private List<MovieDto> getMockMovieDtos() {
-        Integer id = 1;
-        Integer directorId = 1;
-        String title = "Test-title";
-        Genre genre = Genre.SCIENCE_FICTION;
-        String summary = "Test-summary";
-        Set<Integer> actorIds = new HashSet<>();
-
-        MovieDto movieDto1 = MovieDto.builder()
-                .id(id)
-                .title(title)
-                .genre(genre)
-                .rating(3.4)
-                .releaseYear(2022)
-                .language("English")
-                .summary(summary)
-                .directorId(directorId)
-                .actorsIds(actorIds)
-                .build();
-
-        id++;
-
-        MovieDto movieDto2 = MovieDto.builder()
-                .id(id)
-                .title(title)
-                .genre(genre)
-                .rating(2.7)
-                .releaseYear(2015)
-                .language("Spanish")
-                .summary(summary)
-                .directorId(directorId)
-                .actorsIds(actorIds)
-                .build();
-
-        return Arrays.asList(movieDto1, movieDto2);
-    }
-
-    private List<Movie> getMockMovies() {
+    private List<Movie> getMockMovieList() {
         int id = 1;
         String title = "Test-title";
         Genre genre = Genre.SCIENCE_FICTION;
@@ -125,142 +91,152 @@ public class MovieServiceImplTest {
         return Arrays.asList(movie1, movie2);
     }
 
+    @BeforeEach
+    public void setup() {
+        movieList = getMockMovieList();
+        MovieDtoConverter setupMovieDtoConverter = new MovieDtoConverter();
+        movieDtoList = movieList.stream()
+                .map(setupMovieDtoConverter::convert)
+                .toList();
+    }
+
     @Test
     @DisplayName("When CreateMovie Called With Valid Input It Should Return MovieDto")
     public void whenCreateMovieCalledWithValidInput_itShouldReturnMovieDto() {
-        Movie movie = getMockMovies().get(0);
-        MovieDto movieDto = getMockMovieDtos().get(0);
-        int id = movie.getId();
-        int directorId = movieDto.getDirectorId();
+        Movie movie = movieList.get(0);
+        MovieDto expected = movieDtoList.get(0);
+        int directorId = expected.getDirectorId();
 
         CreateMovieRequest request = new CreateMovieRequest();
         request.setTitle(movie.getTitle());
         request.setGenre(movie.getGenre());
         request.setReleaseYear(movie.getReleaseYear());
         request.setLanguage(movie.getLanguage());
-        request.setDirectorId(movieDto.getDirectorId());
-        request.setRating(movieDto.getRating());
+        request.setDirectorId(expected.getDirectorId());
+        request.setRating(expected.getRating());
         request.setSummary(movie.getSummary());
 
 
-        Mockito.when(directorService.getDirectorById(directorId)).thenReturn(movie.getDirector());
-        //Mockito.lenient().when(movieRepository.save(movie)).thenReturn(movie);
-        //Mockito.when(movieRepository.save(movie)).thenReturn(movie);
-        Mockito.when(movieRepository.save(any(Movie.class))).thenReturn(movie);
-        //Mockito.doReturn(movie).when(movieRepository.save(movie));
-        //Mockito.when(movieDtoConverter.convert(movie)).thenReturn(movieDto);
-        //Mockito.lenient().when(movieDtoConverter.convert(movie)).thenReturn(movieDto);
+        when(directorService.getDirectorById(directorId)).thenReturn(movie.getDirector());
+        when(movieRepository.save(any(Movie.class))).thenReturn(movie);
+        when(movieDtoConverter.convert(movie)).thenReturn(expected);
 
-        MovieDto result = movieService.createMovie(request);
+        MovieDto actual = movieService.createMovie(request);
 
-        assertEquals(movieDto, result);
+        Assertions.assertEquals(expected, actual);
 
-        Mockito.verify(directorService).getDirectorById(directorId);
-        Mockito.verify(movieRepository).save(any(Movie.class));
-        //Mockito.verify(movieDtoConverter).convert(movie);
+        verify(directorService, times(1)).getDirectorById(directorId);
+        verify(movieRepository, times(1)).save(any(Movie.class));
+        verify(movieDtoConverter, times(1)).convert(any(Movie.class));
     }
 
     @Test
     @DisplayName("When GetMovie Called With Valid Input It Should Return MovieDto")
     public void whenGetMovieCalledValidInput_itShouldReturnMovieDto() {
-        Movie movie = getMockMovies().get(0);
+        Movie movie = movieList.get(0);
         int id = movie.getId();
 
-        MovieDto movieDto = getMockMovieDtos().get(0);
-        movieDto.setId(id);
+        MovieDto expected = movieDtoList.get(0);
+        expected.setId(id);
         Optional<Movie> optionalMovie = Optional.of(movie);
 
-        Mockito.when(movieRepository.findById(id)).thenReturn(optionalMovie);
-        //Mockito.when(movieDtoConverter.convert(movie)).thenReturn(movieDto);
+        when(movieRepository.findById(id)).thenReturn(optionalMovie);
+        when(movieDtoConverter.convert(movie)).thenReturn(expected);
 
-        MovieDto result = movieService.getMovie(id);
+        MovieDto actual = movieService.getMovie(id);
 
-        assertEquals(movieDto, result);
+        assertEquals(expected, actual);
 
-        Mockito.verify(movieRepository).findById(id);
-        //Mockito.verify(movieDtoConverter).convert(movie);
+        verify(movieRepository, times(1)).findById(id);
+        verify(movieDtoConverter, times(1)).convert(any(Movie.class));
     }
 
     @Test
-    @DisplayName("When Get Movies Called It Should Return MovieDtos")
+    @DisplayName("When Get Movies Called It Should Return MovieDto List")
     public void whenGetMoviesCalledItShouldReturnMovieDto() {
         String language = "English";
 
-        List<Movie> movies = getMockMovies();
-        List<MovieDto> movieDtos = Collections.singletonList(getMockMovieDtos().get(0));
+        List<MovieDto> expected = Collections.singletonList(movieDtoList.get(0));
 
-        Mockito.when(movieRepository.findAll()).thenReturn(movies);
+        when(movieRepository.findAll()).thenReturn(movieList);
+        when(movieDtoConverter.convert(movieList.get(0))).thenReturn(expected.get(0));
 
         MovieFilteringOptions movieFilteringOptions = new MovieFilteringOptions();
         movieFilteringOptions.setLanguage(language);
 
-        List<MovieDto> result = movieService.getMovies(movieFilteringOptions, OrderBy.ASC);
+        List<MovieDto> actual = movieService.getMovies(movieFilteringOptions, OrderBy.ASC);
 
-        assertEquals(movieDtos, result);
+        assertEquals(expected, actual);
 
-        Mockito.verify(movieRepository).findAll();
+        verify(movieRepository, times(1)).findAll();
+        verify(movieDtoConverter, times(1)).convert(any(Movie.class));
     }
 
     @Test
     @DisplayName("When UpdateMovie Called With Valid Inputs It Should Return MovieDto")
     public void whenUpdateMovieCalledWithValidInputs_itShouldReturnMovieDto() {
-        Movie movie = getMockMovies().get(0);
-        MovieDto movieDto = getMockMovieDtos().get(1);
+        Movie movie = movieList.get(0);
+        MovieDto expected = movieDtoList.get(1);
         int id = movie.getId();
-        movieDto.setId(id);
+        expected.setId(id);
 
         UpdateMovieRequest request = new UpdateMovieRequest();
-        request.setTitle(movieDto.getTitle());
-        request.setGenre(movieDto.getGenre());
-        request.setReleaseYear(movieDto.getReleaseYear());
-        request.setLanguage(movieDto.getLanguage());
-        request.setRating(movieDto.getRating());
-        request.setSummary(movieDto.getSummary());
+        request.setTitle(expected.getTitle());
+        request.setGenre(expected.getGenre());
+        request.setReleaseYear(expected.getReleaseYear());
+        request.setLanguage(expected.getLanguage());
+        request.setRating(expected.getRating());
+        request.setSummary(expected.getSummary());
 
 
 
-        Mockito.when(movieRepository.findById(id)).thenReturn(Optional.of(movie));
-        Mockito.when(movieRepository.save(Mockito.any(Movie.class))).thenReturn(movie);
+        when(movieRepository.findById(id)).thenReturn(Optional.of(movie));
+        when(movieRepository.save(any(Movie.class))).thenReturn(movie);
+        when(movieDtoConverter.convert(movie)).thenReturn(expected);
 
-        MovieDto result = movieService.updateMovie(id, request);
+        MovieDto actual = movieService.updateMovie(id, request);
 
-        assertEquals(movieDto, result);
+        assertEquals(expected, actual);
 
-        Mockito.verify(movieRepository).findById(id);
-        Mockito.verify(movieRepository).save(Mockito.any(Movie.class));
+        verify(movieRepository, times(1)).findById(id);
+        verify(movieRepository, times(1)).save(any(Movie.class));
+        verify(movieDtoConverter, times(1)).convert(any(Movie.class));
     }
 
     @Test
-    @DisplayName("When GetLatestMovies Called With Valid Input It Should Return The MovieDtos")
-    public void whenGetLatestMoviesCalledWithValidInput_itShouldReturnTheMovieDtos() {
-        List<Movie> movies = getMockMovies();
-        List<MovieDto> movieDtos = Collections.singletonList(getMockMovieDtos().get(0));
+    @DisplayName("When GetLatestMovies Called With Valid Input It Should Return The MovieDto List")
+    public void whenGetLatestMoviesCalledWithValidInput_itShouldReturnTheMovieDtoList() {
+        List<MovieDto> expected = Collections.singletonList(movieDtoList.get(0));
 
-        Mockito.when(movieRepository.findAll()).thenReturn(movies);
+        when(movieRepository.findAll()).thenReturn(movieList);
+        when(movieDtoConverter.convert(movieList.get(0))).thenReturn(expected.get(0));
 
-        List<MovieDto> result = movieService.getLatestMovies();
+        List<MovieDto> actual = movieService.getLatestMovies();
 
-        assertEquals(movieDtos, result);
+        assertEquals(expected, actual);
 
-        Mockito.verify(movieRepository).findAll();
+        verify(movieRepository, times(1)).findAll();
+        verify(movieDtoConverter, times(1)).convert(any(Movie.class));
     }
 
     @Test
-    @DisplayName("When SearchMovies Called With Valid Input It Should Return The MovieDtos")
-    public void whenSearchMoviesCalledWithValidInput_itShouldReturnTheMovieDtos() {
-        Movie movie = getMockMovies().get(0);
-        List<Movie> movies = Collections.singletonList(movie);
-        List<MovieDto> movieDtos = Collections.singletonList(getMockMovieDtos().get(0));
+    @DisplayName("When SearchMovies Called With Valid Input It Should Return The MovieDto List")
+    public void whenSearchMoviesCalledWithValidInput_itShouldReturnTheMovieDtoList() {
+        Movie movie = movieList.get(0);
+        List<Movie> moviesList = Collections.singletonList(movie);
+        List<MovieDto> expected = Collections.singletonList(movieDtoList.get(0));
 
         String title = movie.getTitle();
 
-        Mockito.when(movieRepository.findByTitleStartingWith(title)).thenReturn(movies);
+        when(movieRepository.findByTitleStartingWith(title)).thenReturn(moviesList);
+        when(movieDtoConverter.convert(movie)).thenReturn(expected.get(0));
 
-        List<MovieDto> result = movieService.searchMovies(title);
+        List<MovieDto> actual = movieService.searchMovies(title);
 
-        assertEquals(movieDtos, result);
+        assertEquals(expected, actual);
 
-        Mockito.verify(movieRepository).findByTitleStartingWith(title);
+        verify(movieRepository, times(1)).findByTitleStartingWith(title);
+        verify(movieDtoConverter, times(1)).convert(any(Movie.class));
     }
 
 }
