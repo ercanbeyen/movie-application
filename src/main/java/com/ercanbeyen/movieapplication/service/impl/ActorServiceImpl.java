@@ -11,7 +11,6 @@ import com.ercanbeyen.movieapplication.entity.Movie;
 import com.ercanbeyen.movieapplication.exception.EntityNotFound;
 import com.ercanbeyen.movieapplication.repository.ActorRepository;
 import com.ercanbeyen.movieapplication.service.ActorService;
-import com.ercanbeyen.movieapplication.service.MovieService;
 import com.ercanbeyen.movieapplication.util.CustomPage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +31,6 @@ import java.util.stream.Collectors;
 public class ActorServiceImpl implements ActorService {
     private final ActorRepository actorRepository;
     private final ActorDtoConverter actorDtoConverter;
-    private final MovieService movieService;
 
     @Override
     public ActorDto createActor(CreateActorRequest request) {
@@ -52,6 +50,16 @@ public class ActorServiceImpl implements ActorService {
     public List<ActorDto> getActors(ActorFilteringOptions filteringOptions, OrderBy orderBy) {
         List<Actor> actors = actorRepository.findAll();
 
+        if (filteringOptions.getMovieId() != null) {
+            actors = actors
+                    .stream()
+                    .filter(actor -> actor.getMoviesPlayed()
+                            .stream()
+                            .map(Movie::getId)
+                            .anyMatch(id -> filteringOptions.getMovieId().intValue() == id.intValue()))
+                    .toList();
+        }
+
         if (!StringUtils.isBlank(filteringOptions.getNationality())) {
             actors = actors.stream()
                     .filter(actor -> actor.getNationality().equals(filteringOptions.getNationality()))
@@ -62,17 +70,6 @@ public class ActorServiceImpl implements ActorService {
             actors = actors.stream()
                     .filter(actor ->  actor.getBirthYear().getYear() == filteringOptions.getYear())
                     .collect(Collectors.toList());
-        }
-
-        if (filteringOptions.getMovieId() != null) {
-
-            actors = actors
-                    .stream()
-                    .filter(actor -> actor.getMoviesPlayed()
-                            .stream()
-                            .map(Movie::getId)
-                            .anyMatch(id -> filteringOptions.getMovieId().intValue() == id.intValue()))
-                    .toList();
         }
 
         if (orderBy != null) {
@@ -159,11 +156,12 @@ public class ActorServiceImpl implements ActorService {
     @Override
     public CustomPage<ActorDto, Actor> getActors(Pageable pageable) {
                 Page<Actor> page = actorRepository.findAll(pageable);
-        List<ActorDto> actorDtos = page.getContent().stream()
+        List<ActorDto> actorDtoList = page.getContent()
+                .stream()
                 .map(actorDtoConverter::convert)
                 .toList();
 
-        return new CustomPage<>(page, actorDtos);
+        return new CustomPage<>(page, actorDtoList);
 
     }
 

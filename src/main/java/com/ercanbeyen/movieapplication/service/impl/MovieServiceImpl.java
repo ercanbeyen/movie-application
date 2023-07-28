@@ -66,18 +66,18 @@ public class MovieServiceImpl implements MovieService {
         log.info("Fetch movies from database");
         List<Movie> movies = movieRepository.findAll();
 
+        if (filteringOptions.getGenres() != null && !filteringOptions.getGenres().isEmpty()) {
+            movies = movies.stream()
+                    .filter(movie -> filteringOptions.getGenres().contains(movie.getGenre()))
+                    .toList();
+            log.info("Movies are filtered by genres");
+        }
+
         if (!StringUtils.isBlank(filteringOptions.getLanguage())) {
             movies = movies.stream()
                     .filter(movie -> movie.getLanguage().equals(filteringOptions.getLanguage()))
                     .collect(Collectors.toList());
             log.info("Movies are filtered by language");
-        }
-
-        if (filteringOptions.getGenre() != null) {
-            movies = movies.stream()
-                    .filter(movie -> movie.getGenre() == filteringOptions.getGenre())
-                    .collect(Collectors.toList());
-            log.info("Movies are filtered by genre");
         }
 
         if (filteringOptions.getYear() != null) {
@@ -190,10 +190,10 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public CustomPage<MovieDto, Movie> getMovies(Pageable pageable) {
         Page<Movie> page = movieRepository.findAll(pageable);
-        List<MovieDto> movieDtos = page.getContent().stream()
+        List<MovieDto> movieDtoList = page.getContent().stream()
                 .map(movieDtoConverter::convert)
                 .toList();
 
-        return new CustomPage<>(page, movieDtos);
+        return new CustomPage<>(page, movieDtoList);
     }
 }

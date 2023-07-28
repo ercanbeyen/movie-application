@@ -1,6 +1,5 @@
 package com.ercanbeyen.movieapplication.dto.option.filter;
 
-import com.ercanbeyen.movieapplication.constant.OrderBy;
 import lombok.Data;
 
 @Data

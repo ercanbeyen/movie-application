@@ -3,10 +3,12 @@ package com.ercanbeyen.movieapplication.dto.option.filter;
 import com.ercanbeyen.movieapplication.entity.enums.Genre;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class MovieFilteringOptions {
     String language;
-    Genre genre;
+    List<Genre> genres;
     Integer year;
     Integer limit;
 }

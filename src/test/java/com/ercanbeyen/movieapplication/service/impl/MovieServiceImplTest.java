@@ -123,7 +123,7 @@ public class MovieServiceImplTest {
 
         MovieDto actual = movieService.createMovie(request);
 
-        Assertions.assertEquals(expected, actual);
+        assertEquals(expected, actual);
 
         verify(directorService, times(1)).getDirectorById(directorId);
         verify(movieRepository, times(1)).save(any(Movie.class));
