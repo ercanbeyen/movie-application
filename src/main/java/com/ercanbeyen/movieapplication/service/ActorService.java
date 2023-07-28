@@ -1,6 +1,6 @@
 package com.ercanbeyen.movieapplication.service;
 
-import com.ercanbeyen.movieapplication.constant.OrderBy;
+import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
 import com.ercanbeyen.movieapplication.dto.ActorDto;
 import com.ercanbeyen.movieapplication.dto.option.filter.ActorFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateActorRequest;

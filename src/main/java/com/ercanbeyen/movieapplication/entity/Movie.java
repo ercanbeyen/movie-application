@@ -1,6 +1,6 @@
 package com.ercanbeyen.movieapplication.entity;
 
-import com.ercanbeyen.movieapplication.entity.enums.Genre;
+import com.ercanbeyen.movieapplication.constant.enums.Genre;
 import jakarta.persistence.*;
 import lombok.*;
 

@@ -1,6 +1,6 @@
 package com.ercanbeyen.movieapplication.dto;
 
-import com.ercanbeyen.movieapplication.entity.enums.Genre;
+import com.ercanbeyen.movieapplication.constant.enums.Genre;
 import lombok.Builder;
 import lombok.Data;
 

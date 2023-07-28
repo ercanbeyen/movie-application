@@ -1,6 +1,10 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
-import com.ercanbeyen.movieapplication.constant.OrderBy;
+import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
+import com.ercanbeyen.movieapplication.constant.message.ActionNames;
+import com.ercanbeyen.movieapplication.constant.message.EntityNames;
+import com.ercanbeyen.movieapplication.constant.message.LogMessages;
+import com.ercanbeyen.movieapplication.constant.message.ResponseMessages;
 import com.ercanbeyen.movieapplication.dto.ActorDto;
 import com.ercanbeyen.movieapplication.dto.converter.ActorDtoConverter;
 import com.ercanbeyen.movieapplication.dto.option.filter.ActorFilteringOptions;
@@ -34,6 +38,8 @@ public class ActorServiceImpl implements ActorService {
 
     @Override
     public ActorDto createActor(CreateActorRequest request) {
+        log.info(String.format(LogMessages.STARTED, "createActor"));
+
         Actor newActor = Actor.builder()
                 .name(request.getName())
                 .surname(request.getSurname())
@@ -43,12 +49,17 @@ public class ActorServiceImpl implements ActorService {
                 .moviesPlayed(new HashSet<>())
                 .build();
 
-        return actorDtoConverter.convert(actorRepository.save(newActor));
+        Actor savedActor = actorRepository.save(newActor);
+        log.info(String.format(LogMessages.SAVED, EntityNames.ACTOR));
+
+        return actorDtoConverter.convert(savedActor);
     }
 
     @Override
     public List<ActorDto> getActors(ActorFilteringOptions filteringOptions, OrderBy orderBy) {
+        log.info(String.format(LogMessages.STARTED, "getActors"));
         List<Actor> actors = actorRepository.findAll();
+        log.info(String.format(LogMessages.FETCHED_ALL, EntityNames.ACTOR));
 
         if (filteringOptions.getMovieId() != null) {
             actors = actors
@@ -58,18 +69,21 @@ public class ActorServiceImpl implements ActorService {
                             .map(Movie::getId)
                             .anyMatch(id -> filteringOptions.getMovieId().intValue() == id.intValue()))
                     .toList();
+            log.info(String.format(LogMessages.FILTERED, "movieId"));
         }
 
         if (!StringUtils.isBlank(filteringOptions.getNationality())) {
             actors = actors.stream()
                     .filter(actor -> actor.getNationality().equals(filteringOptions.getNationality()))
                     .collect(Collectors.toList());
+            log.info(String.format(LogMessages.FILTERED, "nationality"));
         }
 
         if (filteringOptions.getYear() != null) {
             actors = actors.stream()
                     .filter(actor ->  actor.getBirthYear().getYear() == filteringOptions.getYear())
                     .collect(Collectors.toList());
+            log.info(String.format(LogMessages.FILTERED, "birthYear"));
         }
 
         if (orderBy != null) {
@@ -86,14 +100,14 @@ public class ActorServiceImpl implements ActorService {
                     })
                     .toList();
 
-            log.info("Actors are sorted by number of movies played");
+            log.info(String.format(LogMessages.SORTED, "number of movies played"));
+        }
 
-            if (filteringOptions.getLimit() != null) {
-                actors = actors.stream()
-                        .limit(filteringOptions.getLimit())
-                        .toList();
-                log.info("Top {} actors are selected", filteringOptions.getLimit());
-            }
+        if (filteringOptions.getLimit() != null) {
+            actors = actors.stream()
+                    .limit(filteringOptions.getLimit())
+                    .toList();
+            log.info(String.format(String.format(LogMessages.LIMITED, filteringOptions.getLimit())));
         }
 
         return actors.stream()
@@ -104,39 +118,55 @@ public class ActorServiceImpl implements ActorService {
     @Cacheable(value = "actors", key = "#id", unless = "#result.moviesPlayed.size() < 2")
     @Override
     public ActorDto getActor(Integer id) {
-        log.info("Fetch actor from database");
+        log.info(String.format(LogMessages.STARTED, "getActor"));
         Actor actorInDb = getActorById(id);
+        log.info(String.format(LogMessages.FETCHED, EntityNames.ACTOR));
         return actorDtoConverter.convert(actorInDb);
     }
 
     @CacheEvict(value = "actors", allEntries = true)
     @Override
     public ActorDto updateActor(Integer id, UpdateActorRequest request) {
-        log.info("Update actor operation is starting");
+        log.info(String.format(LogMessages.STARTED, "updateActor"));
         Actor actorInDb = getActorById(id);
+        log.info(String.format(LogMessages.FETCHED, EntityNames.ACTOR));
 
         actorInDb.setName(request.getName());
         actorInDb.setSurname(request.getSurname());
         actorInDb.setNationality(request.getNationality());
         actorInDb.setBirthYear(request.getBirthYear());
         actorInDb.setBiography(request.getBiography());
+        log.info(LogMessages.FIELDS_SET);
 
-        return actorDtoConverter.convert(actorRepository.save(actorInDb));
+        Actor savedActor = actorRepository.save(actorInDb);
+        log.info(String.format(LogMessages.SAVED, EntityNames.ACTOR));
+
+        return actorDtoConverter.convert(savedActor);
     }
 
     @CacheEvict(value = "actors", key = "#id")
     @Override
     public String deleteActor(Integer id) {
-        log.info("Delete actor operation is starting");
+        log.info(String.format(LogMessages.STARTED, "deleteActor"));
+        boolean actorExists = actorRepository.existsById(id);
+
+        if (!actorExists) {
+            throw new EntityNotFound(String.format(ResponseMessages.NOT_FOUND, EntityNames.ACTOR, id));
+        }
+
+        log.info(String.format(LogMessages.EXISTS, EntityNames.ACTOR));
         actorRepository.deleteById(id);
-        return "Actor " + id + " is successfully deleted";
+        log.info(String.format(LogMessages.DELETED, EntityNames.ACTOR));
+
+        return String.format(ResponseMessages.SUCCESS, EntityNames.ACTOR, id, ActionNames.DELETED);
     }
 
     @Cacheable(value = "actors")
     @Override
     public List<ActorDto> getMostPopularActors() {
-        log.info("Fetch actors from database");
+        log.info(String.format(LogMessages.STARTED, "getMostPopularActors"));
         List<Actor> actors = actorRepository.findAll();
+        log.info(String.format(LogMessages.FETCHED_ALL, EntityNames.ACTOR));
         int numberOfMovies = 2;
 
         return actors.stream()
@@ -147,7 +177,10 @@ public class ActorServiceImpl implements ActorService {
 
     @Override
     public List<ActorDto> searchActors(String fullName) {
+        log.info(LogMessages.STARTED, "searchActors");
         List<Actor> actors = actorRepository.findByFullName(fullName);
+        log.info(String.format(LogMessages.FETCHED_ALL, EntityNames.ACTOR));
+
         return actors.stream()
                 .map(actorDtoConverter::convert)
                 .toList();
@@ -155,7 +188,10 @@ public class ActorServiceImpl implements ActorService {
 
     @Override
     public CustomPage<ActorDto, Actor> getActors(Pageable pageable) {
-                Page<Actor> page = actorRepository.findAll(pageable);
+        log.info(String.format(LogMessages.STARTED, "getActors"));
+        Page<Actor> page = actorRepository.findAll(pageable);
+        log.info(String.format(LogMessages.FETCHED_ALL, EntityNames.ACTOR));
+
         List<ActorDto> actorDtoList = page.getContent()
                 .stream()
                 .map(actorDtoConverter::convert)
@@ -167,6 +203,6 @@ public class ActorServiceImpl implements ActorService {
 
     private Actor getActorById(Integer id) {
         return actorRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFound("Actor " + id + " is not found"));
+                .orElseThrow(() -> new EntityNotFound(String.format(ResponseMessages.NOT_FOUND, EntityNames.ACTOR, id)));
     }
 }

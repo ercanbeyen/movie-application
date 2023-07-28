@@ -1,4 +1,4 @@
-package com.ercanbeyen.movieapplication.entity.enums;
+package com.ercanbeyen.movieapplication.constant.enums;
 
 public enum Genre {
     ACTION,

@@ -1,10 +1,9 @@
 package com.ercanbeyen.movieapplication.dto.request.base;
 
-import com.ercanbeyen.movieapplication.entity.enums.Genre;
+import com.ercanbeyen.movieapplication.constant.enums.Genre;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 

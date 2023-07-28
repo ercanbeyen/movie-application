@@ -1,6 +1,6 @@
 package com.ercanbeyen.movieapplication.controller;
 
-import com.ercanbeyen.movieapplication.constant.OrderBy;
+import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
 import com.ercanbeyen.movieapplication.dto.DirectorDto;
 import com.ercanbeyen.movieapplication.dto.option.filter.DirectorFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateDirectorRequest;
@@ -56,7 +56,7 @@ public class DirectorController {
 
     @GetMapping("/popular")
     public ResponseEntity<Object> getMostPopularDirectors() {
-        List<DirectorDto> directorDtoList = directorService.getMostPopularDirector();
+        List<DirectorDto> directorDtoList = directorService.getMostPopularDirectors();
         return ResponseHandler.generateResponse(HttpStatus.OK, null, directorDtoList);
     }
 

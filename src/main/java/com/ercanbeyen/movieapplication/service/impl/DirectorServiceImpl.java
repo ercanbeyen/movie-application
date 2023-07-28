@@ -1,6 +1,10 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
-import com.ercanbeyen.movieapplication.constant.OrderBy;
+import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
+import com.ercanbeyen.movieapplication.constant.message.ActionNames;
+import com.ercanbeyen.movieapplication.constant.message.EntityNames;
+import com.ercanbeyen.movieapplication.constant.message.LogMessages;
+import com.ercanbeyen.movieapplication.constant.message.ResponseMessages;
 import com.ercanbeyen.movieapplication.dto.DirectorDto;
 import com.ercanbeyen.movieapplication.dto.converter.DirectorDtoConverter;
 import com.ercanbeyen.movieapplication.dto.option.filter.DirectorFilteringOptions;
@@ -33,6 +37,8 @@ public class DirectorServiceImpl implements DirectorService {
 
     @Override
     public DirectorDto createDirector(CreateDirectorRequest request) {
+        log.info(String.format(LogMessages.STARTED, "createDirector"));
+
         Director newDirector = Director.builder()
                 .name(request.getName())
                 .surname(request.getSurname())
@@ -42,25 +48,30 @@ public class DirectorServiceImpl implements DirectorService {
                 .moviesDirected(new ArrayList<>())
                 .build();
 
-        return directorDtoConverter.convert(directorRepository.save(newDirector));
+        Director savedDirector = directorRepository.save(newDirector);
+        log.info(String.format(LogMessages.SAVED, EntityNames.DIRECTOR));
+
+        return directorDtoConverter.convert(savedDirector);
     }
 
     @Override
     public List<DirectorDto> getDirectors(DirectorFilteringOptions filteringOptions, OrderBy orderBy) {
+        log.info(String.format(LogMessages.STARTED, "getDirectors"));
         List<Director> directors = directorRepository.findAll();
+        log.info(String.format(LogMessages.FETCHED_ALL, EntityNames.DIRECTOR));
 
         if (!StringUtils.isBlank(filteringOptions.getNationality())) {
             directors = directors.stream()
                     .filter(director -> director.getNationality().equals(filteringOptions.getNationality()))
                     .collect(Collectors.toList());
-            log.info("Directors are filtered by nationality");
+            log.info(String.format(LogMessages.FILTERED, "nationality"));
         }
 
         if (filteringOptions.getYear() != null) {
             directors = directors.stream()
                     .filter(director -> director.getBirthYear().getYear() == filteringOptions.getYear())
                     .collect(Collectors.toList());
-            log.info("Directors are filtered by year");
+            log.info(String.format(LogMessages.FILTERED, "birthYear"));
         }
 
         if (orderBy != null) {
@@ -77,13 +88,13 @@ public class DirectorServiceImpl implements DirectorService {
                     })
                     .toList();
 
-            log.info("Directors are sorted by number of movies directed");
+            log.info(String.format(LogMessages.SORTED, "number of movies directed"));
 
             if (filteringOptions.getLimit() != null) {
                 directors = directors.stream()
                         .limit(filteringOptions.getLimit())
                         .toList();
-                log.info("Top {} directors are selected", filteringOptions.getLimit());
+                log.info(String.format(LogMessages.LIMITED, filteringOptions.getLimit()));
             }
         }
 
@@ -95,39 +106,58 @@ public class DirectorServiceImpl implements DirectorService {
     @Cacheable(value = "directors", key = "#id", unless = "#result.moviesDirected.size() < 2")
     @Override
     public DirectorDto getDirector(Integer id) {
-        log.info("Fetch director from database");
+        log.info(String.format(LogMessages.STARTED, "getDirector"));
         Director directorInDb = getDirectorById(id);
+        log.info(String.format(LogMessages.FETCHED, EntityNames.DIRECTOR));
         return directorDtoConverter.convert(directorInDb);
     }
 
     @CacheEvict(value = "directors", allEntries = true)
     @Override
     public DirectorDto updateDirector(Integer id, UpdateDirectorRequest request) {
-        log.info("Update director operation is starting");
+        log.info(String.format(LogMessages.STARTED, "updateDirector"));
+
         Director directorInDb = getDirectorById(id);
+        log.info(String.format(LogMessages.FETCHED, EntityNames.DIRECTOR));
 
         directorInDb.setName(request.getName());
         directorInDb.setSurname(request.getSurname());
         directorInDb.setNationality(request.getNationality());
         directorInDb.setBirthYear(request.getBirthYear());
         directorInDb.setBiography(request.getBiography());
+        log.info(LogMessages.FIELDS_SET);
 
-        return directorDtoConverter.convert(directorRepository.save(directorInDb));
+        Director savedDirector = directorRepository.save(directorInDb);
+        log.info(String.format(LogMessages.SAVED, EntityNames.DIRECTOR));
+
+        return directorDtoConverter.convert(savedDirector);
     }
 
     @CacheEvict(value = "directors", key = "#id")
     @Override
     public String deleteDirector(Integer id) {
-        log.info("Delete director operation is starting");
+        log.info(String.format(LogMessages.STARTED, "deleteDirector"));
+
+        boolean directorExists = directorRepository.existsById(id);
+
+        if (!directorExists) {
+            throw new EntityNotFound(String.format(ResponseMessages.NOT_FOUND, EntityNames.DIRECTOR, id));
+        }
+
+        log.info(String.format(LogMessages.EXISTS, EntityNames.DIRECTOR));
         directorRepository.deleteById(id);
-        return "Director " + id + " is successfully deleted";
+        log.info(String.format(LogMessages.DELETED, EntityNames.DIRECTOR));
+
+        return String.format(ResponseMessages.SUCCESS, EntityNames.DIRECTOR, id, ActionNames.DELETED);
     }
 
     @Cacheable(value = "directors")
     @Override
-    public List<DirectorDto> getMostPopularDirector() {
-        log.info("Fetch directors from database");
+    public List<DirectorDto> getMostPopularDirectors() {
+        log.info(String.format(LogMessages.STARTED, "getMostPopularDirectors"));
+
         List<Director> directors = directorRepository.findAll();
+        log.info(String.format(LogMessages.FETCHED_ALL, EntityNames.DIRECTOR));
         int numberOfMovies = 2;
 
         return directors.stream()
@@ -138,7 +168,11 @@ public class DirectorServiceImpl implements DirectorService {
 
     @Override
     public List<DirectorDto> searchDirectors(String fullName) {
+        log.info(String.format(LogMessages.STARTED, "searchDirectors"));
+
         List<Director> directors = directorRepository.findByFullName(fullName);
+        log.info(String.format(LogMessages.SAVED, EntityNames.DIRECTOR));
+
         return directors.stream()
                 .map(directorDtoConverter::convert)
                 .collect(Collectors.toList());
@@ -146,12 +180,15 @@ public class DirectorServiceImpl implements DirectorService {
 
     @Override
     public Director getDirectorById(Integer id) {
+        log.info(String.format(LogMessages.STARTED, "getDirectorById"));
         return directorRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFound("Director " + id + " is not found"));
+                .orElseThrow(() -> new EntityNotFound(String.format(ResponseMessages.NOT_FOUND, EntityNames.DIRECTOR, id)));
     }
 
     @Override
     public CustomPage<DirectorDto, Director> getDirectors(Pageable pageable) {
+        log.info(String.format(LogMessages.STARTED, "getDirectors"));
+
         Page<Director> page = directorRepository.findAll(pageable);
         List<DirectorDto> directors = page.getContent().stream()
                 .map(directorDtoConverter::convert)

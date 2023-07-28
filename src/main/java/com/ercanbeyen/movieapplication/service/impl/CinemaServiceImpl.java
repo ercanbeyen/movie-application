@@ -1,5 +1,9 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
+import com.ercanbeyen.movieapplication.constant.message.ActionNames;
+import com.ercanbeyen.movieapplication.constant.message.EntityNames;
+import com.ercanbeyen.movieapplication.constant.message.LogMessages;
+import com.ercanbeyen.movieapplication.constant.message.ResponseMessages;
 import com.ercanbeyen.movieapplication.dto.CinemaDto;
 import com.ercanbeyen.movieapplication.dto.converter.CinemaDtoConverter;
 import com.ercanbeyen.movieapplication.dto.option.filter.CinemaFilteringOptions;
@@ -38,6 +42,8 @@ public class CinemaServiceImpl implements CinemaService {
 
     @Override
     public CinemaDto createCinema(CreateCinemaRequest request) {
+        log.info(String.format(LogMessages.STARTED, "createCinema"));
+
         Cinema newCinema = Cinema.builder()
                 .name(request.getName())
                 .country(request.getCountry())
@@ -52,18 +58,22 @@ public class CinemaServiceImpl implements CinemaService {
                 .reservation_with_phone(request.isReservation_with_phone())
                 .build();
 
-        return cinemaDtoConverter.convert(cinemaRepository.save(newCinema));
+        Cinema savedCinema = cinemaRepository.save(newCinema);
+        log.info(String.format(LogMessages.SAVED, EntityNames.CINEMA));
+
+        return cinemaDtoConverter.convert(savedCinema);
     }
 
     @Override
     public List<CinemaDto> searchCinemasByStatus(CinemaSearchOptions searchOptions) {
-        List<Cinema> cinemas = cinemaRepository
-                .findByStatuses(
-                        searchOptions.getReservation_with_phone(),
-                        searchOptions.getThreeD_animation(),
-                        searchOptions.getParking_place(),
-                        searchOptions.getAir_conditioning(),
-                        searchOptions.getCafe_food());
+        log.info(String.format(LogMessages.STARTED, "searchCinemasByStatus"));
+        List<Cinema> cinemas = cinemaRepository.findByStatuses(
+                searchOptions.getReservation_with_phone(),
+                searchOptions.getThreeD_animation(),
+                searchOptions.getParking_place(),
+                searchOptions.getAir_conditioning(),
+                searchOptions.getCafe_food());
+        log.info(String.format(LogMessages.FETCHED, EntityNames.CINEMA));
 
         return cinemas.stream()
                 .map(cinemaDtoConverter::convert)
@@ -72,16 +82,17 @@ public class CinemaServiceImpl implements CinemaService {
 
     @Override
     public CinemaDto getCinema(String id) {
-        Cinema cinemaInDb = cinemaRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFound("Cinema " + id + " is not found"));
-
+        log.info(String.format(LogMessages.STARTED, "getCinema"));
+        Cinema cinemaInDb = findCinemaById(id);
+        log.info(String.format(LogMessages.FETCHED, EntityNames.CINEMA));
         return cinemaDtoConverter.convert(cinemaInDb);
     }
 
     @Override
     public CinemaDto updateCinema(String id, UpdateCinemaRequest request) {
-        Cinema cinemaInDb = cinemaRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFound("Cinema " + id + " is not found"));
+        log.info(String.format(LogMessages.STARTED, "updateCinema"));
+        Cinema cinemaInDb = findCinemaById(id);
+        log.info(String.format(LogMessages.FETCHED, EntityNames.CINEMA));
 
         cinemaInDb.setName(request.getName());
         cinemaInDb.setCountry(request.getCountry());
@@ -94,26 +105,45 @@ public class CinemaServiceImpl implements CinemaService {
         cinemaInDb.setParking_place(request.isParking_place());
         cinemaInDb.setThreeD_animation(request.isThreeD_animation());
         cinemaInDb.setReservation_with_phone(request.isReservation_with_phone());
+        log.info(LogMessages.FIELDS_SET);
 
-        return cinemaDtoConverter.convert(cinemaRepository.save(cinemaInDb));
+        Cinema savedCinema = cinemaRepository.save(cinemaInDb);
+        log.info(String.format(LogMessages.SAVED, EntityNames.CINEMA));
+
+        return cinemaDtoConverter.convert(savedCinema);
     }
 
     @Override
     public String deleteCinema(String id) {
+        log.info(String.format(LogMessages.STARTED, "deleteCinema"));
+        boolean cinemaExists = cinemaRepository.existsById(id);
+
+        if (!cinemaExists) {
+            throw new EntityNotFound(String.format(ResponseMessages.NOT_FOUND, EntityNames.MOVIE, id));
+        }
+
+        log.info(String.format(LogMessages.EXISTS, EntityNames.CINEMA));
         cinemaRepository.deleteById(id);
-        return "Cinema " + id + " is successfully deleted";
+        log.info(String.format(LogMessages.DELETED, EntityNames.CINEMA));
+
+        return String.format(ResponseMessages.SUCCESS, EntityNames.CINEMA, id, ActionNames.DELETED);
     }
 
     @Override
     public List<CustomSearchHit<CinemaDto, Cinema>> getCinemasByName(String searchTerm) {
+        log.info(String.format(LogMessages.STARTED, "getCinemasByName"));
+
         List<SearchHit<Cinema>> searchHits = cinemaRepository.findByName(searchTerm)
                 .getSearchHits();
+        log.info(String.format(LogMessages.FETCHED_ALL, EntityNames.CINEMA));
 
         return convertSearchHitList(searchHits);
     }
 
     @Override
     public List<CustomSearchHit<CinemaDto, Cinema>> getCinemasByAddressLike(String searchTerm) {
+        log.info(String.format(LogMessages.STARTED, "getCinemasByAddressLike"));
+
         Criteria criteria = new Criteria("address").expression("*" + searchTerm + "*");
         CriteriaQuery criteriaQuery = new CriteriaQuery(criteria);
 
@@ -126,18 +156,23 @@ public class CinemaServiceImpl implements CinemaService {
 
     @Override
     public CustomPage<CinemaDto, Cinema> pagination(Pageable pageable) {
+        log.info(String.format(LogMessages.STARTED, "pagination"));
         Page<Cinema> page = cinemaRepository.findAll(pageable);
+        log.info(String.format(LogMessages.FETCHED_ALL, EntityNames.CINEMA));
 
-        List<CinemaDto> cinemaDtos = page.getContent().stream()
+        List<CinemaDto> cinemaDtoList = page.getContent().stream()
                 .map(cinemaDtoConverter::convert)
                 .toList();
 
-        return new CustomPage<>(page, cinemaDtos);
+        return new CustomPage<>(page, cinemaDtoList);
     }
 
     @Override
     public List<CinemaDto> filterCinemas(CinemaFilteringOptions filteringOptions) {
+        log.info(String.format(LogMessages.STARTED, "filterCinemas"));
+
         Iterable<Cinema> cinemaIterable = cinemaRepository.findAll();
+        log.info(String.format(LogMessages.FETCHED_ALL, EntityNames.CINEMA));
         List<Cinema> cinemas = new ArrayList<>();
         cinemaIterable.forEach(cinemas::add);
 
@@ -145,42 +180,49 @@ public class CinemaServiceImpl implements CinemaService {
             cinemas = cinemas.stream()
                     .filter(cinema -> cinema.getCountry().equals(filteringOptions.getCountry()))
                     .collect(Collectors.toList());
+            log.info(String.format(LogMessages.FILTERED, "country"));
         }
 
         if (filteringOptions.getCity() != null) {
             cinemas = cinemas.stream()
                     .filter(cinema -> cinema.getCity().equals(filteringOptions.getCity()))
                     .collect(Collectors.toList());
+            log.info(String.format(LogMessages.FILTERED, "city"));
         }
 
         if (filteringOptions.getReservation_with_phone() != null) {
             cinemas = cinemas.stream()
                     .filter(cinema -> cinema.isReservation_with_phone() == filteringOptions.getReservation_with_phone())
                     .collect(Collectors.toList());
+            log.info(String.format(LogMessages.FILTERED, "reservation_with_phone"));
         }
 
         if (filteringOptions.getThreeD_animation() != null) {
             cinemas = cinemas.stream()
                     .filter(cinema -> cinema.isThreeD_animation() == filteringOptions.getThreeD_animation())
                     .collect(Collectors.toList());
+            log.info(String.format(LogMessages.FILTERED, "threeD_animation"));
         }
 
         if (filteringOptions.getParking_place() != null) {
             cinemas = cinemas.stream()
                     .filter(cinema -> cinema.isParking_place() == filteringOptions.getParking_place())
                     .collect(Collectors.toList());
+            log.info(String.format(LogMessages.FILTERED, "parking_place"));
         }
 
         if (filteringOptions.getAir_conditioning() != null) {
             cinemas = cinemas.stream()
                     .filter(cinema -> cinema.isAir_conditioning() == filteringOptions.getAir_conditioning())
                     .collect(Collectors.toList());
+            log.info(String.format(LogMessages.FILTERED, "air_conditioning"));
         }
 
         if (filteringOptions.getCafe_food() != null) {
             cinemas = cinemas.stream()
                     .filter(cinema -> cinema.isCafe_food() == filteringOptions.getCafe_food())
                     .collect(Collectors.toList());
+            log.info(String.format(LogMessages.FILTERED, "cafe_food"));
         }
 
         return cinemas.stream()
@@ -190,6 +232,7 @@ public class CinemaServiceImpl implements CinemaService {
 
     @Override
     public List<CinemaDto> findCinemasByHallRange(Integer lower, Integer higher) {
+        log.info(String.format(LogMessages.STARTED, "findCinemasByHallRange"));
         List<Cinema> cinemas = new ArrayList<>();
 
         if (lower != null && higher != null) {
@@ -210,6 +253,7 @@ public class CinemaServiceImpl implements CinemaService {
 
 
     public List<CustomSearchHit<CinemaDto, Cinema>> convertSearchHitList(List<SearchHit<Cinema>> searchHits) {
+        log.info(String.format(LogMessages.STARTED, "convertSearchHitList"));
         List<CustomSearchHit<CinemaDto, Cinema>> customSearchHits = new ArrayList<>();
 
         searchHits.forEach(
@@ -221,5 +265,10 @@ public class CinemaServiceImpl implements CinemaService {
         );
 
         return customSearchHits;
+    }
+
+    private Cinema findCinemaById(String id) {
+        return cinemaRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFound(String.format(ResponseMessages.NOT_FOUND, EntityNames.CINEMA, id)));
     }
 }

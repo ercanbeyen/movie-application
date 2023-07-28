@@ -1,6 +1,6 @@
 package com.ercanbeyen.movieapplication.service;
 
-import com.ercanbeyen.movieapplication.constant.OrderBy;
+import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
 import com.ercanbeyen.movieapplication.dto.DirectorDto;
 import com.ercanbeyen.movieapplication.dto.option.filter.DirectorFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateDirectorRequest;
@@ -17,7 +17,7 @@ public interface DirectorService {
     DirectorDto getDirector(Integer id);
     DirectorDto updateDirector(Integer id, UpdateDirectorRequest request);
     String deleteDirector(Integer id);
-    List<DirectorDto> getMostPopularDirector();
+    List<DirectorDto> getMostPopularDirectors();
     List<DirectorDto> searchDirectors(String fullName);
     Director getDirectorById(Integer id);
     CustomPage<DirectorDto, Director> getDirectors(Pageable pageable);
