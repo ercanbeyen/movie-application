@@ -13,12 +13,11 @@ import java.util.List;
 
 public interface DirectorService {
     DirectorDto createDirector(CreateDirectorRequest request);
-    List<DirectorDto> getDirectors(DirectorFilteringOptions filteringOptions, OrderBy orderBy);
+    CustomPage<Director, DirectorDto> filterDirectors(DirectorFilteringOptions filteringOptions, OrderBy orderBy, Pageable pageable);
     DirectorDto getDirector(Integer id);
     DirectorDto updateDirector(Integer id, UpdateDirectorRequest request);
     String deleteDirector(Integer id);
     List<DirectorDto> getMostPopularDirectors();
     List<DirectorDto> searchDirectors(String fullName);
     Director getDirectorById(Integer id);
-    CustomPage<DirectorDto, Director> getDirectors(Pageable pageable);
 }

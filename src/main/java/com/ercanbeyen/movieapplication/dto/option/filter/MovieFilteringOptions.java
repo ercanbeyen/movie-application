@@ -9,6 +9,6 @@ import java.util.List;
 public class MovieFilteringOptions {
     String language;
     List<Genre> genres;
-    Integer year;
-    Integer limit;
+    Integer releaseYear;
+    Long limit;
 }

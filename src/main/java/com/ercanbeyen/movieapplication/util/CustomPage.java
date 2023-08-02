@@ -8,14 +8,14 @@ import java.util.List;
 
 @Data
 public class CustomPage<T, V> {
-    private List<T> content;
+    private List<V> content;
     private int pageNumber;
     private int pageSize;
     private Sort sort;
     private int totalPage;
     private Long totalElements;
 
-    public CustomPage(Page<V> page, List<T> content) {
+    public CustomPage(Page<T> page, List<V> content) {
         this.content = content;
         this.pageNumber = page.getNumber();
         this.pageSize = page.getSize();

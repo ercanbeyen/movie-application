@@ -31,10 +31,10 @@ public class CinemaController {
         return ResponseHandler.generateResponse(HttpStatus.CREATED, null, cinemaDto);
     }
 
-    @GetMapping("/filter")
-    public ResponseEntity<Object> getCinemas(CinemaFilteringOptions filteringOptions) {
-        List<CinemaDto> cinemaDtoList = cinemaService.filterCinemas(filteringOptions);
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemaDtoList);
+    @GetMapping
+    public ResponseEntity<Object> filterCinemas(CinemaFilteringOptions filteringOptions, Pageable pageable) {
+        CustomPage<Cinema, CinemaDto> cinemaDtoPage = cinemaService.filterCinemas(filteringOptions, pageable);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemaDtoPage);
     }
 
     @GetMapping("/{id}")
@@ -65,12 +65,6 @@ public class CinemaController {
     public ResponseEntity<Object> getCinemasByAddress(@RequestParam("full-search") String searchTerm) {
         List<CustomSearchHit<CinemaDto, Cinema>> searchHits = cinemaService.getCinemasByAddressLike(searchTerm);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, searchHits);
-    }
-
-    @GetMapping
-    public ResponseEntity<Object> getCinemas(Pageable pageable) {
-        CustomPage<CinemaDto, Cinema> cinemaPage = cinemaService.pagination(pageable);
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemaPage);
     }
 
     @GetMapping("/search")

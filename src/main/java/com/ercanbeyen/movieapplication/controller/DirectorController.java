@@ -30,10 +30,10 @@ public class DirectorController {
         return ResponseHandler.generateResponse(HttpStatus.CREATED, null, directorDto);
     }
 
-    @GetMapping("/filter")
-    public ResponseEntity<Object> getDirectors(DirectorFilteringOptions filteringOptions, @RequestParam(required = false) OrderBy orderBy) {
-        List<DirectorDto> directorDtoList = directorService.getDirectors(filteringOptions, orderBy);
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, directorDtoList);
+    @GetMapping
+    public ResponseEntity<Object> getDirectors(DirectorFilteringOptions filteringOptions, @RequestParam(required = false) OrderBy orderBy, Pageable pageable) {
+        CustomPage<Director, DirectorDto> directorDtoPage = directorService.filterDirectors(filteringOptions, orderBy, pageable);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, directorDtoPage);
     }
 
     @GetMapping("/{id}")
@@ -66,9 +66,4 @@ public class DirectorController {
         return ResponseHandler.generateResponse(HttpStatus.OK, null, directorDtoList);
     }
 
-    @GetMapping
-    public ResponseEntity<Object> getDirectors(Pageable pageable) {
-        CustomPage<DirectorDto, Director> directorPage = directorService.getDirectors(pageable);
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, directorPage);
-    }
 }

@@ -1,10 +1,7 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
 import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
-import com.ercanbeyen.movieapplication.constant.message.ActionNames;
-import com.ercanbeyen.movieapplication.constant.message.EntityNames;
-import com.ercanbeyen.movieapplication.constant.message.LogMessages;
-import com.ercanbeyen.movieapplication.constant.message.ResponseMessages;
+import com.ercanbeyen.movieapplication.constant.message.*;
 import com.ercanbeyen.movieapplication.dto.MovieDto;
 import com.ercanbeyen.movieapplication.dto.converter.MovieDtoConverter;
 import com.ercanbeyen.movieapplication.dto.option.filter.MovieFilteringOptions;
@@ -28,8 +25,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -66,59 +65,48 @@ public class MovieServiceImpl implements MovieService {
 
     @CacheEvict(value = "movies", allEntries = true)
     @Override
-    public List<MovieDto> getMovies(MovieFilteringOptions filteringOptions, OrderBy orderBy) {
-        log.info(String.format(LogMessages.STARTED, "getMovies"));
-        List<Movie> movies = movieRepository.findAll();
+    public CustomPage<Movie, MovieDto> filterMovies(MovieFilteringOptions filteringOptions, OrderBy orderBy, Pageable pageable) {
+        log.info(String.format(LogMessages.STARTED, "filterMovies"));
+        Page<Movie> moviePage = movieRepository.findAll(pageable);
         log.info(String.format(LogMessages.FETCHED_ALL, EntityNames.MOVIE));
 
-        if (filteringOptions.getGenres() != null && !filteringOptions.getGenres().isEmpty()) {
-            movies = movies.stream()
-                    .filter(movie -> filteringOptions.getGenres().contains(movie.getGenre()))
-                    .toList();
-            log.info(String.format(LogMessages.FILTERED, "genre"));
+        Predicate<Movie> moviePredicate = (movie) -> (
+                (filteringOptions.getGenres() == null || filteringOptions.getGenres().isEmpty() || filteringOptions.getGenres().contains(movie.getGenre())) &&
+                (StringUtils.isBlank(filteringOptions.getLanguage()) || movie.getLanguage().equals(filteringOptions.getLanguage())) &&
+                (filteringOptions.getReleaseYear() == null || movie.getReleaseYear().intValue() == filteringOptions.getReleaseYear().intValue()));
+
+        if (filteringOptions.getLimit() == null) {
+            log.info(String.format(LogMessages.PARAMETER_NULL, ParameterNames.LIMIT));
+            filteringOptions.setLimit(movieRepository.count());
         }
 
-        if (!StringUtils.isBlank(filteringOptions.getLanguage())) {
-            movies = movies.stream()
-                    .filter(movie -> movie.getLanguage().equals(filteringOptions.getLanguage()))
-                    .collect(Collectors.toList());
-            log.info(String.format(LogMessages.FILTERED, "language"));
-        }
+        if (orderBy == null) {
+            log.info(String.format(LogMessages.PARAMETER_NULL, ParameterNames.ORDER_BY));
 
-        if (filteringOptions.getYear() != null) {
-            movies = movies.stream()
-                    .filter(movie -> movie.getReleaseYear().intValue() == filteringOptions.getYear().intValue())
-                    .collect(Collectors.toList());
-            log.info(String.format(LogMessages.FILTERED, "releaseYear"));
-        }
-
-        if (orderBy != null) {
-            movies = movies.stream()
-                    .sorted((movie1, movie2) -> {
-                        Double rating1 = movie1.getRating();
-                        Double rating2 = movie2.getRating();
-
-                        if (orderBy == OrderBy.DESC) {
-                            return Double.compare(rating2, rating1);
-                        } else {
-                            return Double.compare(rating1, rating2);
-                        }
-                    })
-                    .toList();
-
-            log.info(String.format(LogMessages.SORTED, "rating"));
-        }
-
-        if (filteringOptions.getLimit() != null) {
-            movies = movies.stream()
+            List<MovieDto> movieDtoList = moviePage.stream()
+                    .filter(moviePredicate)
                     .limit(filteringOptions.getLimit())
+                    .map(movieDtoConverter::convert)
                     .toList();
-            log.info(String.format(LogMessages.LIMITED, filteringOptions.getLimit()));
+
+            return new CustomPage<>(moviePage, movieDtoList);
         }
 
-        return movies.stream()
+        Comparator<Movie> movieComparator = Comparator.comparing(Movie::getRating);
+        log.info(String.format(LogMessages.ORDER_BY_VALUE, orderBy.name()));
+
+        if (orderBy == OrderBy.DESC) {
+            movieComparator = movieComparator.reversed();
+        }
+
+        List<MovieDto> movieDtoList = moviePage.stream()
+                .filter(moviePredicate)
+                .sorted(movieComparator)
+                .limit(filteringOptions.getLimit())
                 .map(movieDtoConverter::convert)
-                .collect(Collectors.toList());
+                .toList();
+
+        return new CustomPage<>(moviePage, movieDtoList);
     }
 
     @Cacheable(value = "movies", key = "#id", unless = "#result.releaseYear < 2020")
@@ -207,15 +195,4 @@ public class MovieServiceImpl implements MovieService {
                 .orElseThrow(() -> new EntityNotFound(String.format(ResponseMessages.NOT_FOUND, EntityNames.MOVIE, id)));
     }
 
-    @Override
-    public CustomPage<MovieDto, Movie> getMovies(Pageable pageable) {
-        log.info(String.format(LogMessages.STARTED, "getMovies"));
-
-        Page<Movie> page = movieRepository.findAll(pageable);
-        List<MovieDto> movieDtoList = page.getContent().stream()
-                .map(movieDtoConverter::convert)
-                .toList();
-
-        return new CustomPage<>(page, movieDtoList);
-    }
 }

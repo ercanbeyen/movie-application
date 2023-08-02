@@ -1,10 +1,7 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
 import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
-import com.ercanbeyen.movieapplication.constant.message.ActionNames;
-import com.ercanbeyen.movieapplication.constant.message.EntityNames;
-import com.ercanbeyen.movieapplication.constant.message.LogMessages;
-import com.ercanbeyen.movieapplication.constant.message.ResponseMessages;
+import com.ercanbeyen.movieapplication.constant.message.*;
 import com.ercanbeyen.movieapplication.dto.DirectorDto;
 import com.ercanbeyen.movieapplication.dto.converter.DirectorDtoConverter;
 import com.ercanbeyen.movieapplication.dto.option.filter.DirectorFilteringOptions;
@@ -25,7 +22,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -55,52 +54,47 @@ public class DirectorServiceImpl implements DirectorService {
     }
 
     @Override
-    public List<DirectorDto> getDirectors(DirectorFilteringOptions filteringOptions, OrderBy orderBy) {
-        log.info(String.format(LogMessages.STARTED, "getDirectors"));
-        List<Director> directors = directorRepository.findAll();
+    public CustomPage<Director, DirectorDto> filterDirectors(DirectorFilteringOptions filteringOptions, OrderBy orderBy, Pageable pageable) {
+        log.info(String.format(LogMessages.STARTED, "filterDirectors"));
+        Page<Director> directorPage = directorRepository.findAll(pageable);
         log.info(String.format(LogMessages.FETCHED_ALL, EntityNames.DIRECTOR));
 
-        if (!StringUtils.isBlank(filteringOptions.getNationality())) {
-            directors = directors.stream()
-                    .filter(director -> director.getNationality().equals(filteringOptions.getNationality()))
-                    .collect(Collectors.toList());
-            log.info(String.format(LogMessages.FILTERED, "nationality"));
+        Predicate<Director> directorPredicate = (director) -> ((StringUtils.isBlank(filteringOptions.getNationality()) || director.getNationality().equals(filteringOptions.getNationality()))
+                && (filteringOptions.getBirthYear() == null || director.getBirthYear().getYear() == filteringOptions.getBirthYear()));
+
+        if (filteringOptions.getLimit() == null) {
+            log.info(String.format(LogMessages.PARAMETER_NULL, ParameterNames.LIMIT));
+            filteringOptions.setLimit(directorRepository.count());
         }
 
-        if (filteringOptions.getYear() != null) {
-            directors = directors.stream()
-                    .filter(director -> director.getBirthYear().getYear() == filteringOptions.getYear())
-                    .collect(Collectors.toList());
-            log.info(String.format(LogMessages.FILTERED, "birthYear"));
-        }
+        if (orderBy == null) {
+            log.info(String.format(LogMessages.PARAMETER_NULL, ParameterNames.ORDER_BY));
 
-        if (orderBy != null) {
-            directors = directors.stream()
-                    .sorted((director1, director2) -> {
-                        int numberOfMoviesDirected1 = director1.getMoviesDirected().size();
-                        int numberOfMoviesDirected2 = director2.getMoviesDirected().size();
-
-                        if (orderBy == OrderBy.DESC) {
-                            return Integer.compare(numberOfMoviesDirected2, numberOfMoviesDirected1);
-                        } else {
-                            return Integer.compare(numberOfMoviesDirected1, numberOfMoviesDirected2);
-                        }
-                    })
+            List<DirectorDto> directorDtoList = directorPage.stream()
+                    .filter(directorPredicate)
+                    .limit(filteringOptions.getLimit())
+                    .map(directorDtoConverter::convert)
                     .toList();
 
-            log.info(String.format(LogMessages.SORTED, "number of movies directed"));
-
-            if (filteringOptions.getLimit() != null) {
-                directors = directors.stream()
-                        .limit(filteringOptions.getLimit())
-                        .toList();
-                log.info(String.format(LogMessages.LIMITED, filteringOptions.getLimit()));
-            }
+            return new CustomPage<>(directorPage, directorDtoList);
         }
 
-        return directors.stream()
+        Comparator<Director> directorComparator = Comparator.comparing(director -> director.getMoviesDirected().size());
+
+        log.info(String.format(LogMessages.ORDER_BY_VALUE, orderBy.name()));
+
+        if (orderBy == OrderBy.DESC) {
+            directorComparator = directorComparator.reversed();
+        }
+
+        List<DirectorDto> directorList = directorPage.stream()
+                .filter(directorPredicate)
+                .sorted(directorComparator)
+                .limit(filteringOptions.getLimit())
                 .map(directorDtoConverter::convert)
-                .collect(Collectors.toList());
+                .toList();
+
+        return new CustomPage<>(directorPage, directorList);
     }
 
     @Cacheable(value = "directors", key = "#id", unless = "#result.moviesDirected.size() < 2")
@@ -185,15 +179,4 @@ public class DirectorServiceImpl implements DirectorService {
                 .orElseThrow(() -> new EntityNotFound(String.format(ResponseMessages.NOT_FOUND, EntityNames.DIRECTOR, id)));
     }
 
-    @Override
-    public CustomPage<DirectorDto, Director> getDirectors(Pageable pageable) {
-        log.info(String.format(LogMessages.STARTED, "getDirectors"));
-
-        Page<Director> page = directorRepository.findAll(pageable);
-        List<DirectorDto> directors = page.getContent().stream()
-                .map(directorDtoConverter::convert)
-                .toList();
-
-        return new CustomPage<>(page, directors);
-    }
 }

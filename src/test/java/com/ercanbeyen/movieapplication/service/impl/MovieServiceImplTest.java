@@ -1,6 +1,5 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
-import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
 import com.ercanbeyen.movieapplication.dto.MovieDto;
 import com.ercanbeyen.movieapplication.dto.converter.MovieDtoConverter;
 import com.ercanbeyen.movieapplication.dto.option.filter.MovieFilteringOptions;
@@ -11,6 +10,7 @@ import com.ercanbeyen.movieapplication.entity.Director;
 import com.ercanbeyen.movieapplication.entity.Movie;
 import com.ercanbeyen.movieapplication.constant.enums.Genre;
 import com.ercanbeyen.movieapplication.repository.MovieRepository;
+import com.ercanbeyen.movieapplication.util.CustomPage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,6 +19,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -153,21 +156,27 @@ public class MovieServiceImplTest {
     @Test
     @DisplayName("When Get Movies Called It Should Return MovieDto List")
     public void whenGetMoviesCalledItShouldReturnMovieDto() {
-        String language = "English";
+        Pageable pageable = Pageable.ofSize(1).withPage(0);
 
-        List<MovieDto> expected = Collections.singletonList(movieDtoList.get(0));
+        List<Movie> fetchedMovieList = Collections.singletonList(movieList.get(0));
+        List<MovieDto> fetchedMovieDtoList = Collections.singletonList(movieDtoList.get(0));
 
-        when(movieRepository.findAll()).thenReturn(movieList);
-        when(movieDtoConverter.convert(movieList.get(0))).thenReturn(expected.get(0));
+        Page<Movie> moviePage = new PageImpl<>(fetchedMovieList, pageable, fetchedMovieList.size());
+        CustomPage<Movie, MovieDto> expected = new CustomPage<>(moviePage, fetchedMovieDtoList);
+
+        when(movieRepository.findAll(pageable)).thenReturn(moviePage);
+        when(movieRepository.count()).thenReturn(Long.valueOf(movieList.size()));
+        when(movieDtoConverter.convert(movieList.get(0))).thenReturn(movieDtoList.get(0));
 
         MovieFilteringOptions movieFilteringOptions = new MovieFilteringOptions();
-        movieFilteringOptions.setLanguage(language);
+        movieFilteringOptions.setLanguage(movieList.get(0).getLanguage());
 
-        List<MovieDto> actual = movieService.getMovies(movieFilteringOptions, OrderBy.ASC);
+        CustomPage<Movie, MovieDto> actual = movieService.filterMovies(movieFilteringOptions, null, pageable);
 
         assertEquals(expected, actual);
 
-        verify(movieRepository, times(1)).findAll();
+        verify(movieRepository, times(1)).findAll(pageable);
+        verify(movieRepository, times(1)).count();
         verify(movieDtoConverter, times(1)).convert(any(Movie.class));
     }
 

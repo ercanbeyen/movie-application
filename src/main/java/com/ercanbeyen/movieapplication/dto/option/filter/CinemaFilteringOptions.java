@@ -11,4 +11,5 @@ public class CinemaFilteringOptions {
     Boolean parking_place;
     Boolean air_conditioning;
     Boolean cafe_food;
+    Long limit;
 }

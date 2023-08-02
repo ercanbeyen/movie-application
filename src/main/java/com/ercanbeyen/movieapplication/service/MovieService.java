@@ -13,12 +13,11 @@ import java.util.List;
 
 public interface MovieService {
     MovieDto createMovie(CreateMovieRequest request);
-    List<MovieDto> getMovies(MovieFilteringOptions filteringOptions, OrderBy orderBy);
+    CustomPage<Movie, MovieDto> filterMovies(MovieFilteringOptions filteringOptions, OrderBy orderBy, Pageable pageable);
     MovieDto getMovie(Integer id);
     MovieDto updateMovie(Integer id, UpdateMovieRequest request);
     String deleteMovie(Integer id);
     List<MovieDto> getLatestMovies();
     List<MovieDto> searchMovies(String title);
     Movie getMovieById(Integer id);
-    CustomPage<MovieDto, Movie> getMovies(Pageable pageable);
 }

@@ -1,17 +1,13 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
 import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
-import com.ercanbeyen.movieapplication.constant.message.ActionNames;
-import com.ercanbeyen.movieapplication.constant.message.EntityNames;
-import com.ercanbeyen.movieapplication.constant.message.LogMessages;
-import com.ercanbeyen.movieapplication.constant.message.ResponseMessages;
+import com.ercanbeyen.movieapplication.constant.message.*;
 import com.ercanbeyen.movieapplication.dto.ActorDto;
 import com.ercanbeyen.movieapplication.dto.converter.ActorDtoConverter;
 import com.ercanbeyen.movieapplication.dto.option.filter.ActorFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateActorRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateActorRequest;
 import com.ercanbeyen.movieapplication.entity.Actor;
-import com.ercanbeyen.movieapplication.entity.Movie;
 import com.ercanbeyen.movieapplication.exception.EntityNotFound;
 import com.ercanbeyen.movieapplication.repository.ActorRepository;
 import com.ercanbeyen.movieapplication.service.ActorService;
@@ -25,8 +21,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,63 +54,46 @@ public class ActorServiceImpl implements ActorService {
     }
 
     @Override
-    public List<ActorDto> getActors(ActorFilteringOptions filteringOptions, OrderBy orderBy) {
-        log.info(String.format(LogMessages.STARTED, "getActors"));
-        List<Actor> actors = actorRepository.findAll();
+    public CustomPage<Actor, ActorDto> filterActors(ActorFilteringOptions filteringOptions, OrderBy orderBy, Pageable pageable) {
+        log.info(String.format(LogMessages.STARTED, "filterActors"));
+        Page<Actor> actorPage = actorRepository.findAll(pageable);
         log.info(String.format(LogMessages.FETCHED_ALL, EntityNames.ACTOR));
 
-        if (filteringOptions.getMovieId() != null) {
-            actors = actors
-                    .stream()
-                    .filter(actor -> actor.getMoviesPlayed()
-                            .stream()
-                            .map(Movie::getId)
-                            .anyMatch(id -> filteringOptions.getMovieId().intValue() == id.intValue()))
-                    .toList();
-            log.info(String.format(LogMessages.FILTERED, "movieId"));
+        Predicate<Actor> actorPredicate = (actor) -> ((filteringOptions.getMovieId() == null || filteringOptions.getMovieId().intValue() == filteringOptions.getMovieId().intValue())) && (StringUtils.isBlank(filteringOptions.getNationality()) || actor.getNationality().equals(filteringOptions.getNationality()))
+                && (filteringOptions.getBirthYear() == null || actor.getBirthYear().getYear() == filteringOptions.getBirthYear());
+
+        if (filteringOptions.getLimit() == null) {
+            log.info(String.format(LogMessages.PARAMETER_NULL, ParameterNames.LIMIT));
+            filteringOptions.setLimit(actorRepository.count());
         }
 
-        if (!StringUtils.isBlank(filteringOptions.getNationality())) {
-            actors = actors.stream()
-                    .filter(actor -> actor.getNationality().equals(filteringOptions.getNationality()))
-                    .collect(Collectors.toList());
-            log.info(String.format(LogMessages.FILTERED, "nationality"));
-        }
+        if (orderBy == null) {
+            log.info(String.format(LogMessages.PARAMETER_NULL, ParameterNames.ORDER_BY));
 
-        if (filteringOptions.getYear() != null) {
-            actors = actors.stream()
-                    .filter(actor ->  actor.getBirthYear().getYear() == filteringOptions.getYear())
-                    .collect(Collectors.toList());
-            log.info(String.format(LogMessages.FILTERED, "birthYear"));
-        }
-
-        if (orderBy != null) {
-            actors = actors.stream()
-                    .sorted((actor1, actor2) -> {
-                        int numberOfMoviesPlayed1 = actor1.getMoviesPlayed().size();
-                        int numberOfMoviesPlayed2 = actor2.getMoviesPlayed().size();
-
-                        if (orderBy == OrderBy.DESC) {
-                            return Integer.compare(numberOfMoviesPlayed2, numberOfMoviesPlayed1);
-                        } else {
-                            return Integer.compare(numberOfMoviesPlayed1, numberOfMoviesPlayed2);
-                        }
-                    })
-                    .toList();
-
-            log.info(String.format(LogMessages.SORTED, "number of movies played"));
-        }
-
-        if (filteringOptions.getLimit() != null) {
-            actors = actors.stream()
+            List<ActorDto> actorDtoList = actorPage.stream()
+                    .filter(actorPredicate)
                     .limit(filteringOptions.getLimit())
+                    .map(actorDtoConverter::convert)
                     .toList();
-            log.info(String.format(String.format(LogMessages.LIMITED, filteringOptions.getLimit())));
+
+            return new CustomPage<>(actorPage, actorDtoList);
         }
 
-        return actors.stream()
+        Comparator<Actor> actorComparator = Comparator.comparing(actor -> actor.getMoviesPlayed().size());
+        log.info(String.format(LogMessages.ORDER_BY_VALUE, orderBy.name()));
+
+        if (orderBy == OrderBy.DESC) {
+            actorComparator = actorComparator.reversed();
+        }
+
+        List<ActorDto> actorDtoList = actorPage.stream()
+                .filter(actorPredicate)
+                .sorted(actorComparator)
+                .limit(filteringOptions.getLimit())
                 .map(actorDtoConverter::convert)
-                .collect(Collectors.toList());
+                .toList();
+
+        return new CustomPage<>(actorPage, actorDtoList);
     }
 
     @Cacheable(value = "actors", key = "#id", unless = "#result.moviesPlayed.size() < 2")
@@ -177,28 +158,13 @@ public class ActorServiceImpl implements ActorService {
 
     @Override
     public List<ActorDto> searchActors(String fullName) {
-        log.info(LogMessages.STARTED, "searchActors");
+        log.info(String.format(LogMessages.STARTED, "searchActors"));
         List<Actor> actors = actorRepository.findByFullName(fullName);
         log.info(String.format(LogMessages.FETCHED_ALL, EntityNames.ACTOR));
 
         return actors.stream()
                 .map(actorDtoConverter::convert)
                 .toList();
-    }
-
-    @Override
-    public CustomPage<ActorDto, Actor> getActors(Pageable pageable) {
-        log.info(String.format(LogMessages.STARTED, "getActors"));
-        Page<Actor> page = actorRepository.findAll(pageable);
-        log.info(String.format(LogMessages.FETCHED_ALL, EntityNames.ACTOR));
-
-        List<ActorDto> actorDtoList = page.getContent()
-                .stream()
-                .map(actorDtoConverter::convert)
-                .toList();
-
-        return new CustomPage<>(page, actorDtoList);
-
     }
 
     private Actor getActorById(Integer id) {

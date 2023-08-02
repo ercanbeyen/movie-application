@@ -30,9 +30,9 @@ public class MovieController {
         return ResponseHandler.generateResponse(HttpStatus.CREATED, null, movieDto);
     }
 
-    @GetMapping("/filter")
-    public ResponseEntity<Object> getMovies(MovieFilteringOptions movieFilteringOptions, @RequestParam(required = false) OrderBy orderBy) {
-        List<MovieDto> movieDtoList = movieService.getMovies(movieFilteringOptions, orderBy);
+    @GetMapping
+    public ResponseEntity<Object> getMovies(MovieFilteringOptions movieFilteringOptions, @RequestParam(required = false) OrderBy orderBy, Pageable pageable) {
+        CustomPage<Movie, MovieDto> movieDtoList = movieService.filterMovies(movieFilteringOptions, orderBy, pageable);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDtoList);
     }
 
@@ -65,12 +65,6 @@ public class MovieController {
     public ResponseEntity<Object> searchMovies(@RequestParam(required = false) String title) {
         List<MovieDto> movieDtoList = movieService.searchMovies(title);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDtoList);
-    }
-
-    @GetMapping
-    public ResponseEntity<Object> getMovies(Pageable pageable) {
-        CustomPage<MovieDto, Movie> moviePage = movieService.getMovies(pageable);
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, moviePage);
     }
 
 }

@@ -30,9 +30,9 @@ public class ActorController {
         return ResponseHandler.generateResponse(HttpStatus.CREATED, null, createdActor);
     }
 
-    @GetMapping("/filter")
-    public ResponseEntity<Object> getActors(ActorFilteringOptions actorFilteringOptions, @RequestParam(required = false) OrderBy orderBy) {
-        List<ActorDto> actorDtoList = actorService.getActors(actorFilteringOptions, orderBy);
+    @GetMapping
+    public ResponseEntity<Object> getActors(ActorFilteringOptions actorFilteringOptions, @RequestParam(required = false) OrderBy orderBy, Pageable pageable) {
+        CustomPage<Actor, ActorDto> actorDtoList = actorService.filterActors(actorFilteringOptions, orderBy, pageable);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, actorDtoList);
     }
 
@@ -64,12 +64,6 @@ public class ActorController {
     public ResponseEntity<Object> searchActors(@RequestParam String fullName) {
         List<ActorDto> actorDtoList = actorService.searchActors(fullName);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, actorDtoList);
-    }
-
-    @GetMapping
-    public ResponseEntity<Object> getActors(Pageable pageable) {
-        CustomPage<ActorDto, Actor> actorPage = actorService.getActors(pageable);
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, actorPage);
     }
 
 }

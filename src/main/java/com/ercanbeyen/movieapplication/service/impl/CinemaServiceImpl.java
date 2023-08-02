@@ -1,9 +1,6 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
-import com.ercanbeyen.movieapplication.constant.message.ActionNames;
-import com.ercanbeyen.movieapplication.constant.message.EntityNames;
-import com.ercanbeyen.movieapplication.constant.message.LogMessages;
-import com.ercanbeyen.movieapplication.constant.message.ResponseMessages;
+import com.ercanbeyen.movieapplication.constant.message.*;
 import com.ercanbeyen.movieapplication.dto.CinemaDto;
 import com.ercanbeyen.movieapplication.dto.converter.CinemaDtoConverter;
 import com.ercanbeyen.movieapplication.dto.option.filter.CinemaFilteringOptions;
@@ -29,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -155,79 +153,33 @@ public class CinemaServiceImpl implements CinemaService {
     }
 
     @Override
-    public CustomPage<CinemaDto, Cinema> pagination(Pageable pageable) {
-        log.info(String.format(LogMessages.STARTED, "pagination"));
-        Page<Cinema> page = cinemaRepository.findAll(pageable);
+    public CustomPage<Cinema, CinemaDto> filterCinemas(CinemaFilteringOptions filteringOptions, Pageable pageable) {
+        log.info(String.format(LogMessages.STARTED, "filterCinemas"));
+
+        Page<Cinema> cinemaPage = cinemaRepository.findAll(pageable);
         log.info(String.format(LogMessages.FETCHED_ALL, EntityNames.CINEMA));
 
-        List<CinemaDto> cinemaDtoList = page.getContent().stream()
+        Predicate<Cinema> cinemaPredicate = (cinema) -> ((filteringOptions.getCountry() == null || cinema.getCountry().equals(filteringOptions.getCountry()))
+                && (filteringOptions.getCity() == null || cinema.getCity().equals(filteringOptions.getCity()))
+                && (filteringOptions.getReservation_with_phone() == null || cinema.isReservation_with_phone() == filteringOptions.getReservation_with_phone())
+                && (filteringOptions.getThreeD_animation() == null || cinema.isThreeD_animation() == filteringOptions.getThreeD_animation())
+                && (filteringOptions.getParking_place() == null || cinema.isParking_place() == filteringOptions.getParking_place())
+                && (filteringOptions.getAir_conditioning() == null || cinema.isAir_conditioning() == filteringOptions.getAir_conditioning())
+                && (filteringOptions.getCafe_food() == null || cinema.isCafe_food() == filteringOptions.getCafe_food()));
+
+        if (filteringOptions.getLimit() == null) {
+            log.info(String.format(LogMessages.PARAMETER_NULL, ParameterNames.LIMIT));
+            filteringOptions.setLimit(cinemaRepository.count());
+        }
+
+        List<CinemaDto> cinemaDtoList = cinemaPage.stream()
+                .filter(cinemaPredicate)
+                .limit(filteringOptions.getLimit())
                 .map(cinemaDtoConverter::convert)
                 .toList();
 
-        return new CustomPage<>(page, cinemaDtoList);
-    }
+        return new CustomPage<>(cinemaPage, cinemaDtoList);
 
-    @Override
-    public List<CinemaDto> filterCinemas(CinemaFilteringOptions filteringOptions) {
-        log.info(String.format(LogMessages.STARTED, "filterCinemas"));
-
-        Iterable<Cinema> cinemaIterable = cinemaRepository.findAll();
-        log.info(String.format(LogMessages.FETCHED_ALL, EntityNames.CINEMA));
-        List<Cinema> cinemas = new ArrayList<>();
-        cinemaIterable.forEach(cinemas::add);
-
-        if (filteringOptions.getCountry() != null) {
-            cinemas = cinemas.stream()
-                    .filter(cinema -> cinema.getCountry().equals(filteringOptions.getCountry()))
-                    .collect(Collectors.toList());
-            log.info(String.format(LogMessages.FILTERED, "country"));
-        }
-
-        if (filteringOptions.getCity() != null) {
-            cinemas = cinemas.stream()
-                    .filter(cinema -> cinema.getCity().equals(filteringOptions.getCity()))
-                    .collect(Collectors.toList());
-            log.info(String.format(LogMessages.FILTERED, "city"));
-        }
-
-        if (filteringOptions.getReservation_with_phone() != null) {
-            cinemas = cinemas.stream()
-                    .filter(cinema -> cinema.isReservation_with_phone() == filteringOptions.getReservation_with_phone())
-                    .collect(Collectors.toList());
-            log.info(String.format(LogMessages.FILTERED, "reservation_with_phone"));
-        }
-
-        if (filteringOptions.getThreeD_animation() != null) {
-            cinemas = cinemas.stream()
-                    .filter(cinema -> cinema.isThreeD_animation() == filteringOptions.getThreeD_animation())
-                    .collect(Collectors.toList());
-            log.info(String.format(LogMessages.FILTERED, "threeD_animation"));
-        }
-
-        if (filteringOptions.getParking_place() != null) {
-            cinemas = cinemas.stream()
-                    .filter(cinema -> cinema.isParking_place() == filteringOptions.getParking_place())
-                    .collect(Collectors.toList());
-            log.info(String.format(LogMessages.FILTERED, "parking_place"));
-        }
-
-        if (filteringOptions.getAir_conditioning() != null) {
-            cinemas = cinemas.stream()
-                    .filter(cinema -> cinema.isAir_conditioning() == filteringOptions.getAir_conditioning())
-                    .collect(Collectors.toList());
-            log.info(String.format(LogMessages.FILTERED, "air_conditioning"));
-        }
-
-        if (filteringOptions.getCafe_food() != null) {
-            cinemas = cinemas.stream()
-                    .filter(cinema -> cinema.isCafe_food() == filteringOptions.getCafe_food())
-                    .collect(Collectors.toList());
-            log.info(String.format(LogMessages.FILTERED, "cafe_food"));
-        }
-
-        return cinemas.stream()
-                .map(cinemaDtoConverter::convert)
-                .collect(Collectors.toList());
     }
 
     @Override

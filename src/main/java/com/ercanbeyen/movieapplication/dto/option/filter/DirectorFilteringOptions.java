@@ -5,6 +5,8 @@ import lombok.Data;
 @Data
 public class DirectorFilteringOptions {
     String nationality;
-    Integer year;
-    Integer limit;
+    Integer birthYear;
+    Long limit;
+
+
 }

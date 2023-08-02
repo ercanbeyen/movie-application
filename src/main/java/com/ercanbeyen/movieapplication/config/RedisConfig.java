@@ -1,4 +1,4 @@
-package com.ercanbeyen.movieapplication.configuration;
+package com.ercanbeyen.movieapplication.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

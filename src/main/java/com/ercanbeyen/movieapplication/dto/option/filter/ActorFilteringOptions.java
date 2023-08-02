@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class ActorFilteringOptions {
     String nationality;
-    Integer year;
+    Integer birthYear;
     Integer movieId;
-    Integer limit;
+    Long limit;
 }
