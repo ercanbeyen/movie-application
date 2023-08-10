@@ -8,7 +8,7 @@ import com.ercanbeyen.movieapplication.dto.option.filter.DirectorFilteringOption
 import com.ercanbeyen.movieapplication.dto.request.create.CreateDirectorRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateDirectorRequest;
 import com.ercanbeyen.movieapplication.entity.Director;
-import com.ercanbeyen.movieapplication.exception.EntityNotFound;
+import com.ercanbeyen.movieapplication.exception.ResourceNotFound;
 import com.ercanbeyen.movieapplication.repository.DirectorRepository;
 import com.ercanbeyen.movieapplication.service.DirectorService;
 import com.ercanbeyen.movieapplication.util.CustomPage;
@@ -48,7 +48,7 @@ public class DirectorServiceImpl implements DirectorService {
                 .build();
 
         Director savedDirector = directorRepository.save(newDirector);
-        log.info(LogMessages.SAVED, EntityNames.DIRECTOR);
+        log.info(LogMessages.SAVED, ResourceNames.DIRECTOR);
 
         return directorDtoConverter.convert(savedDirector);
     }
@@ -57,7 +57,7 @@ public class DirectorServiceImpl implements DirectorService {
     public CustomPage<Director, DirectorDto> filterDirectors(DirectorFilteringOptions filteringOptions, OrderBy orderBy, Pageable pageable) {
         log.info(LogMessages.STARTED, "filterDirectors");
         Page<Director> directorPage = directorRepository.findAll(pageable);
-        log.info(LogMessages.FETCHED_ALL, EntityNames.DIRECTOR);
+        log.info(LogMessages.FETCHED_ALL, ResourceNames.DIRECTOR);
 
         Predicate<Director> directorPredicate = (director) -> ((StringUtils.isBlank(filteringOptions.getNationality()) || director.getNationality().equals(filteringOptions.getNationality()))
                 && (filteringOptions.getBirthYear() == null || director.getBirthYear().getYear() == filteringOptions.getBirthYear()));
@@ -102,7 +102,7 @@ public class DirectorServiceImpl implements DirectorService {
     public DirectorDto getDirector(Integer id) {
         log.info(LogMessages.STARTED, "getDirector");
         Director directorInDb = findDirectorById(id);
-        log.info(LogMessages.FETCHED, EntityNames.DIRECTOR);
+        log.info(LogMessages.FETCHED, ResourceNames.DIRECTOR);
         return directorDtoConverter.convert(directorInDb);
     }
 
@@ -112,7 +112,7 @@ public class DirectorServiceImpl implements DirectorService {
         log.info(LogMessages.STARTED, "updateDirector");
 
         Director directorInDb = findDirectorById(id);
-        log.info(LogMessages.FETCHED, EntityNames.DIRECTOR);
+        log.info(LogMessages.FETCHED, ResourceNames.DIRECTOR);
 
         directorInDb.setName(request.getName());
         directorInDb.setSurname(request.getSurname());
@@ -122,7 +122,7 @@ public class DirectorServiceImpl implements DirectorService {
         log.info(LogMessages.FIELDS_SET);
 
         Director savedDirector = directorRepository.save(directorInDb);
-        log.info(LogMessages.SAVED, EntityNames.DIRECTOR);
+        log.info(LogMessages.SAVED, ResourceNames.DIRECTOR);
 
         return directorDtoConverter.convert(savedDirector);
     }
@@ -135,14 +135,14 @@ public class DirectorServiceImpl implements DirectorService {
         boolean directorExists = directorRepository.existsById(id);
 
         if (!directorExists) {
-            throw new EntityNotFound(String.format(ResponseMessages.NOT_FOUND, EntityNames.DIRECTOR, id));
+            throw new ResourceNotFound(String.format(ResponseMessages.NOT_FOUND, ResourceNames.DIRECTOR, id));
         }
 
-        log.info(LogMessages.EXISTS, EntityNames.DIRECTOR);
+        log.info(LogMessages.EXISTS, ResourceNames.DIRECTOR);
         directorRepository.deleteById(id);
-        log.info(LogMessages.DELETED, EntityNames.DIRECTOR);
+        log.info(LogMessages.DELETED, ResourceNames.DIRECTOR);
 
-        return String.format(ResponseMessages.SUCCESS, EntityNames.DIRECTOR, id, ActionNames.DELETED);
+        return String.format(ResponseMessages.SUCCESS, ResourceNames.DIRECTOR, id, ActionNames.DELETED);
     }
 
     @Cacheable(value = "directors")
@@ -151,7 +151,7 @@ public class DirectorServiceImpl implements DirectorService {
         log.info(LogMessages.STARTED, "getMostPopularDirectors");
 
         List<Director> directors = directorRepository.findAll();
-        log.info(LogMessages.FETCHED_ALL, EntityNames.DIRECTOR);
+        log.info(LogMessages.FETCHED_ALL, ResourceNames.DIRECTOR);
         int numberOfMovies = 2;
 
         return directors.stream()
@@ -165,7 +165,7 @@ public class DirectorServiceImpl implements DirectorService {
         log.info(LogMessages.STARTED, "searchDirectors");
 
         List<Director> directors = directorRepository.findByFullName(fullName);
-        log.info(LogMessages.SAVED, EntityNames.DIRECTOR);
+        log.info(LogMessages.SAVED, ResourceNames.DIRECTOR);
 
         return directors.stream()
                 .map(directorDtoConverter::convert)
@@ -176,7 +176,7 @@ public class DirectorServiceImpl implements DirectorService {
     public Director findDirectorById(Integer id) {
         log.info(LogMessages.STARTED, "findDirectorById");
         return directorRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFound(String.format(ResponseMessages.NOT_FOUND, EntityNames.DIRECTOR, id)));
+                .orElseThrow(() -> new ResourceNotFound(String.format(ResponseMessages.NOT_FOUND, ResourceNames.DIRECTOR, id)));
     }
 
 }

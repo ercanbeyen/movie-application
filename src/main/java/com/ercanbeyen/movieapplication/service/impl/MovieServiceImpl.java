@@ -10,7 +10,7 @@ import com.ercanbeyen.movieapplication.dto.request.update.UpdateMovieRequest;
 import com.ercanbeyen.movieapplication.entity.Actor;
 import com.ercanbeyen.movieapplication.entity.Director;
 import com.ercanbeyen.movieapplication.entity.Movie;
-import com.ercanbeyen.movieapplication.exception.EntityNotFound;
+import com.ercanbeyen.movieapplication.exception.ResourceNotFound;
 import com.ercanbeyen.movieapplication.repository.MovieRepository;
 import com.ercanbeyen.movieapplication.service.ActorService;
 import com.ercanbeyen.movieapplication.service.DirectorService;
@@ -64,7 +64,7 @@ public class MovieServiceImpl implements MovieService {
                 .build();
 
         Movie createdMovie = movieRepository.save(newMovie);
-        log.info(LogMessages.SAVED, EntityNames.MOVIE);
+        log.info(LogMessages.SAVED, ResourceNames.MOVIE);
 
         return movieDtoConverter.convert(createdMovie);
     }
@@ -74,7 +74,7 @@ public class MovieServiceImpl implements MovieService {
     public CustomPage<Movie, MovieDto> filterMovies(MovieFilteringOptions filteringOptions, OrderBy orderBy, Pageable pageable) {
         log.info(LogMessages.STARTED, "filterMovies");
         Page<Movie> moviePage = movieRepository.findAll(pageable);
-        log.info(LogMessages.FETCHED_ALL, EntityNames.MOVIE);
+        log.info(LogMessages.FETCHED_ALL, ResourceNames.MOVIE);
 
         Predicate<Movie> moviePredicate = (movie) -> (
                 (filteringOptions.getGenres() == null || filteringOptions.getGenres().isEmpty() || filteringOptions.getGenres().contains(movie.getGenre())) &&
@@ -120,7 +120,7 @@ public class MovieServiceImpl implements MovieService {
     public MovieDto getMovie(Integer id) {
         log.info(LogMessages.STARTED, "getMovie");
         Movie movieInDb = findMovieById(id);
-        log.info(LogMessages.FETCHED, EntityNames.MOVIE);
+        log.info(LogMessages.FETCHED, ResourceNames.MOVIE);
         return movieDtoConverter.convert(movieInDb);
     }
 
@@ -150,7 +150,7 @@ public class MovieServiceImpl implements MovieService {
         }
 
         Movie movieInDb = findMovieById(id);
-        log.info(LogMessages.FETCHED, EntityNames.MOVIE);
+        log.info(LogMessages.FETCHED, ResourceNames.MOVIE);
 
 
         movieInDb.setTitle(request.getTitle());
@@ -164,7 +164,7 @@ public class MovieServiceImpl implements MovieService {
         log.info(LogMessages.FIELDS_SET);
 
         Movie savedMovie = movieRepository.save(movieInDb);
-        log.info(LogMessages.SAVED, EntityNames.MOVIE);
+        log.info(LogMessages.SAVED, ResourceNames.MOVIE);
 
         return movieDtoConverter.convert(savedMovie);
     }
@@ -177,14 +177,14 @@ public class MovieServiceImpl implements MovieService {
         boolean movieExists = movieRepository.existsById(id);
 
         if (!movieExists) {
-            throw new EntityNotFound(String.format(ResponseMessages.NOT_FOUND, EntityNames.MOVIE, id));
+            throw new ResourceNotFound(String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE, id));
         }
 
-        log.info(LogMessages.EXISTS, EntityNames.MOVIE);
+        log.info(LogMessages.EXISTS, ResourceNames.MOVIE);
         movieRepository.deleteById(id);
-        log.info(LogMessages.DELETED, EntityNames.MOVIE);
+        log.info(LogMessages.DELETED, ResourceNames.MOVIE);
 
-        return String.format(ResponseMessages.SUCCESS, EntityNames.MOVIE, id, ActionNames.DELETED);
+        return String.format(ResponseMessages.SUCCESS, ResourceNames.MOVIE, id, ActionNames.DELETED);
     }
 
     @Cacheable(value = "movies")
@@ -193,7 +193,7 @@ public class MovieServiceImpl implements MovieService {
         log.info(LogMessages.STARTED, "getLatestMovies");
 
         List<Movie> movies = movieRepository.findAll();
-        log.info(LogMessages.FETCHED_ALL, EntityNames.MOVIE);
+        log.info(LogMessages.FETCHED_ALL, ResourceNames.MOVIE);
         int year = 2020;
 
         return movies.stream()
@@ -210,7 +210,7 @@ public class MovieServiceImpl implements MovieService {
 
         if (isTitleFilled) {
             movies = movieRepository.findByTitleStartingWith(title);
-            log.info(LogMessages.FETCHED_ALL, EntityNames.MOVIE);
+            log.info(LogMessages.FETCHED_ALL, ResourceNames.MOVIE);
         }
 
         return movies.stream()
@@ -222,7 +222,7 @@ public class MovieServiceImpl implements MovieService {
     public Movie findMovieById(Integer id) {
         log.info(LogMessages.STARTED, "findMovieById");
         return movieRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFound(String.format(ResponseMessages.NOT_FOUND, EntityNames.MOVIE, id)));
+                .orElseThrow(() -> new ResourceNotFound(String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE, id)));
     }
 
 }

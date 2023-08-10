@@ -8,7 +8,7 @@ import com.ercanbeyen.movieapplication.dto.option.search.CinemaSearchOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateCinemaRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateCinemaRequest;
 import com.ercanbeyen.movieapplication.document.Cinema;
-import com.ercanbeyen.movieapplication.exception.EntityNotFound;
+import com.ercanbeyen.movieapplication.exception.ResourceNotFound;
 import com.ercanbeyen.movieapplication.repository.CinemaRepository;
 import com.ercanbeyen.movieapplication.service.CinemaService;
 import com.ercanbeyen.movieapplication.util.CustomPage;
@@ -57,7 +57,7 @@ public class CinemaServiceImpl implements CinemaService {
                 .build();
 
         Cinema savedCinema = cinemaRepository.save(newCinema);
-        log.info(LogMessages.SAVED, EntityNames.CINEMA);
+        log.info(LogMessages.SAVED, ResourceNames.CINEMA);
 
         return cinemaDtoConverter.convert(savedCinema);
     }
@@ -71,7 +71,7 @@ public class CinemaServiceImpl implements CinemaService {
                 searchOptions.getParking_place(),
                 searchOptions.getAir_conditioning(),
                 searchOptions.getCafe_food());
-        log.info(LogMessages.FETCHED, EntityNames.CINEMA);
+        log.info(LogMessages.FETCHED, ResourceNames.CINEMA);
 
         return cinemas.stream()
                 .map(cinemaDtoConverter::convert)
@@ -82,7 +82,7 @@ public class CinemaServiceImpl implements CinemaService {
     public CinemaDto getCinema(String id) {
         log.info(LogMessages.STARTED, "getCinema");
         Cinema cinemaInDb = findCinemaById(id);
-        log.info(LogMessages.FETCHED, EntityNames.CINEMA);
+        log.info(LogMessages.FETCHED, ResourceNames.CINEMA);
         return cinemaDtoConverter.convert(cinemaInDb);
     }
 
@@ -90,7 +90,7 @@ public class CinemaServiceImpl implements CinemaService {
     public CinemaDto updateCinema(String id, UpdateCinemaRequest request) {
         log.info(LogMessages.STARTED, "updateCinema");
         Cinema cinemaInDb = findCinemaById(id);
-        log.info(LogMessages.FETCHED, EntityNames.CINEMA);
+        log.info(LogMessages.FETCHED, ResourceNames.CINEMA);
 
         cinemaInDb.setName(request.getName());
         cinemaInDb.setCountry(request.getCountry());
@@ -106,7 +106,7 @@ public class CinemaServiceImpl implements CinemaService {
         log.info(LogMessages.FIELDS_SET);
 
         Cinema savedCinema = cinemaRepository.save(cinemaInDb);
-        log.info(LogMessages.SAVED, EntityNames.CINEMA);
+        log.info(LogMessages.SAVED, ResourceNames.CINEMA);
 
         return cinemaDtoConverter.convert(savedCinema);
     }
@@ -117,14 +117,14 @@ public class CinemaServiceImpl implements CinemaService {
         boolean cinemaExists = cinemaRepository.existsById(id);
 
         if (!cinemaExists) {
-            throw new EntityNotFound(String.format(ResponseMessages.NOT_FOUND, EntityNames.MOVIE, id));
+            throw new ResourceNotFound(String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE, id));
         }
 
-        log.info(LogMessages.EXISTS, EntityNames.CINEMA);
+        log.info(LogMessages.EXISTS, ResourceNames.CINEMA);
         cinemaRepository.deleteById(id);
-        log.info(LogMessages.DELETED, EntityNames.CINEMA);
+        log.info(LogMessages.DELETED, ResourceNames.CINEMA);
 
-        return String.format(ResponseMessages.SUCCESS, EntityNames.CINEMA, id, ActionNames.DELETED);
+        return String.format(ResponseMessages.SUCCESS, ResourceNames.CINEMA, id, ActionNames.DELETED);
     }
 
     @Override
@@ -133,7 +133,7 @@ public class CinemaServiceImpl implements CinemaService {
 
         List<SearchHit<Cinema>> searchHits = cinemaRepository.findByName(searchTerm)
                 .getSearchHits();
-        log.info(LogMessages.FETCHED_ALL, EntityNames.CINEMA);
+        log.info(LogMessages.FETCHED_ALL, ResourceNames.CINEMA);
 
         return convertSearchHitList(searchHits);
     }
@@ -157,7 +157,7 @@ public class CinemaServiceImpl implements CinemaService {
         log.info(LogMessages.STARTED, "filterCinemas");
 
         Page<Cinema> cinemaPage = cinemaRepository.findAll(pageable);
-        log.info(LogMessages.FETCHED_ALL, EntityNames.CINEMA);
+        log.info(LogMessages.FETCHED_ALL, ResourceNames.CINEMA);
 
         Predicate<Cinema> cinemaPredicate = (cinema) -> ((filteringOptions.getCountry() == null || cinema.getCountry().equals(filteringOptions.getCountry()))
                 && (filteringOptions.getCity() == null || cinema.getCity().equals(filteringOptions.getCity()))
@@ -221,6 +221,6 @@ public class CinemaServiceImpl implements CinemaService {
 
     private Cinema findCinemaById(String id) {
         return cinemaRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFound(String.format(ResponseMessages.NOT_FOUND, EntityNames.CINEMA, id)));
+                .orElseThrow(() -> new ResourceNotFound(String.format(ResponseMessages.NOT_FOUND, ResourceNames.CINEMA, id)));
     }
 }

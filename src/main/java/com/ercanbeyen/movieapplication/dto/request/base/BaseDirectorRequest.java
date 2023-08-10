@@ -1,5 +1,6 @@
 package com.ercanbeyen.movieapplication.dto.request.base;
 
+import com.ercanbeyen.movieapplication.constant.message.ResponseMessages;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -14,11 +15,11 @@ import java.util.Date;
 @Setter
 @MappedSuperclass
 public abstract class BaseDirectorRequest {
-    @NotBlank(message = "name should not be blank")
+    @NotBlank(message = "Name" + ResponseMessages.SHOULD_NOT_BLANK)
     private String name;
-    @NotBlank(message = "surname should not be blank")
+    @NotBlank(message = "Surname" + ResponseMessages.SHOULD_NOT_BLANK)
     private String surname;
-    @NotBlank(message = "nationality should not be blank")
+    @NotBlank(message = "Nationality" + ResponseMessages.SHOULD_NOT_BLANK)
     private String nationality;
     private LocalDate birthYear;
     private String biography;

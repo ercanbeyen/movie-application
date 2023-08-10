@@ -45,14 +45,6 @@ public class ScheduledTasks {
                     COLLECTION_URI + "?page=" + pageable.getPageNumber() + "&size=" + pageable.getPageSize(), HashMap.class
             );
 
-            /*JsonNode response = restTemplate.getForObject(
-                    COLLECTION_URL + "?page=" + pageable.getPageNumber() + "&size=" + pageable.getPageSize(), JsonNode.class
-            );*/
-
-
-            /*CustomPage response = restTemplate.getForObject(
-                    COLLECTION_URL + "?page=" + pageable.getPageNumber() + "&size=" + pageable.getPageSize(), CustomPage.class
-            );*/
             log.info(LogMessages.SUCCESS);
             log.info(LogMessages.RESPONSE_DISPLAYED, response);
         } catch (RestClientException exception) {

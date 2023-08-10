@@ -1,6 +1,6 @@
 package com.ercanbeyen.movieapplication.constant.message;
 
-public class EntityNames {
+public class ResourceNames {
     public static final String MOVIE = "Movie";
     public static final String DIRECTOR = "Director";
     public static final String ACTOR = "Actor";

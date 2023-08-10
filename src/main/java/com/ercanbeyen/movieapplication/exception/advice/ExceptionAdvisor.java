@@ -1,7 +1,7 @@
 package com.ercanbeyen.movieapplication.exception.advice;
 
 import com.ercanbeyen.movieapplication.util.ResponseHandler;
-import com.ercanbeyen.movieapplication.exception.EntityNotFound;
+import com.ercanbeyen.movieapplication.exception.ResourceNotFound;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -35,13 +35,13 @@ public class ExceptionAdvisor extends ResponseEntityExceptionHandler {
         return ResponseHandler.generateResponse(HttpStatus.BAD_REQUEST, null, errors);
     }
 
-    @ExceptionHandler(EntityNotFound.class)
-    public ResponseEntity<?> handleEntityNotFoundException(Exception exception) {
+    @ExceptionHandler(ResourceNotFound.class)
+    public ResponseEntity<?> handleResourceNotFoundException(Exception exception) {
         return ResponseHandler.generateResponse(HttpStatus.NOT_FOUND, exception.getMessage(), null);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleEntityGeneralException(Exception exception) {
+    public ResponseEntity<?> handleGeneralException(Exception exception) {
         return ResponseHandler.generateResponse(HttpStatus.EXPECTATION_FAILED, exception.getMessage(), null);
     }
 }

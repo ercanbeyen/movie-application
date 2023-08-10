@@ -1,5 +1,8 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
+import com.ercanbeyen.movieapplication.constant.message.ActionNames;
+import com.ercanbeyen.movieapplication.constant.message.ResourceNames;
+import com.ercanbeyen.movieapplication.constant.message.ResponseMessages;
 import com.ercanbeyen.movieapplication.dto.MovieDto;
 import com.ercanbeyen.movieapplication.dto.converter.MovieDtoConverter;
 import com.ercanbeyen.movieapplication.dto.option.filter.MovieFilteringOptions;
@@ -9,6 +12,7 @@ import com.ercanbeyen.movieapplication.entity.Actor;
 import com.ercanbeyen.movieapplication.entity.Director;
 import com.ercanbeyen.movieapplication.entity.Movie;
 import com.ercanbeyen.movieapplication.constant.enums.Genre;
+import com.ercanbeyen.movieapplication.exception.ResourceNotFound;
 import com.ercanbeyen.movieapplication.repository.MovieRepository;
 import com.ercanbeyen.movieapplication.util.CustomPage;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
@@ -27,6 +32,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -132,9 +138,10 @@ public class MovieServiceImplTest {
         verify(movieDtoConverter, times(1)).convert(any(Movie.class));
     }
 
+
     @Test
-    @DisplayName("When GetMovie Called With Valid Input It Should Return MovieDto")
-    public void whenGetMovieCalledValidInput_itShouldReturnMovieDto() {
+    @DisplayName("When GetMovie Called With Existed Id It Should Return MovieDto")
+    public void whenGetMovieCalledExistedId_itShouldReturnMovieDto() {
         Movie movie = movieList.get(0);
         int id = movie.getId();
 
@@ -154,8 +161,28 @@ public class MovieServiceImplTest {
     }
 
     @Test
+    @DisplayName("When GetMovie Called With Not Existed Id It Should Throw ResourceNotFoundException")
+    public void whenGetMovieCalledWithNotExistedId_itShouldThrowResourceNotFoundException() {
+        int id = 15;
+        Optional<Movie> movieOptional = Optional.empty();
+
+        when(movieRepository.findById(id)).thenReturn(movieOptional);
+
+        RuntimeException exception = assertThrows(ResourceNotFound.class, () -> movieService.getMovie(id));
+        String expected = exception.getMessage();
+
+        String actual = String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE, id);
+
+        assertEquals(expected, actual);
+
+        Mockito.verify(movieRepository, times(1)).findById(id);
+        verifyNoMoreInteractions(movieRepository);
+        verifyNoInteractions(movieDtoConverter);
+    }
+
+    @Test
     @DisplayName("When Get Movies Called It Should Return MovieDto List")
-    public void whenGetMoviesCalledItShouldReturnMovieDto() {
+    public void whenGetMoviesCalled_itShouldReturnMovieDto() {
         Pageable pageable = Pageable.ofSize(1).withPage(0);
 
         List<Movie> fetchedMovieList = Collections.singletonList(movieList.get(0));
@@ -181,8 +208,8 @@ public class MovieServiceImplTest {
     }
 
     @Test
-    @DisplayName("When UpdateMovie Called With Valid Inputs It Should Return MovieDto")
-    public void whenUpdateMovieCalledWithValidInputs_itShouldReturnMovieDto() {
+    @DisplayName("When UpdateMovie Called With Existed Id And Valid Request It Should Return MovieDto")
+    public void whenUpdateMovieCalledWithExistedIdAndValidRequest_itShouldReturnMovieDto() {
         Movie movie = movieList.get(0);
         MovieDto expected = movieDtoList.get(1);
         int id = movie.getId();
@@ -196,8 +223,6 @@ public class MovieServiceImplTest {
         request.setRating(expected.getRating());
         request.setSummary(expected.getSummary());
 
-
-
         when(movieRepository.findById(id)).thenReturn(Optional.of(movie));
         when(movieRepository.save(any(Movie.class))).thenReturn(movie);
         when(movieDtoConverter.convert(movie)).thenReturn(expected);
@@ -209,6 +234,68 @@ public class MovieServiceImplTest {
         verify(movieRepository, times(1)).findById(id);
         verify(movieRepository, times(1)).save(any(Movie.class));
         verify(movieDtoConverter, times(1)).convert(any(Movie.class));
+    }
+
+    @Test
+    @DisplayName("When UpdateMovie Called With Not Existed Id It Should Throw ResourceNotFoundException")
+    public void whenUpdateMovieCalledWithNotExistedId_itShouldThrowResourceNotFoundException() {
+        int id = 15;
+        Optional<Movie> movieOptional = Optional.empty();
+
+        UpdateMovieRequest request = new UpdateMovieRequest();
+        request.setTitle("Test-title");
+        request.setLanguage("Test-language");
+        request.setRating(2d);
+        request.setSummary("Test-summary");
+
+        String expected = String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE, id);
+
+        when(movieRepository.findById(id)).thenReturn(movieOptional);
+
+        RuntimeException exception = assertThrows(ResourceNotFound.class, () -> movieService.updateMovie(id, request));
+        String actual = exception.getMessage();
+
+        assertEquals(expected, actual);
+
+        verify(movieRepository, times(1)).findById(id);
+        verifyNoMoreInteractions(movieRepository);
+        verifyNoInteractions(movieDtoConverter);
+    }
+
+    @Test
+    @DisplayName("When DeleteMovie Called With Existed Id It Should Return Message")
+    public void whenDeleteMovieCalledWithExistedId_itShouldReturnMessage() {
+        Movie movie = movieList.get(0);
+        int id = movie.getId();
+
+        String expected = String.format(ResponseMessages.SUCCESS, ResourceNames.MOVIE, id, ActionNames.DELETED);
+
+        when(movieRepository.existsById(id)).thenReturn(true);
+
+        String actual = movieService.deleteMovie(id);
+
+        assertEquals(expected, actual);
+
+        verify(movieRepository, times(1)).existsById(id);
+        verify(movieRepository, times(1)).deleteById(id);
+    }
+
+    @Test
+    @DisplayName("When DeleteMovie Called With Not Existed Id It_Should Throw ResourceNotFoundException")
+    public void whenDeleteMovieCalledWithNotExistedId_itShouldThrowResourceNotFoundException() {
+        int id = 15;
+
+        String expected = String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE, id);
+
+        when(movieRepository.existsById(id)).thenReturn(false);
+
+        RuntimeException exception = assertThrows(ResourceNotFound.class, () -> movieService.deleteMovie(id));
+        String actual = exception.getMessage();
+
+        assertEquals(expected, actual);
+
+        verify(movieRepository, times(1)).existsById(id);
+        verifyNoMoreInteractions(movieRepository);
     }
 
     @Test

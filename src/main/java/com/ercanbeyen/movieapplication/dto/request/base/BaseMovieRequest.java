@@ -1,6 +1,7 @@
 package com.ercanbeyen.movieapplication.dto.request.base;
 
 import com.ercanbeyen.movieapplication.constant.enums.Genre;
+import com.ercanbeyen.movieapplication.constant.message.ResponseMessages;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -11,15 +12,14 @@ import lombok.Setter;
 @Setter
 @MappedSuperclass
 public abstract class BaseMovieRequest {
-    @NotBlank(message = "title should not be blank")
+    @NotBlank(message = "Title" + ResponseMessages.SHOULD_NOT_BLANK)
     private String title;
-    //@NotNull(message = "Director id should not be null")
     Integer directorId;
-    @NotBlank(message = "language should not be blank")
+    @NotBlank(message = "Language" + ResponseMessages.SHOULD_NOT_BLANK)
     private String language;
-    @NotNull(message = "release year should not be null")
+    @NotNull(message = "Release year" + ResponseMessages.SHOULD_NOT_NULL)
     private Integer releaseYear;
-    @NotNull(message = "rating should not be null")
+    @NotNull(message = "Rating" + ResponseMessages.SHOULD_NOT_NULL)
     private Double rating;
     private Genre genre;
     private String summary;

@@ -8,7 +8,7 @@ import com.ercanbeyen.movieapplication.dto.option.filter.ActorFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateActorRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateActorRequest;
 import com.ercanbeyen.movieapplication.entity.Actor;
-import com.ercanbeyen.movieapplication.exception.EntityNotFound;
+import com.ercanbeyen.movieapplication.exception.ResourceNotFound;
 import com.ercanbeyen.movieapplication.repository.ActorRepository;
 import com.ercanbeyen.movieapplication.service.ActorService;
 import com.ercanbeyen.movieapplication.util.CustomPage;
@@ -48,7 +48,7 @@ public class ActorServiceImpl implements ActorService {
                 .build();
 
         Actor savedActor = actorRepository.save(newActor);
-        log.info(LogMessages.SAVED, EntityNames.ACTOR);
+        log.info(LogMessages.SAVED, ResourceNames.ACTOR);
 
         return actorDtoConverter.convert(savedActor);
     }
@@ -57,7 +57,7 @@ public class ActorServiceImpl implements ActorService {
     public CustomPage<Actor, ActorDto> filterActors(ActorFilteringOptions filteringOptions, OrderBy orderBy, Pageable pageable) {
         log.info(LogMessages.STARTED, "filterActors");
         Page<Actor> actorPage = actorRepository.findAll(pageable);
-        log.info(LogMessages.FETCHED_ALL, EntityNames.ACTOR);
+        log.info(LogMessages.FETCHED_ALL, ResourceNames.ACTOR);
 
         Predicate<Actor> actorPredicate = (actor) -> ((filteringOptions.getMovieId() == null || filteringOptions.getMovieId().intValue() == filteringOptions.getMovieId().intValue())) && (StringUtils.isBlank(filteringOptions.getNationality()) || actor.getNationality().equals(filteringOptions.getNationality()))
                 && (filteringOptions.getBirthYear() == null || actor.getBirthYear().getYear() == filteringOptions.getBirthYear());
@@ -101,7 +101,7 @@ public class ActorServiceImpl implements ActorService {
     public ActorDto getActor(Integer id) {
         log.info(LogMessages.STARTED, "getActor");
         Actor actorInDb = getActorById(id);
-        log.info(LogMessages.FETCHED, EntityNames.ACTOR);
+        log.info(LogMessages.FETCHED, ResourceNames.ACTOR);
         return actorDtoConverter.convert(actorInDb);
     }
 
@@ -110,7 +110,7 @@ public class ActorServiceImpl implements ActorService {
     public ActorDto updateActor(Integer id, UpdateActorRequest request) {
         log.info(LogMessages.STARTED, "updateActor");
         Actor actorInDb = getActorById(id);
-        log.info(LogMessages.FETCHED, EntityNames.ACTOR);
+        log.info(LogMessages.FETCHED, ResourceNames.ACTOR);
 
         actorInDb.setName(request.getName());
         actorInDb.setSurname(request.getSurname());
@@ -120,7 +120,7 @@ public class ActorServiceImpl implements ActorService {
         log.info(LogMessages.FIELDS_SET);
 
         Actor savedActor = actorRepository.save(actorInDb);
-        log.info(LogMessages.SAVED, EntityNames.ACTOR);
+        log.info(LogMessages.SAVED, ResourceNames.ACTOR);
 
         return actorDtoConverter.convert(savedActor);
     }
@@ -132,14 +132,14 @@ public class ActorServiceImpl implements ActorService {
         boolean actorExists = actorRepository.existsById(id);
 
         if (!actorExists) {
-            throw new EntityNotFound(String.format(ResponseMessages.NOT_FOUND, EntityNames.ACTOR, id));
+            throw new ResourceNotFound(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ACTOR, id));
         }
 
-        log.info(LogMessages.EXISTS, EntityNames.ACTOR);
+        log.info(LogMessages.EXISTS, ResourceNames.ACTOR);
         actorRepository.deleteById(id);
-        log.info(LogMessages.DELETED, EntityNames.ACTOR);
+        log.info(LogMessages.DELETED, ResourceNames.ACTOR);
 
-        return String.format(ResponseMessages.SUCCESS, EntityNames.ACTOR, id, ActionNames.DELETED);
+        return String.format(ResponseMessages.SUCCESS, ResourceNames.ACTOR, id, ActionNames.DELETED);
     }
 
     @Cacheable(value = "actors")
@@ -147,7 +147,7 @@ public class ActorServiceImpl implements ActorService {
     public List<ActorDto> getMostPopularActors() {
         log.info(LogMessages.STARTED, "getMostPopularActors");
         List<Actor> actors = actorRepository.findAll();
-        log.info(LogMessages.FETCHED_ALL, EntityNames.ACTOR);
+        log.info(LogMessages.FETCHED_ALL, ResourceNames.ACTOR);
         int numberOfMovies = 2;
 
         return actors.stream()
@@ -160,7 +160,7 @@ public class ActorServiceImpl implements ActorService {
     public List<ActorDto> searchActors(String fullName) {
         log.info(LogMessages.STARTED, "searchActors");
         List<Actor> actors = actorRepository.findByFullName(fullName);
-        log.info(LogMessages.FETCHED_ALL, EntityNames.ACTOR);
+        log.info(LogMessages.FETCHED_ALL, ResourceNames.ACTOR);
 
         return actors.stream()
                 .map(actorDtoConverter::convert)
@@ -172,11 +172,11 @@ public class ActorServiceImpl implements ActorService {
     public Actor findActorById(Integer id) {
         log.info(LogMessages.STARTED, "findActorById");
         return actorRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFound(String.format(ResponseMessages.NOT_FOUND, EntityNames.ACTOR, id)));
+                .orElseThrow(() -> new ResourceNotFound(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ACTOR, id)));
     }
 
     private Actor getActorById(Integer id) {
         return actorRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFound(String.format(ResponseMessages.NOT_FOUND, EntityNames.ACTOR, id)));
+                .orElseThrow(() -> new ResourceNotFound(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ACTOR, id)));
     }
 }
