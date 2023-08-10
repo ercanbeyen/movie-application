@@ -36,7 +36,7 @@ public class DirectorServiceImpl implements DirectorService {
 
     @Override
     public DirectorDto createDirector(CreateDirectorRequest request) {
-        log.info(String.format(LogMessages.STARTED, "createDirector"));
+        log.info(LogMessages.STARTED, "createDirector");
 
         Director newDirector = Director.builder()
                 .name(request.getName())
@@ -48,27 +48,27 @@ public class DirectorServiceImpl implements DirectorService {
                 .build();
 
         Director savedDirector = directorRepository.save(newDirector);
-        log.info(String.format(LogMessages.SAVED, EntityNames.DIRECTOR));
+        log.info(LogMessages.SAVED, EntityNames.DIRECTOR);
 
         return directorDtoConverter.convert(savedDirector);
     }
 
     @Override
     public CustomPage<Director, DirectorDto> filterDirectors(DirectorFilteringOptions filteringOptions, OrderBy orderBy, Pageable pageable) {
-        log.info(String.format(LogMessages.STARTED, "filterDirectors"));
+        log.info(LogMessages.STARTED, "filterDirectors");
         Page<Director> directorPage = directorRepository.findAll(pageable);
-        log.info(String.format(LogMessages.FETCHED_ALL, EntityNames.DIRECTOR));
+        log.info(LogMessages.FETCHED_ALL, EntityNames.DIRECTOR);
 
         Predicate<Director> directorPredicate = (director) -> ((StringUtils.isBlank(filteringOptions.getNationality()) || director.getNationality().equals(filteringOptions.getNationality()))
                 && (filteringOptions.getBirthYear() == null || director.getBirthYear().getYear() == filteringOptions.getBirthYear()));
 
         if (filteringOptions.getLimit() == null) {
-            log.info(String.format(LogMessages.PARAMETER_NULL, ParameterNames.LIMIT));
+            log.info(LogMessages.PARAMETER_NULL, ParameterNames.LIMIT);
             filteringOptions.setLimit(directorRepository.count());
         }
 
         if (orderBy == null) {
-            log.info(String.format(LogMessages.PARAMETER_NULL, ParameterNames.ORDER_BY));
+            log.info(LogMessages.PARAMETER_NULL, ParameterNames.ORDER_BY);
 
             List<DirectorDto> directorDtoList = directorPage.stream()
                     .filter(directorPredicate)
@@ -81,7 +81,7 @@ public class DirectorServiceImpl implements DirectorService {
 
         Comparator<Director> directorComparator = Comparator.comparing(director -> director.getMoviesDirected().size());
 
-        log.info(String.format(LogMessages.ORDER_BY_VALUE, orderBy.name()));
+        log.info(LogMessages.ORDER_BY_VALUE, orderBy.name());
 
         if (orderBy == OrderBy.DESC) {
             directorComparator = directorComparator.reversed();
@@ -100,19 +100,19 @@ public class DirectorServiceImpl implements DirectorService {
     @Cacheable(value = "directors", key = "#id", unless = "#result.moviesDirected.size() < 2")
     @Override
     public DirectorDto getDirector(Integer id) {
-        log.info(String.format(LogMessages.STARTED, "getDirector"));
-        Director directorInDb = getDirectorById(id);
-        log.info(String.format(LogMessages.FETCHED, EntityNames.DIRECTOR));
+        log.info(LogMessages.STARTED, "getDirector");
+        Director directorInDb = findDirectorById(id);
+        log.info(LogMessages.FETCHED, EntityNames.DIRECTOR);
         return directorDtoConverter.convert(directorInDb);
     }
 
     @CacheEvict(value = "directors", allEntries = true)
     @Override
     public DirectorDto updateDirector(Integer id, UpdateDirectorRequest request) {
-        log.info(String.format(LogMessages.STARTED, "updateDirector"));
+        log.info(LogMessages.STARTED, "updateDirector");
 
-        Director directorInDb = getDirectorById(id);
-        log.info(String.format(LogMessages.FETCHED, EntityNames.DIRECTOR));
+        Director directorInDb = findDirectorById(id);
+        log.info(LogMessages.FETCHED, EntityNames.DIRECTOR);
 
         directorInDb.setName(request.getName());
         directorInDb.setSurname(request.getSurname());
@@ -122,7 +122,7 @@ public class DirectorServiceImpl implements DirectorService {
         log.info(LogMessages.FIELDS_SET);
 
         Director savedDirector = directorRepository.save(directorInDb);
-        log.info(String.format(LogMessages.SAVED, EntityNames.DIRECTOR));
+        log.info(LogMessages.SAVED, EntityNames.DIRECTOR);
 
         return directorDtoConverter.convert(savedDirector);
     }
@@ -130,7 +130,7 @@ public class DirectorServiceImpl implements DirectorService {
     @CacheEvict(value = "directors", key = "#id")
     @Override
     public String deleteDirector(Integer id) {
-        log.info(String.format(LogMessages.STARTED, "deleteDirector"));
+        log.info(LogMessages.STARTED, "deleteDirector");
 
         boolean directorExists = directorRepository.existsById(id);
 
@@ -138,9 +138,9 @@ public class DirectorServiceImpl implements DirectorService {
             throw new EntityNotFound(String.format(ResponseMessages.NOT_FOUND, EntityNames.DIRECTOR, id));
         }
 
-        log.info(String.format(LogMessages.EXISTS, EntityNames.DIRECTOR));
+        log.info(LogMessages.EXISTS, EntityNames.DIRECTOR);
         directorRepository.deleteById(id);
-        log.info(String.format(LogMessages.DELETED, EntityNames.DIRECTOR));
+        log.info(LogMessages.DELETED, EntityNames.DIRECTOR);
 
         return String.format(ResponseMessages.SUCCESS, EntityNames.DIRECTOR, id, ActionNames.DELETED);
     }
@@ -148,10 +148,10 @@ public class DirectorServiceImpl implements DirectorService {
     @Cacheable(value = "directors")
     @Override
     public List<DirectorDto> getMostPopularDirectors() {
-        log.info(String.format(LogMessages.STARTED, "getMostPopularDirectors"));
+        log.info(LogMessages.STARTED, "getMostPopularDirectors");
 
         List<Director> directors = directorRepository.findAll();
-        log.info(String.format(LogMessages.FETCHED_ALL, EntityNames.DIRECTOR));
+        log.info(LogMessages.FETCHED_ALL, EntityNames.DIRECTOR);
         int numberOfMovies = 2;
 
         return directors.stream()
@@ -162,10 +162,10 @@ public class DirectorServiceImpl implements DirectorService {
 
     @Override
     public List<DirectorDto> searchDirectors(String fullName) {
-        log.info(String.format(LogMessages.STARTED, "searchDirectors"));
+        log.info(LogMessages.STARTED, "searchDirectors");
 
         List<Director> directors = directorRepository.findByFullName(fullName);
-        log.info(String.format(LogMessages.SAVED, EntityNames.DIRECTOR));
+        log.info(LogMessages.SAVED, EntityNames.DIRECTOR);
 
         return directors.stream()
                 .map(directorDtoConverter::convert)
@@ -173,8 +173,8 @@ public class DirectorServiceImpl implements DirectorService {
     }
 
     @Override
-    public Director getDirectorById(Integer id) {
-        log.info(String.format(LogMessages.STARTED, "getDirectorById"));
+    public Director findDirectorById(Integer id) {
+        log.info(LogMessages.STARTED, "findDirectorById");
         return directorRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFound(String.format(ResponseMessages.NOT_FOUND, EntityNames.DIRECTOR, id)));
     }

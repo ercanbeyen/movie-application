@@ -31,7 +31,7 @@ public class MovieController {
     }
 
     @GetMapping
-    public ResponseEntity<Object> getMovies(MovieFilteringOptions movieFilteringOptions, @RequestParam(required = false) OrderBy orderBy, Pageable pageable) {
+    public ResponseEntity<Object> filterMovies(MovieFilteringOptions movieFilteringOptions, @RequestParam(required = false) OrderBy orderBy, Pageable pageable) {
         CustomPage<Movie, MovieDto> movieDtoList = movieService.filterMovies(movieFilteringOptions, orderBy, pageable);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDtoList);
     }

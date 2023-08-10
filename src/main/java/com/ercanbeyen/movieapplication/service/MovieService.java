@@ -19,5 +19,5 @@ public interface MovieService {
     String deleteMovie(Integer id);
     List<MovieDto> getLatestMovies();
     List<MovieDto> searchMovies(String title);
-    Movie getMovieById(Integer id);
+    Movie findMovieById(Integer id);
 }

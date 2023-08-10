@@ -13,6 +13,8 @@ import lombok.Setter;
 public abstract class BaseMovieRequest {
     @NotBlank(message = "title should not be blank")
     private String title;
+    //@NotNull(message = "Director id should not be null")
+    Integer directorId;
     @NotBlank(message = "language should not be blank")
     private String language;
     @NotNull(message = "release year should not be null")

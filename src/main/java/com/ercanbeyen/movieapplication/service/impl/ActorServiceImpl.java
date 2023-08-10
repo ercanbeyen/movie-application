@@ -36,7 +36,7 @@ public class ActorServiceImpl implements ActorService {
 
     @Override
     public ActorDto createActor(CreateActorRequest request) {
-        log.info(String.format(LogMessages.STARTED, "createActor"));
+        log.info(LogMessages.STARTED, "createActor");
 
         Actor newActor = Actor.builder()
                 .name(request.getName())
@@ -48,27 +48,27 @@ public class ActorServiceImpl implements ActorService {
                 .build();
 
         Actor savedActor = actorRepository.save(newActor);
-        log.info(String.format(LogMessages.SAVED, EntityNames.ACTOR));
+        log.info(LogMessages.SAVED, EntityNames.ACTOR);
 
         return actorDtoConverter.convert(savedActor);
     }
 
     @Override
     public CustomPage<Actor, ActorDto> filterActors(ActorFilteringOptions filteringOptions, OrderBy orderBy, Pageable pageable) {
-        log.info(String.format(LogMessages.STARTED, "filterActors"));
+        log.info(LogMessages.STARTED, "filterActors");
         Page<Actor> actorPage = actorRepository.findAll(pageable);
-        log.info(String.format(LogMessages.FETCHED_ALL, EntityNames.ACTOR));
+        log.info(LogMessages.FETCHED_ALL, EntityNames.ACTOR);
 
         Predicate<Actor> actorPredicate = (actor) -> ((filteringOptions.getMovieId() == null || filteringOptions.getMovieId().intValue() == filteringOptions.getMovieId().intValue())) && (StringUtils.isBlank(filteringOptions.getNationality()) || actor.getNationality().equals(filteringOptions.getNationality()))
                 && (filteringOptions.getBirthYear() == null || actor.getBirthYear().getYear() == filteringOptions.getBirthYear());
 
         if (filteringOptions.getLimit() == null) {
-            log.info(String.format(LogMessages.PARAMETER_NULL, ParameterNames.LIMIT));
+            log.info(LogMessages.PARAMETER_NULL, ParameterNames.LIMIT);
             filteringOptions.setLimit(actorRepository.count());
         }
 
         if (orderBy == null) {
-            log.info(String.format(LogMessages.PARAMETER_NULL, ParameterNames.ORDER_BY));
+            log.info(LogMessages.PARAMETER_NULL, ParameterNames.ORDER_BY);
 
             List<ActorDto> actorDtoList = actorPage.stream()
                     .filter(actorPredicate)
@@ -80,7 +80,7 @@ public class ActorServiceImpl implements ActorService {
         }
 
         Comparator<Actor> actorComparator = Comparator.comparing(actor -> actor.getMoviesPlayed().size());
-        log.info(String.format(LogMessages.ORDER_BY_VALUE, orderBy.name()));
+        log.info(LogMessages.ORDER_BY_VALUE, orderBy.name());
 
         if (orderBy == OrderBy.DESC) {
             actorComparator = actorComparator.reversed();
@@ -99,18 +99,18 @@ public class ActorServiceImpl implements ActorService {
     @Cacheable(value = "actors", key = "#id", unless = "#result.moviesPlayed.size() < 2")
     @Override
     public ActorDto getActor(Integer id) {
-        log.info(String.format(LogMessages.STARTED, "getActor"));
+        log.info(LogMessages.STARTED, "getActor");
         Actor actorInDb = getActorById(id);
-        log.info(String.format(LogMessages.FETCHED, EntityNames.ACTOR));
+        log.info(LogMessages.FETCHED, EntityNames.ACTOR);
         return actorDtoConverter.convert(actorInDb);
     }
 
     @CacheEvict(value = "actors", allEntries = true)
     @Override
     public ActorDto updateActor(Integer id, UpdateActorRequest request) {
-        log.info(String.format(LogMessages.STARTED, "updateActor"));
+        log.info(LogMessages.STARTED, "updateActor");
         Actor actorInDb = getActorById(id);
-        log.info(String.format(LogMessages.FETCHED, EntityNames.ACTOR));
+        log.info(LogMessages.FETCHED, EntityNames.ACTOR);
 
         actorInDb.setName(request.getName());
         actorInDb.setSurname(request.getSurname());
@@ -120,7 +120,7 @@ public class ActorServiceImpl implements ActorService {
         log.info(LogMessages.FIELDS_SET);
 
         Actor savedActor = actorRepository.save(actorInDb);
-        log.info(String.format(LogMessages.SAVED, EntityNames.ACTOR));
+        log.info(LogMessages.SAVED, EntityNames.ACTOR);
 
         return actorDtoConverter.convert(savedActor);
     }
@@ -128,16 +128,16 @@ public class ActorServiceImpl implements ActorService {
     @CacheEvict(value = "actors", key = "#id")
     @Override
     public String deleteActor(Integer id) {
-        log.info(String.format(LogMessages.STARTED, "deleteActor"));
+        log.info(LogMessages.STARTED, "deleteActor");
         boolean actorExists = actorRepository.existsById(id);
 
         if (!actorExists) {
             throw new EntityNotFound(String.format(ResponseMessages.NOT_FOUND, EntityNames.ACTOR, id));
         }
 
-        log.info(String.format(LogMessages.EXISTS, EntityNames.ACTOR));
+        log.info(LogMessages.EXISTS, EntityNames.ACTOR);
         actorRepository.deleteById(id);
-        log.info(String.format(LogMessages.DELETED, EntityNames.ACTOR));
+        log.info(LogMessages.DELETED, EntityNames.ACTOR);
 
         return String.format(ResponseMessages.SUCCESS, EntityNames.ACTOR, id, ActionNames.DELETED);
     }
@@ -145,9 +145,9 @@ public class ActorServiceImpl implements ActorService {
     @Cacheable(value = "actors")
     @Override
     public List<ActorDto> getMostPopularActors() {
-        log.info(String.format(LogMessages.STARTED, "getMostPopularActors"));
+        log.info(LogMessages.STARTED, "getMostPopularActors");
         List<Actor> actors = actorRepository.findAll();
-        log.info(String.format(LogMessages.FETCHED_ALL, EntityNames.ACTOR));
+        log.info(LogMessages.FETCHED_ALL, EntityNames.ACTOR);
         int numberOfMovies = 2;
 
         return actors.stream()
@@ -158,13 +158,21 @@ public class ActorServiceImpl implements ActorService {
 
     @Override
     public List<ActorDto> searchActors(String fullName) {
-        log.info(String.format(LogMessages.STARTED, "searchActors"));
+        log.info(LogMessages.STARTED, "searchActors");
         List<Actor> actors = actorRepository.findByFullName(fullName);
-        log.info(String.format(LogMessages.FETCHED_ALL, EntityNames.ACTOR));
+        log.info(LogMessages.FETCHED_ALL, EntityNames.ACTOR);
 
         return actors.stream()
                 .map(actorDtoConverter::convert)
                 .toList();
+    }
+
+
+    @Override
+    public Actor findActorById(Integer id) {
+        log.info(LogMessages.STARTED, "findActorById");
+        return actorRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFound(String.format(ResponseMessages.NOT_FOUND, EntityNames.ACTOR, id)));
     }
 
     private Actor getActorById(Integer id) {

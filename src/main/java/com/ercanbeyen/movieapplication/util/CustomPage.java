@@ -1,12 +1,17 @@
 package com.ercanbeyen.movieapplication.util;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class CustomPage<T, V> {
     private List<V> content;
     private int pageNumber;
@@ -23,4 +28,6 @@ public class CustomPage<T, V> {
         this.totalPage = page.getTotalPages();
         this.totalElements = page.getTotalElements();
     }
+
+
 }

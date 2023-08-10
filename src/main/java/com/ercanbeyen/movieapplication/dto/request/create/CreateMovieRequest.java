@@ -9,6 +9,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CreateMovieRequest extends BaseMovieRequest {
-    @NotNull(message = "Director id should not be null")
-    Integer directorId;
+
 }

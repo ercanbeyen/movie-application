@@ -7,10 +7,12 @@ import com.ercanbeyen.movieapplication.dto.converter.MovieDtoConverter;
 import com.ercanbeyen.movieapplication.dto.option.filter.MovieFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateMovieRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateMovieRequest;
+import com.ercanbeyen.movieapplication.entity.Actor;
 import com.ercanbeyen.movieapplication.entity.Director;
 import com.ercanbeyen.movieapplication.entity.Movie;
 import com.ercanbeyen.movieapplication.exception.EntityNotFound;
 import com.ercanbeyen.movieapplication.repository.MovieRepository;
+import com.ercanbeyen.movieapplication.service.ActorService;
 import com.ercanbeyen.movieapplication.service.DirectorService;
 import com.ercanbeyen.movieapplication.service.MovieService;
 import com.ercanbeyen.movieapplication.util.CustomPage;
@@ -24,10 +26,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -38,13 +37,20 @@ public class MovieServiceImpl implements MovieService {
     private final MovieRepository movieRepository;
     private final MovieDtoConverter movieDtoConverter;
     private final DirectorService directorService;
+    private final ActorService actorService;
 
     @CachePut(value = "movies", key = "#result.id")
     @Override
     public MovieDto createMovie(CreateMovieRequest request) {
-        log.info(String.format(LogMessages.STARTED, "createMovie"));
-        Director director = directorService.getDirectorById(request.getDirectorId());
-        log.info("Director is found");
+        log.info(LogMessages.STARTED, "createMovie");
+        Director director = null;
+
+        if (request.getDirectorId() != null) {
+            director = directorService.findDirectorById(request.getDirectorId());
+            log.info(LogMessages.DIRECTOR_FOUND, request.getDirectorId());
+        } else {
+            log.warn(LogMessages.DIRECTOR_SEARCH_SKIPPED);
+        }
 
         Movie newMovie = Movie.builder()
                 .title(request.getTitle())
@@ -58,7 +64,7 @@ public class MovieServiceImpl implements MovieService {
                 .build();
 
         Movie createdMovie = movieRepository.save(newMovie);
-        log.info(String.format(LogMessages.SAVED, EntityNames.MOVIE));
+        log.info(LogMessages.SAVED, EntityNames.MOVIE);
 
         return movieDtoConverter.convert(createdMovie);
     }
@@ -66,9 +72,9 @@ public class MovieServiceImpl implements MovieService {
     @CacheEvict(value = "movies", allEntries = true)
     @Override
     public CustomPage<Movie, MovieDto> filterMovies(MovieFilteringOptions filteringOptions, OrderBy orderBy, Pageable pageable) {
-        log.info(String.format(LogMessages.STARTED, "filterMovies"));
+        log.info(LogMessages.STARTED, "filterMovies");
         Page<Movie> moviePage = movieRepository.findAll(pageable);
-        log.info(String.format(LogMessages.FETCHED_ALL, EntityNames.MOVIE));
+        log.info(LogMessages.FETCHED_ALL, EntityNames.MOVIE);
 
         Predicate<Movie> moviePredicate = (movie) -> (
                 (filteringOptions.getGenres() == null || filteringOptions.getGenres().isEmpty() || filteringOptions.getGenres().contains(movie.getGenre())) &&
@@ -76,12 +82,12 @@ public class MovieServiceImpl implements MovieService {
                 (filteringOptions.getReleaseYear() == null || movie.getReleaseYear().intValue() == filteringOptions.getReleaseYear().intValue()));
 
         if (filteringOptions.getLimit() == null) {
-            log.info(String.format(LogMessages.PARAMETER_NULL, ParameterNames.LIMIT));
+            log.info(LogMessages.PARAMETER_NULL, ParameterNames.LIMIT);
             filteringOptions.setLimit(movieRepository.count());
         }
 
         if (orderBy == null) {
-            log.info(String.format(LogMessages.PARAMETER_NULL, ParameterNames.ORDER_BY));
+            log.info(LogMessages.PARAMETER_NULL, ParameterNames.ORDER_BY);
 
             List<MovieDto> movieDtoList = moviePage.stream()
                     .filter(moviePredicate)
@@ -93,7 +99,7 @@ public class MovieServiceImpl implements MovieService {
         }
 
         Comparator<Movie> movieComparator = Comparator.comparing(Movie::getRating);
-        log.info(String.format(LogMessages.ORDER_BY_VALUE, orderBy.name()));
+        log.info(LogMessages.ORDER_BY_VALUE, orderBy.name());
 
         if (orderBy == OrderBy.DESC) {
             movieComparator = movieComparator.reversed();
@@ -112,20 +118,44 @@ public class MovieServiceImpl implements MovieService {
     @Cacheable(value = "movies", key = "#id", unless = "#result.releaseYear < 2020")
     @Override
     public MovieDto getMovie(Integer id) {
-        log.info(String.format(LogMessages.STARTED, "getMovie"));
-        Movie movieInDb = getMovieById(id);
-        log.info(String.format(LogMessages.FETCHED, EntityNames.MOVIE));
+        log.info(LogMessages.STARTED, "getMovie");
+        Movie movieInDb = findMovieById(id);
+        log.info(LogMessages.FETCHED, EntityNames.MOVIE);
         return movieDtoConverter.convert(movieInDb);
     }
 
     @CacheEvict(value = "movies", allEntries = true)
     @Override
     public MovieDto updateMovie(Integer id, UpdateMovieRequest request) {
-        log.info(String.format(LogMessages.STARTED, "updateMovie"));
-        Movie movieInDb = getMovieById(id);
-        log.info(String.format(LogMessages.FETCHED, EntityNames.MOVIE));
+        log.info(LogMessages.STARTED, "updateMovie");
+
+        Set<Actor> actorIds = new HashSet<>();
+
+        if (request.getActorIds() != null) {
+            for (Integer actorId : request.getActorIds()) {
+                Actor actorInDb = actorService.findActorById(actorId);
+                actorIds.add(actorInDb);
+            }
+        } else {
+            log.warn("actorIds list is null. So empty list is going to be used");
+        }
+
+        Director director = null;
+
+        if (request.getDirectorId() != null) {
+            director = directorService.findDirectorById(request.getDirectorId());
+            log.info(LogMessages.DIRECTOR_FOUND, request.getDirectorId());
+        } else {
+            log.warn(LogMessages.DIRECTOR_SEARCH_SKIPPED);
+        }
+
+        Movie movieInDb = findMovieById(id);
+        log.info(LogMessages.FETCHED, EntityNames.MOVIE);
+
 
         movieInDb.setTitle(request.getTitle());
+        movieInDb.setDirector(director);
+        movieInDb.setActors(actorIds);
         movieInDb.setGenre(request.getGenre());
         movieInDb.setLanguage(request.getLanguage());
         movieInDb.setReleaseYear(request.getReleaseYear());
@@ -134,7 +164,7 @@ public class MovieServiceImpl implements MovieService {
         log.info(LogMessages.FIELDS_SET);
 
         Movie savedMovie = movieRepository.save(movieInDb);
-        log.info(String.format(LogMessages.SAVED, EntityNames.MOVIE));
+        log.info(LogMessages.SAVED, EntityNames.MOVIE);
 
         return movieDtoConverter.convert(savedMovie);
     }
@@ -142,7 +172,7 @@ public class MovieServiceImpl implements MovieService {
     @CacheEvict(value = "movies", key = "#id")
     @Override
     public String deleteMovie(Integer id) {
-        log.info(String.format(LogMessages.STARTED, "deleteMovie"));
+        log.info(LogMessages.STARTED, "deleteMovie");
 
         boolean movieExists = movieRepository.existsById(id);
 
@@ -150,9 +180,9 @@ public class MovieServiceImpl implements MovieService {
             throw new EntityNotFound(String.format(ResponseMessages.NOT_FOUND, EntityNames.MOVIE, id));
         }
 
-        log.info(String.format(LogMessages.EXISTS, EntityNames.MOVIE));
+        log.info(LogMessages.EXISTS, EntityNames.MOVIE);
         movieRepository.deleteById(id);
-        log.info(String.format(LogMessages.DELETED, EntityNames.MOVIE));
+        log.info(LogMessages.DELETED, EntityNames.MOVIE);
 
         return String.format(ResponseMessages.SUCCESS, EntityNames.MOVIE, id, ActionNames.DELETED);
     }
@@ -160,10 +190,10 @@ public class MovieServiceImpl implements MovieService {
     @Cacheable(value = "movies")
     @Override
     public List<MovieDto> getLatestMovies() {
-        log.info(String.format(LogMessages.STARTED, "getLatestMovies"));
+        log.info(LogMessages.STARTED, "getLatestMovies");
 
         List<Movie> movies = movieRepository.findAll();
-        log.info(String.format(LogMessages.FETCHED_ALL, EntityNames.MOVIE));
+        log.info(LogMessages.FETCHED_ALL, EntityNames.MOVIE);
         int year = 2020;
 
         return movies.stream()
@@ -174,13 +204,13 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public List<MovieDto> searchMovies(String title) {
-        log.info(String.format(LogMessages.STARTED, "searchMovies"));
+        log.info(LogMessages.STARTED, "searchMovies");
         boolean isTitleFilled = StringUtils.isNotBlank(title);
         List<Movie> movies = new ArrayList<>();
 
         if (isTitleFilled) {
             movies = movieRepository.findByTitleStartingWith(title);
-            log.info(String.format(LogMessages.FETCHED_ALL, EntityNames.MOVIE));
+            log.info(LogMessages.FETCHED_ALL, EntityNames.MOVIE);
         }
 
         return movies.stream()
@@ -189,8 +219,8 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @Override
-    public Movie getMovieById(Integer id) {
-        log.info(String.format(LogMessages.STARTED, "getMovieById"));
+    public Movie findMovieById(Integer id) {
+        log.info(LogMessages.STARTED, "findMovieById");
         return movieRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFound(String.format(ResponseMessages.NOT_FOUND, EntityNames.MOVIE, id)));
     }

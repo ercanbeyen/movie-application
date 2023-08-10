@@ -19,5 +19,5 @@ public interface DirectorService {
     String deleteDirector(Integer id);
     List<DirectorDto> getMostPopularDirectors();
     List<DirectorDto> searchDirectors(String fullName);
-    Director getDirectorById(Integer id);
+    Director findDirectorById(Integer id);
 }

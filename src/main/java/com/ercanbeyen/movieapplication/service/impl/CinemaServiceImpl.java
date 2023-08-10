@@ -40,7 +40,7 @@ public class CinemaServiceImpl implements CinemaService {
 
     @Override
     public CinemaDto createCinema(CreateCinemaRequest request) {
-        log.info(String.format(LogMessages.STARTED, "createCinema"));
+        log.info(LogMessages.STARTED, "createCinema");
 
         Cinema newCinema = Cinema.builder()
                 .name(request.getName())
@@ -57,21 +57,21 @@ public class CinemaServiceImpl implements CinemaService {
                 .build();
 
         Cinema savedCinema = cinemaRepository.save(newCinema);
-        log.info(String.format(LogMessages.SAVED, EntityNames.CINEMA));
+        log.info(LogMessages.SAVED, EntityNames.CINEMA);
 
         return cinemaDtoConverter.convert(savedCinema);
     }
 
     @Override
     public List<CinemaDto> searchCinemasByStatus(CinemaSearchOptions searchOptions) {
-        log.info(String.format(LogMessages.STARTED, "searchCinemasByStatus"));
+        log.info(LogMessages.STARTED, "searchCinemasByStatus");
         List<Cinema> cinemas = cinemaRepository.findByStatuses(
                 searchOptions.getReservation_with_phone(),
                 searchOptions.getThreeD_animation(),
                 searchOptions.getParking_place(),
                 searchOptions.getAir_conditioning(),
                 searchOptions.getCafe_food());
-        log.info(String.format(LogMessages.FETCHED, EntityNames.CINEMA));
+        log.info(LogMessages.FETCHED, EntityNames.CINEMA);
 
         return cinemas.stream()
                 .map(cinemaDtoConverter::convert)
@@ -80,17 +80,17 @@ public class CinemaServiceImpl implements CinemaService {
 
     @Override
     public CinemaDto getCinema(String id) {
-        log.info(String.format(LogMessages.STARTED, "getCinema"));
+        log.info(LogMessages.STARTED, "getCinema");
         Cinema cinemaInDb = findCinemaById(id);
-        log.info(String.format(LogMessages.FETCHED, EntityNames.CINEMA));
+        log.info(LogMessages.FETCHED, EntityNames.CINEMA);
         return cinemaDtoConverter.convert(cinemaInDb);
     }
 
     @Override
     public CinemaDto updateCinema(String id, UpdateCinemaRequest request) {
-        log.info(String.format(LogMessages.STARTED, "updateCinema"));
+        log.info(LogMessages.STARTED, "updateCinema");
         Cinema cinemaInDb = findCinemaById(id);
-        log.info(String.format(LogMessages.FETCHED, EntityNames.CINEMA));
+        log.info(LogMessages.FETCHED, EntityNames.CINEMA);
 
         cinemaInDb.setName(request.getName());
         cinemaInDb.setCountry(request.getCountry());
@@ -106,41 +106,41 @@ public class CinemaServiceImpl implements CinemaService {
         log.info(LogMessages.FIELDS_SET);
 
         Cinema savedCinema = cinemaRepository.save(cinemaInDb);
-        log.info(String.format(LogMessages.SAVED, EntityNames.CINEMA));
+        log.info(LogMessages.SAVED, EntityNames.CINEMA);
 
         return cinemaDtoConverter.convert(savedCinema);
     }
 
     @Override
     public String deleteCinema(String id) {
-        log.info(String.format(LogMessages.STARTED, "deleteCinema"));
+        log.info(LogMessages.STARTED, "deleteCinema");
         boolean cinemaExists = cinemaRepository.existsById(id);
 
         if (!cinemaExists) {
             throw new EntityNotFound(String.format(ResponseMessages.NOT_FOUND, EntityNames.MOVIE, id));
         }
 
-        log.info(String.format(LogMessages.EXISTS, EntityNames.CINEMA));
+        log.info(LogMessages.EXISTS, EntityNames.CINEMA);
         cinemaRepository.deleteById(id);
-        log.info(String.format(LogMessages.DELETED, EntityNames.CINEMA));
+        log.info(LogMessages.DELETED, EntityNames.CINEMA);
 
         return String.format(ResponseMessages.SUCCESS, EntityNames.CINEMA, id, ActionNames.DELETED);
     }
 
     @Override
     public List<CustomSearchHit<CinemaDto, Cinema>> getCinemasByName(String searchTerm) {
-        log.info(String.format(LogMessages.STARTED, "getCinemasByName"));
+        log.info(LogMessages.STARTED, "getCinemasByName");
 
         List<SearchHit<Cinema>> searchHits = cinemaRepository.findByName(searchTerm)
                 .getSearchHits();
-        log.info(String.format(LogMessages.FETCHED_ALL, EntityNames.CINEMA));
+        log.info(LogMessages.FETCHED_ALL, EntityNames.CINEMA);
 
         return convertSearchHitList(searchHits);
     }
 
     @Override
     public List<CustomSearchHit<CinemaDto, Cinema>> getCinemasByAddressLike(String searchTerm) {
-        log.info(String.format(LogMessages.STARTED, "getCinemasByAddressLike"));
+        log.info(LogMessages.STARTED, "getCinemasByAddressLike");
 
         Criteria criteria = new Criteria("address").expression("*" + searchTerm + "*");
         CriteriaQuery criteriaQuery = new CriteriaQuery(criteria);
@@ -154,10 +154,10 @@ public class CinemaServiceImpl implements CinemaService {
 
     @Override
     public CustomPage<Cinema, CinemaDto> filterCinemas(CinemaFilteringOptions filteringOptions, Pageable pageable) {
-        log.info(String.format(LogMessages.STARTED, "filterCinemas"));
+        log.info(LogMessages.STARTED, "filterCinemas");
 
         Page<Cinema> cinemaPage = cinemaRepository.findAll(pageable);
-        log.info(String.format(LogMessages.FETCHED_ALL, EntityNames.CINEMA));
+        log.info(LogMessages.FETCHED_ALL, EntityNames.CINEMA);
 
         Predicate<Cinema> cinemaPredicate = (cinema) -> ((filteringOptions.getCountry() == null || cinema.getCountry().equals(filteringOptions.getCountry()))
                 && (filteringOptions.getCity() == null || cinema.getCity().equals(filteringOptions.getCity()))
@@ -168,7 +168,7 @@ public class CinemaServiceImpl implements CinemaService {
                 && (filteringOptions.getCafe_food() == null || cinema.isCafe_food() == filteringOptions.getCafe_food()));
 
         if (filteringOptions.getLimit() == null) {
-            log.info(String.format(LogMessages.PARAMETER_NULL, ParameterNames.LIMIT));
+            log.info(LogMessages.PARAMETER_NULL, ParameterNames.LIMIT);
             filteringOptions.setLimit(cinemaRepository.count());
         }
 
@@ -184,7 +184,7 @@ public class CinemaServiceImpl implements CinemaService {
 
     @Override
     public List<CinemaDto> findCinemasByHallRange(Integer lower, Integer higher) {
-        log.info(String.format(LogMessages.STARTED, "findCinemasByHallRange"));
+        log.info(LogMessages.STARTED, "findCinemasByHallRange");
         List<Cinema> cinemas = new ArrayList<>();
 
         if (lower != null && higher != null) {
@@ -205,7 +205,7 @@ public class CinemaServiceImpl implements CinemaService {
 
 
     public List<CustomSearchHit<CinemaDto, Cinema>> convertSearchHitList(List<SearchHit<Cinema>> searchHits) {
-        log.info(String.format(LogMessages.STARTED, "convertSearchHitList"));
+        log.info(LogMessages.STARTED, "convertSearchHitList");
         List<CustomSearchHit<CinemaDto, Cinema>> customSearchHits = new ArrayList<>();
 
         searchHits.forEach(

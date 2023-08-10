@@ -16,10 +16,10 @@ public class ActorDtoConverter {
                 .surname(actor.getSurname())
                 .nationality(actor.getNationality())
                 .birthYear(actor.getBirthYear())
-                .moviesPlayed(
-                        actor.getMoviesPlayed().stream()
-                                .map(Movie::getId)
-                                .collect(Collectors.toSet()))
+                .moviesPlayed(actor.getMoviesPlayed()
+                        .stream()
+                        .map(Movie::getId)
+                        .collect(Collectors.toSet()))
                 .build();
     }
 }

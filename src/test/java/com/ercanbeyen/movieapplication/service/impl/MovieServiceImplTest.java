@@ -119,7 +119,7 @@ public class MovieServiceImplTest {
         request.setSummary(movie.getSummary());
 
 
-        when(directorService.getDirectorById(directorId)).thenReturn(movie.getDirector());
+        when(directorService.findDirectorById(directorId)).thenReturn(movie.getDirector());
         when(movieRepository.save(any(Movie.class))).thenReturn(movie);
         when(movieDtoConverter.convert(movie)).thenReturn(expected);
 
@@ -127,7 +127,7 @@ public class MovieServiceImplTest {
 
         assertEquals(expected, actual);
 
-        verify(directorService, times(1)).getDirectorById(directorId);
+        verify(directorService, times(1)).findDirectorById(directorId);
         verify(movieRepository, times(1)).save(any(Movie.class));
         verify(movieDtoConverter, times(1)).convert(any(Movie.class));
     }

@@ -15,10 +15,10 @@ public class DirectorDtoConverter {
                 .nationality(director.getNationality())
                 .birthYear(director.getBirthYear())
                 .biography(director.getBiography())
-                .moviesDirected(
-                        director.getMoviesDirected().stream()
-                                .map(Movie::getId)
-                                .toList())
+                .moviesDirected(director.getMoviesDirected()
+                        .stream()
+                        .map(Movie::getId)
+                        .toList())
                 .build();
     }
 }
