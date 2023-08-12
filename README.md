@@ -18,7 +18,7 @@ Entities:
 
 ### Requirements
 
-- Each movie must have title, language, genre, release year, rating and director.
+- Each movie must have title, language, genre, release year, rating.
 - Each director and actor must have name, surname, nationality and birth year.
 - Directors and actors may appear in multiple movies.
 
@@ -31,6 +31,7 @@ Entities:
 - PostgreSQL
 - Redis
 - Elasticsearch
+- Scheduler
 - OpenAPI Documentation
 
 
