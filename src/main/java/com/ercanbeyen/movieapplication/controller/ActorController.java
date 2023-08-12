@@ -8,7 +8,7 @@ import com.ercanbeyen.movieapplication.dto.request.update.UpdateActorRequest;
 import com.ercanbeyen.movieapplication.util.ResponseHandler;
 import com.ercanbeyen.movieapplication.entity.Actor;
 import com.ercanbeyen.movieapplication.service.ActorService;
-import com.ercanbeyen.movieapplication.util.CustomPage;
+import com.ercanbeyen.movieapplication.dto.PageDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -25,43 +25,43 @@ public class ActorController {
     private final ActorService actorService;
 
     @PostMapping
-    public ResponseEntity<Object> createActor(@RequestBody @Valid CreateActorRequest request) {
+    public ResponseEntity<?> createActor(@RequestBody @Valid CreateActorRequest request) {
         ActorDto createdActor = actorService.createActor(request);
         return ResponseHandler.generateResponse(HttpStatus.CREATED, null, createdActor);
     }
 
     @GetMapping
-    public ResponseEntity<Object> getActors(ActorFilteringOptions actorFilteringOptions, @RequestParam(required = false) OrderBy orderBy, Pageable pageable) {
-        CustomPage<Actor, ActorDto> actorDtoList = actorService.filterActors(actorFilteringOptions, orderBy, pageable);
+    public ResponseEntity<?> getActors(ActorFilteringOptions actorFilteringOptions, @RequestParam(required = false) OrderBy orderBy, Pageable pageable) {
+        PageDto<Actor, ActorDto> actorDtoList = actorService.filterActors(actorFilteringOptions, orderBy, pageable);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, actorDtoList);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getActor(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> getActor(@PathVariable("id") Integer id) {
         ActorDto actorDto = actorService.getActor(id);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, actorDto);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> updateActor(@PathVariable("id") Integer id, @RequestBody @Valid UpdateActorRequest request) {
+    public ResponseEntity<?> updateActor(@PathVariable("id") Integer id, @RequestBody @Valid UpdateActorRequest request) {
         ActorDto actorDto = actorService.updateActor(id, request);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, actorDto);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteActor(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> deleteActor(@PathVariable("id") Integer id) {
         String message = actorService.deleteActor(id);
         return ResponseHandler.generateResponse(HttpStatus.OK, message, null);
     }
 
     @GetMapping("/popular")
-    public ResponseEntity<Object> getMostPopularActors() {
+    public ResponseEntity<?> getMostPopularActors() {
         List<ActorDto> actorDtoList = actorService.getMostPopularActors();
         return ResponseHandler.generateResponse(HttpStatus.OK, null, actorDtoList);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Object> searchActors(@RequestParam String fullName) {
+    public ResponseEntity<?> searchActors(@RequestParam String fullName) {
         List<ActorDto> actorDtoList = actorService.searchActors(fullName);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, actorDtoList);
     }

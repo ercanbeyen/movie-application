@@ -6,14 +6,14 @@ import com.ercanbeyen.movieapplication.dto.option.filter.DirectorFilteringOption
 import com.ercanbeyen.movieapplication.dto.request.create.CreateDirectorRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateDirectorRequest;
 import com.ercanbeyen.movieapplication.entity.Director;
-import com.ercanbeyen.movieapplication.util.CustomPage;
+import com.ercanbeyen.movieapplication.dto.PageDto;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 public interface DirectorService {
     DirectorDto createDirector(CreateDirectorRequest request);
-    CustomPage<Director, DirectorDto> filterDirectors(DirectorFilteringOptions filteringOptions, OrderBy orderBy, Pageable pageable);
+    PageDto<Director, DirectorDto> filterDirectors(DirectorFilteringOptions filteringOptions, OrderBy orderBy, Pageable pageable);
     DirectorDto getDirector(Integer id);
     DirectorDto updateDirector(Integer id, UpdateDirectorRequest request);
     String deleteDirector(Integer id);

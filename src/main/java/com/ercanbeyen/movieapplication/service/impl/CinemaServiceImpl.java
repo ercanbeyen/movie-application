@@ -11,8 +11,8 @@ import com.ercanbeyen.movieapplication.document.Cinema;
 import com.ercanbeyen.movieapplication.exception.ResourceNotFound;
 import com.ercanbeyen.movieapplication.repository.CinemaRepository;
 import com.ercanbeyen.movieapplication.service.CinemaService;
-import com.ercanbeyen.movieapplication.util.CustomPage;
-import com.ercanbeyen.movieapplication.util.CustomSearchHit;
+import com.ercanbeyen.movieapplication.dto.PageDto;
+import com.ercanbeyen.movieapplication.dto.SearchHitDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -128,7 +128,7 @@ public class CinemaServiceImpl implements CinemaService {
     }
 
     @Override
-    public List<CustomSearchHit<CinemaDto, Cinema>> getCinemasByName(String searchTerm) {
+    public List<SearchHitDto<CinemaDto, Cinema>> getCinemasByName(String searchTerm) {
         log.info(LogMessages.STARTED, "getCinemasByName");
 
         List<SearchHit<Cinema>> searchHits = cinemaRepository.findByName(searchTerm)
@@ -139,7 +139,7 @@ public class CinemaServiceImpl implements CinemaService {
     }
 
     @Override
-    public List<CustomSearchHit<CinemaDto, Cinema>> getCinemasByAddressLike(String searchTerm) {
+    public List<SearchHitDto<CinemaDto, Cinema>> getCinemasByAddressLike(String searchTerm) {
         log.info(LogMessages.STARTED, "getCinemasByAddressLike");
 
         Criteria criteria = new Criteria("address").expression("*" + searchTerm + "*");
@@ -153,7 +153,7 @@ public class CinemaServiceImpl implements CinemaService {
     }
 
     @Override
-    public CustomPage<Cinema, CinemaDto> filterCinemas(CinemaFilteringOptions filteringOptions, Pageable pageable) {
+    public PageDto<Cinema, CinemaDto> filterCinemas(CinemaFilteringOptions filteringOptions, Pageable pageable) {
         log.info(LogMessages.STARTED, "filterCinemas");
 
         Page<Cinema> cinemaPage = cinemaRepository.findAll(pageable);
@@ -178,7 +178,7 @@ public class CinemaServiceImpl implements CinemaService {
                 .map(cinemaDtoConverter::convert)
                 .toList();
 
-        return new CustomPage<>(cinemaPage, cinemaDtoList);
+        return new PageDto<>(cinemaPage, cinemaDtoList);
 
     }
 
@@ -204,19 +204,19 @@ public class CinemaServiceImpl implements CinemaService {
     }
 
 
-    public List<CustomSearchHit<CinemaDto, Cinema>> convertSearchHitList(List<SearchHit<Cinema>> searchHits) {
+    public List<SearchHitDto<CinemaDto, Cinema>> convertSearchHitList(List<SearchHit<Cinema>> searchHits) {
         log.info(LogMessages.STARTED, "convertSearchHitList");
-        List<CustomSearchHit<CinemaDto, Cinema>> customSearchHits = new ArrayList<>();
+        List<SearchHitDto<CinemaDto, Cinema>> searchHitDtos = new ArrayList<>();
 
         searchHits.forEach(
                 searchHit -> {
                     CinemaDto cinemaDto = cinemaDtoConverter.convert(searchHit.getContent());
-                    CustomSearchHit<CinemaDto, Cinema> customSearchHit = new CustomSearchHit<>(searchHit, cinemaDto);
-                    customSearchHits.add(customSearchHit);
+                    SearchHitDto<CinemaDto, Cinema> searchHitDto = new SearchHitDto<>(searchHit, cinemaDto);
+                    searchHitDtos.add(searchHitDto);
                 }
         );
 
-        return customSearchHits;
+        return searchHitDtos;
     }
 
     private Cinema findCinemaById(String id) {

@@ -6,7 +6,7 @@ import com.ercanbeyen.movieapplication.dto.MovieDto;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateMovieRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateMovieRequest;
 import com.ercanbeyen.movieapplication.entity.Movie;
-import com.ercanbeyen.movieapplication.util.CustomPage;
+import com.ercanbeyen.movieapplication.dto.PageDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -29,7 +29,8 @@ import java.util.Map;
 public class ScheduledTasks {
     private final RestTemplate restTemplate;
     private static final String COLLECTION_URI = "http://localhost:8080/api/v1/movies";
-    private static final String ELEMENT_URI = COLLECTION_URI + "/{id}";
+    private static final String ID = "id";
+    private static final String ELEMENT_URI = COLLECTION_URI + "/{" + ID + "}";
 
     @Scheduled(fixedRate = 25_000) // Every 25 seconds
     public void checkForFilterMovies() {
@@ -41,7 +42,7 @@ public class ScheduledTasks {
         log.info(LogMessages.BEFORE_REQUEST);
 
         try {
-            HashMap<String, CustomPage<Movie, MovieDto>> response = restTemplate.getForObject(
+            Map<String, PageDto<Movie, MovieDto>> response = restTemplate.getForObject(
                     COLLECTION_URI + "?page=" + pageable.getPageNumber() + "&size=" + pageable.getPageSize(), HashMap.class
             );
 
@@ -59,7 +60,7 @@ public class ScheduledTasks {
         log.info(LogMessages.TASK_COMPLETED, checkedMethod);
     }
 
-    @Scheduled(fixedRate = 90_000) // Every 90 seconds
+    @Scheduled(fixedRate = 30_000) // Every 30 seconds
     public void checkForCreateMovie() {
         final String checkedMethod = "createMethod";
         log.info(LogMessages.STARTED, checkedMethod);
@@ -96,12 +97,12 @@ public class ScheduledTasks {
         log.info(LogMessages.TASK_STARTED, checkedMethod);
 
         Map<String, Integer> parameters = new HashMap<>();
-        parameters.put("id", 1);
+        parameters.put(ID, 1);
 
         log.info(LogMessages.BEFORE_REQUEST);
 
         try {
-            HashMap<String, MovieDto> response = restTemplate.getForObject(ELEMENT_URI, HashMap.class, parameters);
+            Map<String, MovieDto> response = restTemplate.getForObject(ELEMENT_URI, HashMap.class, parameters);
             log.info(LogMessages.SUCCESS);
             log.info(LogMessages.RESPONSE_DISPLAYED, response);
         } catch (RestClientException exception) {
@@ -116,13 +117,13 @@ public class ScheduledTasks {
         log.info(LogMessages.TASK_COMPLETED, checkedMethod);
     }
 
-    @Scheduled(cron = "0/1 * * * * *") // Every minute
+    @Scheduled(cron = "0 * * * * *") // Every minute
     public void checkForUpdateMovie() {
         final String checkedMethod = "updateMovie";
         log.info(LogMessages.TASK_STARTED, checkedMethod);
 
         Map<String, Integer> parameters = new HashMap<>();
-        parameters.put("id", 1);
+        parameters.put(ID, 1);
 
         UpdateMovieRequest request = new UpdateMovieRequest();
         request.setTitle("Test-movie");
@@ -148,13 +149,13 @@ public class ScheduledTasks {
         log.info(LogMessages.TASK_COMPLETED, checkedMethod);
     }
 
-    @Scheduled(cron = "0/2 * * * *") // Every 2 minutes
+    @Scheduled(cron = "0 0/2 * * * *") // Every 2 minutes
     public void checkForDelete() {
         final String checkedMethod = "deleteMovie";
         log.info(LogMessages.TASK_STARTED, checkedMethod);
 
         Map<String, Integer> parameters = new HashMap<>();
-        parameters.put("id", 1);
+        parameters.put(ID, 1);
 
         log.info(LogMessages.BEFORE_REQUEST);
 

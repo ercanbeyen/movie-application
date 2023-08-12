@@ -15,7 +15,9 @@ import com.ercanbeyen.movieapplication.repository.MovieRepository;
 import com.ercanbeyen.movieapplication.service.ActorService;
 import com.ercanbeyen.movieapplication.service.DirectorService;
 import com.ercanbeyen.movieapplication.service.MovieService;
-import com.ercanbeyen.movieapplication.util.CustomPage;
+import com.ercanbeyen.movieapplication.dto.PageDto;
+import com.ercanbeyen.movieapplication.dto.Statistics;
+import com.ercanbeyen.movieapplication.util.StatisticsUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -71,7 +73,7 @@ public class MovieServiceImpl implements MovieService {
 
     @CacheEvict(value = "movies", allEntries = true)
     @Override
-    public CustomPage<Movie, MovieDto> filterMovies(MovieFilteringOptions filteringOptions, OrderBy orderBy, Pageable pageable) {
+    public PageDto<Movie, MovieDto> filterMovies(MovieFilteringOptions filteringOptions, OrderBy orderBy, Pageable pageable) {
         log.info(LogMessages.STARTED, "filterMovies");
         Page<Movie> moviePage = movieRepository.findAll(pageable);
         log.info(LogMessages.FETCHED_ALL, ResourceNames.MOVIE);
@@ -95,7 +97,7 @@ public class MovieServiceImpl implements MovieService {
                     .map(movieDtoConverter::convert)
                     .toList();
 
-            return new CustomPage<>(moviePage, movieDtoList);
+            return new PageDto<>(moviePage, movieDtoList);
         }
 
         Comparator<Movie> movieComparator = Comparator.comparing(Movie::getRating);
@@ -112,7 +114,7 @@ public class MovieServiceImpl implements MovieService {
                 .map(movieDtoConverter::convert)
                 .toList();
 
-        return new CustomPage<>(moviePage, movieDtoList);
+        return new PageDto<>(moviePage, movieDtoList);
     }
 
     @Cacheable(value = "movies", key = "#id", unless = "#result.releaseYear < 2020")
@@ -223,6 +225,51 @@ public class MovieServiceImpl implements MovieService {
         log.info(LogMessages.STARTED, "findMovieById");
         return movieRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFound(String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE, id)));
+    }
+
+    @Override
+    public Statistics<String, String> calculateStatistics() {
+        log.info(LogMessages.STARTED, "calculateStatistics");
+        Statistics<String, String> statistics = new Statistics<>();
+
+        statistics.setTopic("Movie");
+
+        Map<String, String> statisticsMap = new HashMap<>();
+        List<Movie> movieList = movieRepository.findAll();
+
+        Comparator<Movie> movieComparator = Comparator.comparing(Movie::getRating);
+
+        String titleOfMostRatedMovie = movieList.stream()
+                .max(movieComparator)
+                .map(Movie::getTitle)
+                .orElse(StatisticsMessages.NOT_EXISTS);
+
+        statisticsMap.put("mostRatedMovie", titleOfMostRatedMovie);
+
+        String titleOfLeastRatedMovie = movieList.stream()
+                .min(movieComparator)
+                .map(Movie::getTitle)
+                .orElse(StatisticsMessages.NOT_EXISTS);
+
+        statisticsMap.put("leastRatedMovie", titleOfLeastRatedMovie);
+
+        List<String> languageList = movieList.stream()
+                .map(Movie::getLanguage)
+                .toList();
+
+        String mostPopularLanguage = StatisticsUtil.calculateMostOccurred(languageList);
+        mostPopularLanguage = StatisticsUtil.valueAssignmentToStringItem(mostPopularLanguage);
+
+        statisticsMap.put("mostPopularLanguage", mostPopularLanguage);
+
+        String leastPopularLanguage = StatisticsUtil.calculateLeastOccurred(languageList);
+        leastPopularLanguage = StatisticsUtil.valueAssignmentToStringItem(leastPopularLanguage);
+
+        statisticsMap.put("leastPopularLanguage", leastPopularLanguage);
+
+        statistics.setResult(statisticsMap);
+
+        return statistics;
     }
 
 }

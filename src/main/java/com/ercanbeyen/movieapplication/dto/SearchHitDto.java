@@ -1,4 +1,4 @@
-package com.ercanbeyen.movieapplication.util;
+package com.ercanbeyen.movieapplication.dto;
 
 import lombok.Data;
 import org.springframework.data.elasticsearch.core.SearchHit;
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-public class CustomSearchHit<T, V> {
+public class SearchHitDto<T, V> {
     private String index;
     private String id;
     private float score;
@@ -23,7 +23,7 @@ public class CustomSearchHit<T, V> {
     private Explanation explanation;
     private List<String> matchedQueries;
 
-    public CustomSearchHit(SearchHit<V> searchHit, T content) {
+    public SearchHitDto(SearchHit<V> searchHit, T content) {
         this.index = searchHit.getIndex();
         this.id = searchHit.getId();
         this.score = searchHit.getScore();

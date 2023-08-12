@@ -11,7 +11,7 @@ import com.ercanbeyen.movieapplication.entity.Actor;
 import com.ercanbeyen.movieapplication.exception.ResourceNotFound;
 import com.ercanbeyen.movieapplication.repository.ActorRepository;
 import com.ercanbeyen.movieapplication.service.ActorService;
-import com.ercanbeyen.movieapplication.util.CustomPage;
+import com.ercanbeyen.movieapplication.dto.PageDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -54,7 +54,7 @@ public class ActorServiceImpl implements ActorService {
     }
 
     @Override
-    public CustomPage<Actor, ActorDto> filterActors(ActorFilteringOptions filteringOptions, OrderBy orderBy, Pageable pageable) {
+    public PageDto<Actor, ActorDto> filterActors(ActorFilteringOptions filteringOptions, OrderBy orderBy, Pageable pageable) {
         log.info(LogMessages.STARTED, "filterActors");
         Page<Actor> actorPage = actorRepository.findAll(pageable);
         log.info(LogMessages.FETCHED_ALL, ResourceNames.ACTOR);
@@ -76,7 +76,7 @@ public class ActorServiceImpl implements ActorService {
                     .map(actorDtoConverter::convert)
                     .toList();
 
-            return new CustomPage<>(actorPage, actorDtoList);
+            return new PageDto<>(actorPage, actorDtoList);
         }
 
         Comparator<Actor> actorComparator = Comparator.comparing(actor -> actor.getMoviesPlayed().size());
@@ -93,7 +93,7 @@ public class ActorServiceImpl implements ActorService {
                 .map(actorDtoConverter::convert)
                 .toList();
 
-        return new CustomPage<>(actorPage, actorDtoList);
+        return new PageDto<>(actorPage, actorDtoList);
     }
 
     @Cacheable(value = "actors", key = "#id", unless = "#result.moviesPlayed.size() < 2")

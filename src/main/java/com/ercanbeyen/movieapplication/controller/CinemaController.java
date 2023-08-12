@@ -8,8 +8,8 @@ import com.ercanbeyen.movieapplication.dto.request.create.CreateCinemaRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateCinemaRequest;
 import com.ercanbeyen.movieapplication.util.ResponseHandler;
 import com.ercanbeyen.movieapplication.service.CinemaService;
-import com.ercanbeyen.movieapplication.util.CustomPage;
-import com.ercanbeyen.movieapplication.util.CustomSearchHit;
+import com.ercanbeyen.movieapplication.dto.PageDto;
+import com.ercanbeyen.movieapplication.dto.SearchHitDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -26,55 +26,55 @@ public class CinemaController {
     private final CinemaService cinemaService;
 
     @PostMapping
-    public ResponseEntity<Object> createCinema(@RequestBody @Valid CreateCinemaRequest request) {
+    public ResponseEntity<?> createCinema(@RequestBody @Valid CreateCinemaRequest request) {
         CinemaDto cinemaDto = cinemaService.createCinema(request);
         return ResponseHandler.generateResponse(HttpStatus.CREATED, null, cinemaDto);
     }
 
     @GetMapping
-    public ResponseEntity<Object> filterCinemas(CinemaFilteringOptions filteringOptions, Pageable pageable) {
-        CustomPage<Cinema, CinemaDto> cinemaDtoPage = cinemaService.filterCinemas(filteringOptions, pageable);
+    public ResponseEntity<?> filterCinemas(CinemaFilteringOptions filteringOptions, Pageable pageable) {
+        PageDto<Cinema, CinemaDto> cinemaDtoPage = cinemaService.filterCinemas(filteringOptions, pageable);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemaDtoPage);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getCinema(@PathVariable("id") String id) {
+    public ResponseEntity<?> getCinema(@PathVariable("id") String id) {
         CinemaDto cinemaDto = cinemaService.getCinema(id);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemaDto);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> updateCinema(@PathVariable("id") String id, @RequestBody @Valid UpdateCinemaRequest request) {
+    public ResponseEntity<?> updateCinema(@PathVariable("id") String id, @RequestBody @Valid UpdateCinemaRequest request) {
         CinemaDto cinemaDto = cinemaService.updateCinema(id, request);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemaDto);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteCinema(@PathVariable("id") String id) {
+    public ResponseEntity<?> deleteCinema(@PathVariable("id") String id) {
         String message = cinemaService.deleteCinema(id);
         return ResponseHandler.generateResponse(HttpStatus.OK, message, null);
     }
 
     @GetMapping("/name")
-    public ResponseEntity<Object> getCinemasByName(@RequestParam("search") String searchTerm) {
-        List<CustomSearchHit<CinemaDto, Cinema>> searchHits = cinemaService.getCinemasByName(searchTerm);
+    public ResponseEntity<?> getCinemasByName(@RequestParam("search") String searchTerm) {
+        List<SearchHitDto<CinemaDto, Cinema>> searchHits = cinemaService.getCinemasByName(searchTerm);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, searchHits);
     }
 
     @GetMapping("/address")
-    public ResponseEntity<Object> getCinemasByAddress(@RequestParam("full-search") String searchTerm) {
-        List<CustomSearchHit<CinemaDto, Cinema>> searchHits = cinemaService.getCinemasByAddressLike(searchTerm);
+    public ResponseEntity<?> getCinemasByAddress(@RequestParam("full-search") String searchTerm) {
+        List<SearchHitDto<CinemaDto, Cinema>> searchHits = cinemaService.getCinemasByAddressLike(searchTerm);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, searchHits);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Object> getCinemas(@Valid CinemaSearchOptions searchOptions) {
+    public ResponseEntity<?> getCinemas(@Valid CinemaSearchOptions searchOptions) {
         List<CinemaDto> cinemaDtoList = cinemaService.searchCinemasByStatus(searchOptions);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemaDtoList);
     }
 
     @GetMapping("/halls")
-    public ResponseEntity<Object> getCinemas(
+    public ResponseEntity<?> getCinemas(
             @RequestParam(required = false) Integer lower,
             @RequestParam(required = false) Integer higher) {
         List<CinemaDto> cinemaDtoList = cinemaService.findCinemasByHallRange(lower, higher);

@@ -11,7 +11,7 @@ import com.ercanbeyen.movieapplication.entity.Director;
 import com.ercanbeyen.movieapplication.exception.ResourceNotFound;
 import com.ercanbeyen.movieapplication.repository.DirectorRepository;
 import com.ercanbeyen.movieapplication.service.DirectorService;
-import com.ercanbeyen.movieapplication.util.CustomPage;
+import com.ercanbeyen.movieapplication.dto.PageDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -54,7 +54,7 @@ public class DirectorServiceImpl implements DirectorService {
     }
 
     @Override
-    public CustomPage<Director, DirectorDto> filterDirectors(DirectorFilteringOptions filteringOptions, OrderBy orderBy, Pageable pageable) {
+    public PageDto<Director, DirectorDto> filterDirectors(DirectorFilteringOptions filteringOptions, OrderBy orderBy, Pageable pageable) {
         log.info(LogMessages.STARTED, "filterDirectors");
         Page<Director> directorPage = directorRepository.findAll(pageable);
         log.info(LogMessages.FETCHED_ALL, ResourceNames.DIRECTOR);
@@ -76,7 +76,7 @@ public class DirectorServiceImpl implements DirectorService {
                     .map(directorDtoConverter::convert)
                     .toList();
 
-            return new CustomPage<>(directorPage, directorDtoList);
+            return new PageDto<>(directorPage, directorDtoList);
         }
 
         Comparator<Director> directorComparator = Comparator.comparing(director -> director.getMoviesDirected().size());
@@ -94,7 +94,7 @@ public class DirectorServiceImpl implements DirectorService {
                 .map(directorDtoConverter::convert)
                 .toList();
 
-        return new CustomPage<>(directorPage, directorList);
+        return new PageDto<>(directorPage, directorList);
     }
 
     @Cacheable(value = "directors", key = "#id", unless = "#result.moviesDirected.size() < 2")

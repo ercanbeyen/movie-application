@@ -14,14 +14,13 @@ import com.ercanbeyen.movieapplication.entity.Movie;
 import com.ercanbeyen.movieapplication.constant.enums.Genre;
 import com.ercanbeyen.movieapplication.exception.ResourceNotFound;
 import com.ercanbeyen.movieapplication.repository.MovieRepository;
-import com.ercanbeyen.movieapplication.util.CustomPage;
+import com.ercanbeyen.movieapplication.dto.PageDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
@@ -109,8 +108,8 @@ public class MovieServiceImplTest {
     }
 
     @Test
-    @DisplayName("When CreateMovie Called With Valid Input It Should Return MovieDto")
-    public void whenCreateMovieCalledWithValidInput_itShouldReturnMovieDto() {
+    @DisplayName("When CreateMovie Called With Valid Request It Should Return MovieDto")
+    public void whenCreateMovieCalledWithValidRequest_itShouldReturnMovieDto() {
         Movie movie = movieList.get(0);
         MovieDto expected = movieDtoList.get(0);
         int directorId = expected.getDirectorId();
@@ -175,21 +174,21 @@ public class MovieServiceImplTest {
 
         assertEquals(expected, actual);
 
-        Mockito.verify(movieRepository, times(1)).findById(id);
+        verify(movieRepository, times(1)).findById(id);
         verifyNoMoreInteractions(movieRepository);
         verifyNoInteractions(movieDtoConverter);
     }
 
     @Test
-    @DisplayName("When Get Movies Called It Should Return MovieDto List")
-    public void whenGetMoviesCalled_itShouldReturnMovieDto() {
+    @DisplayName("When Get Movies Called With Parameters It Should Return MovieDto List")
+    public void whenGetMoviesCalledWithParameters_itShouldReturnMovieDto() {
         Pageable pageable = Pageable.ofSize(1).withPage(0);
 
         List<Movie> fetchedMovieList = Collections.singletonList(movieList.get(0));
         List<MovieDto> fetchedMovieDtoList = Collections.singletonList(movieDtoList.get(0));
 
         Page<Movie> moviePage = new PageImpl<>(fetchedMovieList, pageable, fetchedMovieList.size());
-        CustomPage<Movie, MovieDto> expected = new CustomPage<>(moviePage, fetchedMovieDtoList);
+        PageDto<Movie, MovieDto> expected = new PageDto<>(moviePage, fetchedMovieDtoList);
 
         when(movieRepository.findAll(pageable)).thenReturn(moviePage);
         when(movieRepository.count()).thenReturn(Long.valueOf(movieList.size()));
@@ -198,7 +197,7 @@ public class MovieServiceImplTest {
         MovieFilteringOptions movieFilteringOptions = new MovieFilteringOptions();
         movieFilteringOptions.setLanguage(movieList.get(0).getLanguage());
 
-        CustomPage<Movie, MovieDto> actual = movieService.filterMovies(movieFilteringOptions, null, pageable);
+        PageDto<Movie, MovieDto> actual = movieService.filterMovies(movieFilteringOptions, null, pageable);
 
         assertEquals(expected, actual);
 
@@ -299,8 +298,8 @@ public class MovieServiceImplTest {
     }
 
     @Test
-    @DisplayName("When GetLatestMovies Called With Valid Input It Should Return The MovieDto List")
-    public void whenGetLatestMoviesCalledWithValidInput_itShouldReturnTheMovieDtoList() {
+    @DisplayName("When GetLatestMovies Called It Should Return The MovieDto List")
+    public void whenGetLatestMoviesCalled_itShouldReturnTheMovieDtoList() {
         List<MovieDto> expected = Collections.singletonList(movieDtoList.get(0));
 
         when(movieRepository.findAll()).thenReturn(movieList);
@@ -315,8 +314,8 @@ public class MovieServiceImplTest {
     }
 
     @Test
-    @DisplayName("When SearchMovies Called With Valid Input It Should Return The MovieDto List")
-    public void whenSearchMoviesCalledWithValidInput_itShouldReturnTheMovieDtoList() {
+    @DisplayName("When SearchMovies Called With Parameters It Should Return The MovieDto List")
+    public void whenSearchMoviesCalledWithParameters_itShouldReturnTheMovieDtoList() {
         Movie movie = movieList.get(0);
         List<Movie> moviesList = Collections.singletonList(movie);
         List<MovieDto> expected = Collections.singletonList(movieDtoList.get(0));

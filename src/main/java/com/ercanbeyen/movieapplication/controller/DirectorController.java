@@ -8,7 +8,7 @@ import com.ercanbeyen.movieapplication.dto.request.update.UpdateDirectorRequest;
 import com.ercanbeyen.movieapplication.util.ResponseHandler;
 import com.ercanbeyen.movieapplication.entity.Director;
 import com.ercanbeyen.movieapplication.service.DirectorService;
-import com.ercanbeyen.movieapplication.util.CustomPage;
+import com.ercanbeyen.movieapplication.dto.PageDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -25,43 +25,43 @@ public class DirectorController {
     private final DirectorService directorService;
 
     @PostMapping
-    public ResponseEntity<Object> createDirector(@RequestBody @Valid CreateDirectorRequest request) {
+    public ResponseEntity<?> createDirector(@RequestBody @Valid CreateDirectorRequest request) {
         DirectorDto directorDto = directorService.createDirector(request);
         return ResponseHandler.generateResponse(HttpStatus.CREATED, null, directorDto);
     }
 
     @GetMapping
-    public ResponseEntity<Object> getDirectors(DirectorFilteringOptions filteringOptions, @RequestParam(required = false) OrderBy orderBy, Pageable pageable) {
-        CustomPage<Director, DirectorDto> directorDtoPage = directorService.filterDirectors(filteringOptions, orderBy, pageable);
+    public ResponseEntity<?> getDirectors(DirectorFilteringOptions filteringOptions, @RequestParam(required = false) OrderBy orderBy, Pageable pageable) {
+        PageDto<Director, DirectorDto> directorDtoPage = directorService.filterDirectors(filteringOptions, orderBy, pageable);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, directorDtoPage);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getDirector(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> getDirector(@PathVariable("id") Integer id) {
         DirectorDto directorDto = directorService.getDirector(id);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, directorDto);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> updateDirector(@PathVariable("id") Integer id, @RequestBody @Valid UpdateDirectorRequest request) {
+    public ResponseEntity<?> updateDirector(@PathVariable("id") Integer id, @RequestBody @Valid UpdateDirectorRequest request) {
         DirectorDto directorDto = directorService.updateDirector(id, request);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, directorDto);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteDirector(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> deleteDirector(@PathVariable("id") Integer id) {
         String message = directorService.deleteDirector(id);
         return ResponseHandler.generateResponse(HttpStatus.OK, message, null);
     }
 
     @GetMapping("/popular")
-    public ResponseEntity<Object> getMostPopularDirectors() {
+    public ResponseEntity<?> getMostPopularDirectors() {
         List<DirectorDto> directorDtoList = directorService.getMostPopularDirectors();
         return ResponseHandler.generateResponse(HttpStatus.OK, null, directorDtoList);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Object> searchDirectors(@RequestParam String fullName) {
+    public ResponseEntity<?> searchDirectors(@RequestParam String fullName) {
         List<DirectorDto> directorDtoList = directorService.searchDirectors(fullName);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, directorDtoList);
     }
