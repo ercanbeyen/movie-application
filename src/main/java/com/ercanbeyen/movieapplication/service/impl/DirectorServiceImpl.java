@@ -3,6 +3,7 @@ package com.ercanbeyen.movieapplication.service.impl;
 import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
 import com.ercanbeyen.movieapplication.constant.message.*;
 import com.ercanbeyen.movieapplication.dto.DirectorDto;
+import com.ercanbeyen.movieapplication.dto.Statistics;
 import com.ercanbeyen.movieapplication.dto.converter.DirectorDtoConverter;
 import com.ercanbeyen.movieapplication.dto.option.filter.DirectorFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateDirectorRequest;
@@ -21,9 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -177,6 +176,31 @@ public class DirectorServiceImpl implements DirectorService {
         log.info(LogMessages.STARTED, "findDirectorById");
         return directorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFound(String.format(ResponseMessages.NOT_FOUND, ResourceNames.DIRECTOR, id)));
+    }
+
+    @Override
+    public Statistics<String, String> calculateStatistics() {
+        log.info(LogMessages.STARTED, LogMessages.CALCULATE_STATISTICS);
+
+        Statistics<String, String> statistics = new Statistics<>();
+        statistics.setTopic("Director");
+
+        Map<String, String> statisticsMap = new HashMap<>();
+        List<Director> directorList = directorRepository.findAll();
+
+        DoubleSummaryStatistics summaryStatistics = directorList.stream()
+                .mapToDouble(director -> director.getMoviesDirected().size())
+                .summaryStatistics();
+
+        statisticsMap.put("mostDirectedCount", String.valueOf(summaryStatistics.getMax()));
+        statisticsMap.put("leastDirectedCount", String.valueOf(summaryStatistics.getMin()));
+        statisticsMap.put("directedMovieSum", String.valueOf(summaryStatistics.getSum()));
+        statisticsMap.put("directedMovieAverage", String.valueOf(summaryStatistics.getAverage()));
+        statisticsMap.put("directorCount", String.valueOf(summaryStatistics.getCount()));
+
+        statistics.setResult(statisticsMap);
+
+        return statistics;
     }
 
 }

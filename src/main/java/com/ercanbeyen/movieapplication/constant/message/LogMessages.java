@@ -21,5 +21,5 @@ public class LogMessages {
     public static final String UNKNOWN_EXCEPTION = "Unknown exception. Exception: {}";
     public static final String DIRECTOR_FOUND = "Director {} is found";
     public static final String DIRECTOR_SEARCH_SKIPPED = "Director id is null. So findDirectorById method is skipped";
-
+    public static final String CALCULATE_STATISTICS = "calculateStatistics";
 }

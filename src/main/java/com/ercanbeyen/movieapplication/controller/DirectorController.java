@@ -2,6 +2,7 @@ package com.ercanbeyen.movieapplication.controller;
 
 import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
 import com.ercanbeyen.movieapplication.dto.DirectorDto;
+import com.ercanbeyen.movieapplication.dto.Statistics;
 import com.ercanbeyen.movieapplication.dto.option.filter.DirectorFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateDirectorRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateDirectorRequest;
@@ -64,6 +65,12 @@ public class DirectorController {
     public ResponseEntity<?> searchDirectors(@RequestParam String fullName) {
         List<DirectorDto> directorDtoList = directorService.searchDirectors(fullName);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, directorDtoList);
+    }
+
+    @GetMapping("/statistics")
+    public ResponseEntity<?> calculateStatistics() {
+        Statistics<String, String> statistics = directorService.calculateStatistics();
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, statistics);
     }
 
 }

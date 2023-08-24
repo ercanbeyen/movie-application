@@ -229,7 +229,7 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public Statistics<String, String> calculateStatistics() {
-        log.info(LogMessages.STARTED, "calculateStatistics");
+        log.info(LogMessages.STARTED, LogMessages.CALCULATE_STATISTICS);
         Statistics<String, String> statistics = new Statistics<>();
 
         statistics.setTopic("Movie");

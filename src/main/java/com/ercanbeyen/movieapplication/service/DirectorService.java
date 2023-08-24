@@ -2,6 +2,7 @@ package com.ercanbeyen.movieapplication.service;
 
 import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
 import com.ercanbeyen.movieapplication.dto.DirectorDto;
+import com.ercanbeyen.movieapplication.dto.Statistics;
 import com.ercanbeyen.movieapplication.dto.option.filter.DirectorFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateDirectorRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateDirectorRequest;
@@ -20,4 +21,5 @@ public interface DirectorService {
     List<DirectorDto> getMostPopularDirectors();
     List<DirectorDto> searchDirectors(String fullName);
     Director findDirectorById(Integer id);
+    Statistics<String, String> calculateStatistics();
 }
