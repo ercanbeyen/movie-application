@@ -2,6 +2,7 @@ package com.ercanbeyen.movieapplication.service.impl;
 
 import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
 import com.ercanbeyen.movieapplication.constant.message.*;
+import com.ercanbeyen.movieapplication.constant.names.ParameterNames;
 import com.ercanbeyen.movieapplication.dto.MovieDto;
 import com.ercanbeyen.movieapplication.dto.converter.MovieDtoConverter;
 import com.ercanbeyen.movieapplication.dto.option.filter.MovieFilteringOptions;
@@ -10,7 +11,7 @@ import com.ercanbeyen.movieapplication.dto.request.update.UpdateMovieRequest;
 import com.ercanbeyen.movieapplication.entity.Actor;
 import com.ercanbeyen.movieapplication.entity.Director;
 import com.ercanbeyen.movieapplication.entity.Movie;
-import com.ercanbeyen.movieapplication.exception.ResourceNotFound;
+import com.ercanbeyen.movieapplication.exception.ResourceNotFoundException;
 import com.ercanbeyen.movieapplication.repository.MovieRepository;
 import com.ercanbeyen.movieapplication.service.ActorService;
 import com.ercanbeyen.movieapplication.service.DirectorService;
@@ -73,7 +74,7 @@ public class MovieServiceImpl implements MovieService {
 
     @CacheEvict(value = "movies", allEntries = true)
     @Override
-    public PageDto<Movie, MovieDto> filterMovies(MovieFilteringOptions filteringOptions, OrderBy orderBy, Pageable pageable) {
+    public PageDto<Movie, MovieDto> filterMovies(MovieFilteringOptions filteringOptions, OrderBy orderBy, String limit, Pageable pageable) {
         log.info(LogMessages.STARTED, "filterMovies");
         Page<Movie> moviePage = movieRepository.findAll(pageable);
         log.info(LogMessages.FETCHED_ALL, ResourceNames.MOVIE);
@@ -83,17 +84,14 @@ public class MovieServiceImpl implements MovieService {
                 (StringUtils.isBlank(filteringOptions.getLanguage()) || movie.getLanguage().equals(filteringOptions.getLanguage())) &&
                 (filteringOptions.getReleaseYear() == null || movie.getReleaseYear().intValue() == filteringOptions.getReleaseYear().intValue()));
 
-        if (filteringOptions.getLimit() == null) {
-            log.info(LogMessages.PARAMETER_NULL, ParameterNames.LIMIT);
-            filteringOptions.setLimit(movieRepository.count());
-        }
+        long maximumSize = Long.parseLong(limit);
 
         if (orderBy == null) {
-            log.info(LogMessages.PARAMETER_NULL, ParameterNames.ORDER_BY);
+            log.info(LogMessages.REQUEST_PARAMETER_NULL, ParameterNames.ORDER_BY);
 
             List<MovieDto> movieDtoList = moviePage.stream()
                     .filter(moviePredicate)
-                    .limit(filteringOptions.getLimit())
+                    .limit(maximumSize)
                     .map(movieDtoConverter::convert)
                     .toList();
 
@@ -110,7 +108,7 @@ public class MovieServiceImpl implements MovieService {
         List<MovieDto> movieDtoList = moviePage.stream()
                 .filter(moviePredicate)
                 .sorted(movieComparator)
-                .limit(filteringOptions.getLimit())
+                .limit(maximumSize)
                 .map(movieDtoConverter::convert)
                 .toList();
 
@@ -179,14 +177,14 @@ public class MovieServiceImpl implements MovieService {
         boolean movieExists = movieRepository.existsById(id);
 
         if (!movieExists) {
-            throw new ResourceNotFound(String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE, id));
+            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE, id));
         }
 
         log.info(LogMessages.EXISTS, ResourceNames.MOVIE);
         movieRepository.deleteById(id);
         log.info(LogMessages.DELETED, ResourceNames.MOVIE);
 
-        return String.format(ResponseMessages.SUCCESS, ResourceNames.MOVIE, id, ActionNames.DELETED);
+        return String.format(ResponseMessages.SUCCESS, ResourceNames.MOVIE, id, ActionMessages.DELETED);
     }
 
     @Cacheable(value = "movies")
@@ -207,13 +205,10 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public List<MovieDto> searchMovies(String title) {
         log.info(LogMessages.STARTED, "searchMovies");
-        boolean isTitleFilled = StringUtils.isNotBlank(title);
-        List<Movie> movies = new ArrayList<>();
 
-        if (isTitleFilled) {
-            movies = movieRepository.findByTitleStartingWith(title);
-            log.info(LogMessages.FETCHED_ALL, ResourceNames.MOVIE);
-        }
+        List<Movie> movies = movieRepository.findByTitleStartingWith(title);
+        log.info(LogMessages.FETCHED_ALL, ResourceNames.MOVIE);
+
 
         return movies.stream()
                 .map(movieDtoConverter::convert)
@@ -224,7 +219,7 @@ public class MovieServiceImpl implements MovieService {
     public Movie findMovieById(Integer id) {
         log.info(LogMessages.STARTED, "findMovieById");
         return movieRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFound(String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE, id)));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE, id)));
     }
 
     @Override

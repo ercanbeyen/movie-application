@@ -14,7 +14,7 @@ import java.util.List;
 
 public interface DirectorService {
     DirectorDto createDirector(CreateDirectorRequest request);
-    PageDto<Director, DirectorDto> filterDirectors(DirectorFilteringOptions filteringOptions, OrderBy orderBy, Pageable pageable);
+    PageDto<Director, DirectorDto> filterDirectors(DirectorFilteringOptions filteringOptions, OrderBy orderBy, String limit, Pageable pageable);
     DirectorDto getDirector(Integer id);
     DirectorDto updateDirector(Integer id, UpdateDirectorRequest request);
     String deleteDirector(Integer id);

@@ -14,7 +14,7 @@ import java.util.List;
 
 public interface MovieService {
     MovieDto createMovie(CreateMovieRequest request);
-    PageDto<Movie, MovieDto> filterMovies(MovieFilteringOptions filteringOptions, OrderBy orderBy, Pageable pageable);
+    PageDto<Movie, MovieDto> filterMovies(MovieFilteringOptions filteringOptions, OrderBy orderBy, String limit, Pageable pageable);
     MovieDto getMovie(Integer id);
     MovieDto updateMovie(Integer id, UpdateMovieRequest request);
     String deleteMovie(Integer id);

@@ -14,7 +14,7 @@ import java.util.List;
 
 public interface ActorService {
     ActorDto createActor(CreateActorRequest request);
-    PageDto<Actor, ActorDto> filterActors(ActorFilteringOptions filteringOptions, OrderBy orderBy, Pageable pageable);
+    PageDto<Actor, ActorDto> filterActors(ActorFilteringOptions filteringOptions, OrderBy orderBy, String limit, Pageable pageable);
     ActorDto getActor(Integer id);
     ActorDto updateActor(Integer id, UpdateActorRequest request);
     String deleteActor(Integer id);

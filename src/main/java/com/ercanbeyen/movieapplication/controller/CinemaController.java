@@ -1,5 +1,6 @@
 package com.ercanbeyen.movieapplication.controller;
 
+import com.ercanbeyen.movieapplication.constant.defaults.DefaultValues;
 import com.ercanbeyen.movieapplication.document.Cinema;
 import com.ercanbeyen.movieapplication.dto.CinemaDto;
 import com.ercanbeyen.movieapplication.dto.option.filter.CinemaFilteringOptions;
@@ -31,9 +32,9 @@ public class CinemaController {
         return ResponseHandler.generateResponse(HttpStatus.CREATED, null, cinemaDto);
     }
 
-    @GetMapping
-    public ResponseEntity<?> filterCinemas(CinemaFilteringOptions filteringOptions, Pageable pageable) {
-        PageDto<Cinema, CinemaDto> cinemaDtoPage = cinemaService.filterCinemas(filteringOptions, pageable);
+    @GetMapping({"", "/filter"})
+    public ResponseEntity<?> filterCinemas(CinemaFilteringOptions filteringOptions, @RequestParam(required = false, defaultValue = DefaultValues.DEFAULT_LIMIT_VALUE) String limit, Pageable pageable, @RequestHeader(name = "Country", required = false) String country) {
+        PageDto<Cinema, CinemaDto> cinemaDtoPage = cinemaService.filterCinemas(filteringOptions, limit, pageable, country);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemaDtoPage);
     }
 

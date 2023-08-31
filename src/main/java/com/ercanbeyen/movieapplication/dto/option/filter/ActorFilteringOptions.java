@@ -7,5 +7,4 @@ public class ActorFilteringOptions {
     String nationality;
     Integer birthYear;
     Integer movieId;
-    Long limit;
 }

@@ -6,7 +6,6 @@ import lombok.Data;
 public class DirectorFilteringOptions {
     String nationality;
     Integer birthYear;
-    Long limit;
 
 
 }

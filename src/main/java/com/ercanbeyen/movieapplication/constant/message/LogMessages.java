@@ -8,7 +8,8 @@ public class LogMessages {
     public static final String DELETED = "{} is deleted";
     public static final String EXISTS = "{} exists";
     public static final String FIELDS_SET = "Fields are set";
-    public static final String PARAMETER_NULL = "Parameter {} is null";
+    public static final String REQUEST_PARAMETER_NULL = "Request parameter {} is null";
+    public static final String REQUEST_HEADER_FIELD_NULL = "Request header field {} is null";
     public static final String ORDER_BY_VALUE = "Value of orderBy is {}";
     public static final String TASK_STARTED = "Task for method {} is started";
     public static final String TASK_COMPLETED = "Task for method {} is completed";

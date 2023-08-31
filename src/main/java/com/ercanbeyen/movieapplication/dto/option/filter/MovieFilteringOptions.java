@@ -10,5 +10,4 @@ public class MovieFilteringOptions {
     String language;
     List<Genre> genres;
     Integer releaseYear;
-    Long limit;
 }

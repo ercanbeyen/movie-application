@@ -1,6 +1,7 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
 import com.ercanbeyen.movieapplication.constant.message.*;
+import com.ercanbeyen.movieapplication.constant.names.ParameterNames;
 import com.ercanbeyen.movieapplication.dto.CinemaDto;
 import com.ercanbeyen.movieapplication.dto.converter.CinemaDtoConverter;
 import com.ercanbeyen.movieapplication.dto.option.filter.CinemaFilteringOptions;
@@ -8,13 +9,14 @@ import com.ercanbeyen.movieapplication.dto.option.search.CinemaSearchOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateCinemaRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateCinemaRequest;
 import com.ercanbeyen.movieapplication.document.Cinema;
-import com.ercanbeyen.movieapplication.exception.ResourceNotFound;
+import com.ercanbeyen.movieapplication.exception.ResourceNotFoundException;
 import com.ercanbeyen.movieapplication.repository.CinemaRepository;
 import com.ercanbeyen.movieapplication.service.CinemaService;
 import com.ercanbeyen.movieapplication.dto.PageDto;
 import com.ercanbeyen.movieapplication.dto.SearchHitDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -117,14 +119,14 @@ public class CinemaServiceImpl implements CinemaService {
         boolean cinemaExists = cinemaRepository.existsById(id);
 
         if (!cinemaExists) {
-            throw new ResourceNotFound(String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE, id));
+            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE, id));
         }
 
         log.info(LogMessages.EXISTS, ResourceNames.CINEMA);
         cinemaRepository.deleteById(id);
         log.info(LogMessages.DELETED, ResourceNames.CINEMA);
 
-        return String.format(ResponseMessages.SUCCESS, ResourceNames.CINEMA, id, ActionNames.DELETED);
+        return String.format(ResponseMessages.SUCCESS, ResourceNames.CINEMA, id, ActionMessages.DELETED);
     }
 
     @Override
@@ -153,28 +155,31 @@ public class CinemaServiceImpl implements CinemaService {
     }
 
     @Override
-    public PageDto<Cinema, CinemaDto> filterCinemas(CinemaFilteringOptions filteringOptions, Pageable pageable) {
+    public PageDto<Cinema, CinemaDto> filterCinemas(CinemaFilteringOptions filteringOptions, String limit, Pageable pageable, String country) {
         log.info(LogMessages.STARTED, "filterCinemas");
 
         Page<Cinema> cinemaPage = cinemaRepository.findAll(pageable);
         log.info(LogMessages.FETCHED_ALL, ResourceNames.CINEMA);
 
-        Predicate<Cinema> cinemaPredicate = (cinema) -> ((filteringOptions.getCountry() == null || cinema.getCountry().equals(filteringOptions.getCountry()))
-                && (filteringOptions.getCity() == null || cinema.getCity().equals(filteringOptions.getCity()))
+        boolean isCountryBlank = StringUtils.isBlank(country);
+
+        if (isCountryBlank) {
+            log.info(LogMessages.REQUEST_HEADER_FIELD_NULL, "Country");
+        }
+
+        Predicate<Cinema> cinemaPredicate = (cinema) -> (isCountryBlank || cinema.getCountry().equals(country))
+                && (StringUtils.isBlank(filteringOptions.getCity()) || cinema.getCity().equals(filteringOptions.getCity()))
                 && (filteringOptions.getReservation_with_phone() == null || cinema.isReservation_with_phone() == filteringOptions.getReservation_with_phone())
                 && (filteringOptions.getThreeD_animation() == null || cinema.isThreeD_animation() == filteringOptions.getThreeD_animation())
                 && (filteringOptions.getParking_place() == null || cinema.isParking_place() == filteringOptions.getParking_place())
                 && (filteringOptions.getAir_conditioning() == null || cinema.isAir_conditioning() == filteringOptions.getAir_conditioning())
-                && (filteringOptions.getCafe_food() == null || cinema.isCafe_food() == filteringOptions.getCafe_food()));
+                && (filteringOptions.getCafe_food() == null || cinema.isCafe_food() == filteringOptions.getCafe_food());
 
-        if (filteringOptions.getLimit() == null) {
-            log.info(LogMessages.PARAMETER_NULL, ParameterNames.LIMIT);
-            filteringOptions.setLimit(cinemaRepository.count());
-        }
+        long maximumSize = Long.parseLong(limit);
 
         List<CinemaDto> cinemaDtoList = cinemaPage.stream()
                 .filter(cinemaPredicate)
-                .limit(filteringOptions.getLimit())
+                .limit(maximumSize)
                 .map(cinemaDtoConverter::convert)
                 .toList();
 
@@ -206,21 +211,21 @@ public class CinemaServiceImpl implements CinemaService {
 
     public List<SearchHitDto<CinemaDto, Cinema>> convertSearchHitList(List<SearchHit<Cinema>> searchHits) {
         log.info(LogMessages.STARTED, "convertSearchHitList");
-        List<SearchHitDto<CinemaDto, Cinema>> searchHitDtos = new ArrayList<>();
+        List<SearchHitDto<CinemaDto, Cinema>> searchHitDtoList = new ArrayList<>();
 
         searchHits.forEach(
                 searchHit -> {
                     CinemaDto cinemaDto = cinemaDtoConverter.convert(searchHit.getContent());
                     SearchHitDto<CinemaDto, Cinema> searchHitDto = new SearchHitDto<>(searchHit, cinemaDto);
-                    searchHitDtos.add(searchHitDto);
+                    searchHitDtoList.add(searchHitDto);
                 }
         );
 
-        return searchHitDtos;
+        return searchHitDtoList;
     }
 
     private Cinema findCinemaById(String id) {
         return cinemaRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFound(String.format(ResponseMessages.NOT_FOUND, ResourceNames.CINEMA, id)));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.CINEMA, id)));
     }
 }

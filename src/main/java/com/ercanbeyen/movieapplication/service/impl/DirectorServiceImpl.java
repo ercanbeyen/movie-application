@@ -2,6 +2,7 @@ package com.ercanbeyen.movieapplication.service.impl;
 
 import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
 import com.ercanbeyen.movieapplication.constant.message.*;
+import com.ercanbeyen.movieapplication.constant.names.ParameterNames;
 import com.ercanbeyen.movieapplication.dto.DirectorDto;
 import com.ercanbeyen.movieapplication.dto.Statistics;
 import com.ercanbeyen.movieapplication.dto.converter.DirectorDtoConverter;
@@ -9,7 +10,7 @@ import com.ercanbeyen.movieapplication.dto.option.filter.DirectorFilteringOption
 import com.ercanbeyen.movieapplication.dto.request.create.CreateDirectorRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateDirectorRequest;
 import com.ercanbeyen.movieapplication.entity.Director;
-import com.ercanbeyen.movieapplication.exception.ResourceNotFound;
+import com.ercanbeyen.movieapplication.exception.ResourceNotFoundException;
 import com.ercanbeyen.movieapplication.repository.DirectorRepository;
 import com.ercanbeyen.movieapplication.service.DirectorService;
 import com.ercanbeyen.movieapplication.dto.PageDto;
@@ -53,7 +54,7 @@ public class DirectorServiceImpl implements DirectorService {
     }
 
     @Override
-    public PageDto<Director, DirectorDto> filterDirectors(DirectorFilteringOptions filteringOptions, OrderBy orderBy, Pageable pageable) {
+    public PageDto<Director, DirectorDto> filterDirectors(DirectorFilteringOptions filteringOptions, OrderBy orderBy, String limit, Pageable pageable) {
         log.info(LogMessages.STARTED, "filterDirectors");
         Page<Director> directorPage = directorRepository.findAll(pageable);
         log.info(LogMessages.FETCHED_ALL, ResourceNames.DIRECTOR);
@@ -61,17 +62,14 @@ public class DirectorServiceImpl implements DirectorService {
         Predicate<Director> directorPredicate = (director) -> ((StringUtils.isBlank(filteringOptions.getNationality()) || director.getNationality().equals(filteringOptions.getNationality()))
                 && (filteringOptions.getBirthYear() == null || director.getBirthYear().getYear() == filteringOptions.getBirthYear()));
 
-        if (filteringOptions.getLimit() == null) {
-            log.info(LogMessages.PARAMETER_NULL, ParameterNames.LIMIT);
-            filteringOptions.setLimit(directorRepository.count());
-        }
+        long maximumSize = Long.parseLong(limit);
 
         if (orderBy == null) {
-            log.info(LogMessages.PARAMETER_NULL, ParameterNames.ORDER_BY);
+            log.info(LogMessages.REQUEST_PARAMETER_NULL, ParameterNames.ORDER_BY);
 
             List<DirectorDto> directorDtoList = directorPage.stream()
                     .filter(directorPredicate)
-                    .limit(filteringOptions.getLimit())
+                    .limit(maximumSize)
                     .map(directorDtoConverter::convert)
                     .toList();
 
@@ -89,7 +87,7 @@ public class DirectorServiceImpl implements DirectorService {
         List<DirectorDto> directorList = directorPage.stream()
                 .filter(directorPredicate)
                 .sorted(directorComparator)
-                .limit(filteringOptions.getLimit())
+                .limit(maximumSize)
                 .map(directorDtoConverter::convert)
                 .toList();
 
@@ -134,14 +132,14 @@ public class DirectorServiceImpl implements DirectorService {
         boolean directorExists = directorRepository.existsById(id);
 
         if (!directorExists) {
-            throw new ResourceNotFound(String.format(ResponseMessages.NOT_FOUND, ResourceNames.DIRECTOR, id));
+            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.DIRECTOR, id));
         }
 
         log.info(LogMessages.EXISTS, ResourceNames.DIRECTOR);
         directorRepository.deleteById(id);
         log.info(LogMessages.DELETED, ResourceNames.DIRECTOR);
 
-        return String.format(ResponseMessages.SUCCESS, ResourceNames.DIRECTOR, id, ActionNames.DELETED);
+        return String.format(ResponseMessages.SUCCESS, ResourceNames.DIRECTOR, id, ActionMessages.DELETED);
     }
 
     @Cacheable(value = "directors")
@@ -175,7 +173,7 @@ public class DirectorServiceImpl implements DirectorService {
     public Director findDirectorById(Integer id) {
         log.info(LogMessages.STARTED, "findDirectorById");
         return directorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFound(String.format(ResponseMessages.NOT_FOUND, ResourceNames.DIRECTOR, id)));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.DIRECTOR, id)));
     }
 
     @Override

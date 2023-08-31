@@ -1,5 +1,6 @@
 package com.ercanbeyen.movieapplication.controller;
 
+import com.ercanbeyen.movieapplication.constant.defaults.DefaultValues;
 import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
 import com.ercanbeyen.movieapplication.dto.MovieDto;
 import com.ercanbeyen.movieapplication.dto.option.filter.MovieFilteringOptions;
@@ -31,9 +32,9 @@ public class MovieController {
         return ResponseHandler.generateResponse(HttpStatus.CREATED, null, movieDto);
     }
 
-    @GetMapping
-    public ResponseEntity<?> filterMovies(MovieFilteringOptions movieFilteringOptions, @RequestParam(required = false) OrderBy orderBy, Pageable pageable) {
-        PageDto<Movie, MovieDto> movieDtoList = movieService.filterMovies(movieFilteringOptions, orderBy, pageable);
+    @GetMapping({"", "/filter"})
+    public ResponseEntity<?> filterMovies(MovieFilteringOptions movieFilteringOptions, @RequestParam(required = false) OrderBy orderBy, @RequestParam(required = false, defaultValue = DefaultValues.DEFAULT_LIMIT_VALUE) String limit, Pageable pageable) {
+        PageDto<Movie, MovieDto> movieDtoList = movieService.filterMovies(movieFilteringOptions, orderBy, limit, pageable);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDtoList);
     }
 
@@ -63,7 +64,7 @@ public class MovieController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<?> searchMovies(@RequestParam(required = false) String title) {
+    public ResponseEntity<?> searchMovies(@RequestParam String title) {
         List<MovieDto> movieDtoList = movieService.searchMovies(title);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDtoList);
     }

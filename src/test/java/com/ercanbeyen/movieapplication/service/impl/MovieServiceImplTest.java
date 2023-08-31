@@ -1,6 +1,6 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
-import com.ercanbeyen.movieapplication.constant.message.ActionNames;
+import com.ercanbeyen.movieapplication.constant.message.ActionMessages;
 import com.ercanbeyen.movieapplication.constant.message.ResourceNames;
 import com.ercanbeyen.movieapplication.constant.message.ResponseMessages;
 import com.ercanbeyen.movieapplication.dto.MovieDto;
@@ -12,7 +12,7 @@ import com.ercanbeyen.movieapplication.entity.Actor;
 import com.ercanbeyen.movieapplication.entity.Director;
 import com.ercanbeyen.movieapplication.entity.Movie;
 import com.ercanbeyen.movieapplication.constant.enums.Genre;
-import com.ercanbeyen.movieapplication.exception.ResourceNotFound;
+import com.ercanbeyen.movieapplication.exception.ResourceNotFoundException;
 import com.ercanbeyen.movieapplication.repository.MovieRepository;
 import com.ercanbeyen.movieapplication.dto.PageDto;
 import org.junit.jupiter.api.BeforeEach;
@@ -167,7 +167,7 @@ public class MovieServiceImplTest {
 
         when(movieRepository.findById(id)).thenReturn(movieOptional);
 
-        RuntimeException exception = assertThrows(ResourceNotFound.class, () -> movieService.getMovie(id));
+        RuntimeException exception = assertThrows(ResourceNotFoundException.class, () -> movieService.getMovie(id));
         String expected = exception.getMessage();
 
         String actual = String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE, id);
@@ -197,7 +197,7 @@ public class MovieServiceImplTest {
         MovieFilteringOptions movieFilteringOptions = new MovieFilteringOptions();
         movieFilteringOptions.setLanguage(movieList.get(0).getLanguage());
 
-        PageDto<Movie, MovieDto> actual = movieService.filterMovies(movieFilteringOptions, null, pageable);
+        PageDto<Movie, MovieDto> actual = movieService.filterMovies(movieFilteringOptions, null, null, pageable);
 
         assertEquals(expected, actual);
 
@@ -251,7 +251,7 @@ public class MovieServiceImplTest {
 
         when(movieRepository.findById(id)).thenReturn(movieOptional);
 
-        RuntimeException exception = assertThrows(ResourceNotFound.class, () -> movieService.updateMovie(id, request));
+        RuntimeException exception = assertThrows(ResourceNotFoundException.class, () -> movieService.updateMovie(id, request));
         String actual = exception.getMessage();
 
         assertEquals(expected, actual);
@@ -267,7 +267,7 @@ public class MovieServiceImplTest {
         Movie movie = movieList.get(0);
         int id = movie.getId();
 
-        String expected = String.format(ResponseMessages.SUCCESS, ResourceNames.MOVIE, id, ActionNames.DELETED);
+        String expected = String.format(ResponseMessages.SUCCESS, ResourceNames.MOVIE, id, ActionMessages.DELETED);
 
         when(movieRepository.existsById(id)).thenReturn(true);
 
@@ -288,7 +288,7 @@ public class MovieServiceImplTest {
 
         when(movieRepository.existsById(id)).thenReturn(false);
 
-        RuntimeException exception = assertThrows(ResourceNotFound.class, () -> movieService.deleteMovie(id));
+        RuntimeException exception = assertThrows(ResourceNotFoundException.class, () -> movieService.deleteMovie(id));
         String actual = exception.getMessage();
 
         assertEquals(expected, actual);

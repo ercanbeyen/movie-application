@@ -2,13 +2,14 @@ package com.ercanbeyen.movieapplication.service.impl;
 
 import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
 import com.ercanbeyen.movieapplication.constant.message.*;
+import com.ercanbeyen.movieapplication.constant.names.ParameterNames;
 import com.ercanbeyen.movieapplication.dto.ActorDto;
 import com.ercanbeyen.movieapplication.dto.converter.ActorDtoConverter;
 import com.ercanbeyen.movieapplication.dto.option.filter.ActorFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateActorRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateActorRequest;
 import com.ercanbeyen.movieapplication.entity.Actor;
-import com.ercanbeyen.movieapplication.exception.ResourceNotFound;
+import com.ercanbeyen.movieapplication.exception.ResourceNotFoundException;
 import com.ercanbeyen.movieapplication.repository.ActorRepository;
 import com.ercanbeyen.movieapplication.service.ActorService;
 import com.ercanbeyen.movieapplication.dto.PageDto;
@@ -54,7 +55,7 @@ public class ActorServiceImpl implements ActorService {
     }
 
     @Override
-    public PageDto<Actor, ActorDto> filterActors(ActorFilteringOptions filteringOptions, OrderBy orderBy, Pageable pageable) {
+    public PageDto<Actor, ActorDto> filterActors(ActorFilteringOptions filteringOptions, OrderBy orderBy, String limit, Pageable pageable) {
         log.info(LogMessages.STARTED, "filterActors");
         Page<Actor> actorPage = actorRepository.findAll(pageable);
         log.info(LogMessages.FETCHED_ALL, ResourceNames.ACTOR);
@@ -62,17 +63,14 @@ public class ActorServiceImpl implements ActorService {
         Predicate<Actor> actorPredicate = (actor) -> ((filteringOptions.getMovieId() == null || filteringOptions.getMovieId().intValue() == filteringOptions.getMovieId().intValue())) && (StringUtils.isBlank(filteringOptions.getNationality()) || actor.getNationality().equals(filteringOptions.getNationality()))
                 && (filteringOptions.getBirthYear() == null || actor.getBirthYear().getYear() == filteringOptions.getBirthYear());
 
-        if (filteringOptions.getLimit() == null) {
-            log.info(LogMessages.PARAMETER_NULL, ParameterNames.LIMIT);
-            filteringOptions.setLimit(actorRepository.count());
-        }
+        long maximumSize = Long.parseLong(limit);
 
         if (orderBy == null) {
-            log.info(LogMessages.PARAMETER_NULL, ParameterNames.ORDER_BY);
+            log.info(LogMessages.REQUEST_PARAMETER_NULL, ParameterNames.ORDER_BY);
 
             List<ActorDto> actorDtoList = actorPage.stream()
                     .filter(actorPredicate)
-                    .limit(filteringOptions.getLimit())
+                    .limit(maximumSize)
                     .map(actorDtoConverter::convert)
                     .toList();
 
@@ -89,7 +87,7 @@ public class ActorServiceImpl implements ActorService {
         List<ActorDto> actorDtoList = actorPage.stream()
                 .filter(actorPredicate)
                 .sorted(actorComparator)
-                .limit(filteringOptions.getLimit())
+                .limit(maximumSize)
                 .map(actorDtoConverter::convert)
                 .toList();
 
@@ -132,14 +130,14 @@ public class ActorServiceImpl implements ActorService {
         boolean actorExists = actorRepository.existsById(id);
 
         if (!actorExists) {
-            throw new ResourceNotFound(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ACTOR, id));
+            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ACTOR, id));
         }
 
         log.info(LogMessages.EXISTS, ResourceNames.ACTOR);
         actorRepository.deleteById(id);
         log.info(LogMessages.DELETED, ResourceNames.ACTOR);
 
-        return String.format(ResponseMessages.SUCCESS, ResourceNames.ACTOR, id, ActionNames.DELETED);
+        return String.format(ResponseMessages.SUCCESS, ResourceNames.ACTOR, id, ActionMessages.DELETED);
     }
 
     @Cacheable(value = "actors")
@@ -172,11 +170,11 @@ public class ActorServiceImpl implements ActorService {
     public Actor findActorById(Integer id) {
         log.info(LogMessages.STARTED, "findActorById");
         return actorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFound(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ACTOR, id)));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ACTOR, id)));
     }
 
     private Actor getActorById(Integer id) {
         return actorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFound(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ACTOR, id)));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ACTOR, id)));
     }
 }
