@@ -1,9 +1,11 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
+import com.ercanbeyen.movieapplication.constant.defaults.DefaultValues;
 import com.ercanbeyen.movieapplication.constant.message.ActionMessages;
 import com.ercanbeyen.movieapplication.constant.names.ResourceNames;
 import com.ercanbeyen.movieapplication.constant.message.ResponseMessages;
 import com.ercanbeyen.movieapplication.dto.MovieDto;
+import com.ercanbeyen.movieapplication.dto.Statistics;
 import com.ercanbeyen.movieapplication.dto.converter.MovieDtoConverter;
 import com.ercanbeyen.movieapplication.dto.option.filter.MovieFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateMovieRequest;
@@ -108,7 +110,7 @@ public class MovieServiceImplTest {
     }
 
     @Test
-    @DisplayName("When CreateMovie Called With Valid Request It Should Return MovieDto")
+    @DisplayName("When createMovie Called With Valid Request It Should Return MovieDto")
     public void whenCreateMovieCalledWithValidRequest_itShouldReturnMovieDto() {
         Movie movie = movieList.get(0);
         MovieDto expected = movieDtoList.get(0);
@@ -139,7 +141,7 @@ public class MovieServiceImplTest {
 
 
     @Test
-    @DisplayName("When GetMovie Called With Existed Id It Should Return MovieDto")
+    @DisplayName("When getMovie Called With Existed Id It Should Return MovieDto")
     public void whenGetMovieCalledExistedId_itShouldReturnMovieDto() {
         Movie movie = movieList.get(0);
         int id = movie.getId();
@@ -160,7 +162,7 @@ public class MovieServiceImplTest {
     }
 
     @Test
-    @DisplayName("When GetMovie Called With Not Existed Id It Should Throw ResourceNotFoundException")
+    @DisplayName("When getMovie Called With Not Existed Id It Should Throw ResourceNotFoundException")
     public void whenGetMovieCalledWithNotExistedId_itShouldThrowResourceNotFoundException() {
         int id = 15;
         Optional<Movie> movieOptional = Optional.empty();
@@ -180,8 +182,8 @@ public class MovieServiceImplTest {
     }
 
     @Test
-    @DisplayName("When Get Movies Called With Parameters It Should Return MovieDto List")
-    public void whenGetMoviesCalledWithParameters_itShouldReturnMovieDto() {
+    @DisplayName("When filterMovies Called With Parameters It Should Return MovieDto List")
+    public void whenFilterMoviesCalledWithParameters_itShouldReturnMovieDto() {
         Pageable pageable = Pageable.ofSize(1).withPage(0);
 
         List<Movie> fetchedMovieList = Collections.singletonList(movieList.get(0));
@@ -191,23 +193,21 @@ public class MovieServiceImplTest {
         PageDto<Movie, MovieDto> expected = new PageDto<>(moviePage, fetchedMovieDtoList);
 
         when(movieRepository.findAll(pageable)).thenReturn(moviePage);
-        when(movieRepository.count()).thenReturn(Long.valueOf(movieList.size()));
         when(movieDtoConverter.convert(movieList.get(0))).thenReturn(movieDtoList.get(0));
 
         MovieFilteringOptions movieFilteringOptions = new MovieFilteringOptions();
         movieFilteringOptions.setLanguage(movieList.get(0).getLanguage());
 
-        PageDto<Movie, MovieDto> actual = movieService.filterMovies(movieFilteringOptions, null, null, pageable);
+        PageDto<Movie, MovieDto> actual = movieService.filterMovies(movieFilteringOptions, null, DefaultValues.DEFAULT_LIMIT_VALUE, pageable);
 
         assertEquals(expected, actual);
 
         verify(movieRepository, times(1)).findAll(pageable);
-        verify(movieRepository, times(1)).count();
         verify(movieDtoConverter, times(1)).convert(any(Movie.class));
     }
 
     @Test
-    @DisplayName("When UpdateMovie Called With Existed Id And Valid Request It Should Return MovieDto")
+    @DisplayName("When updateMovie Called With Existed Id And Valid Request It Should Return MovieDto")
     public void whenUpdateMovieCalledWithExistedIdAndValidRequest_itShouldReturnMovieDto() {
         Movie movie = movieList.get(0);
         MovieDto expected = movieDtoList.get(1);
@@ -236,7 +236,7 @@ public class MovieServiceImplTest {
     }
 
     @Test
-    @DisplayName("When UpdateMovie Called With Not Existed Id It Should Throw ResourceNotFoundException")
+    @DisplayName("When updateMovie Called With Not Existed Id It Should Throw ResourceNotFoundException")
     public void whenUpdateMovieCalledWithNotExistedId_itShouldThrowResourceNotFoundException() {
         int id = 15;
         Optional<Movie> movieOptional = Optional.empty();
@@ -262,7 +262,7 @@ public class MovieServiceImplTest {
     }
 
     @Test
-    @DisplayName("When DeleteMovie Called With Existed Id It Should Return Message")
+    @DisplayName("When deleteMovie Called With Existed Id It Should Return Message")
     public void whenDeleteMovieCalledWithExistedId_itShouldReturnMessage() {
         Movie movie = movieList.get(0);
         int id = movie.getId();
@@ -280,7 +280,7 @@ public class MovieServiceImplTest {
     }
 
     @Test
-    @DisplayName("When DeleteMovie Called With Not Existed Id It_Should Throw ResourceNotFoundException")
+    @DisplayName("When deleteMovie Called With Not Existed Id It_Should Throw ResourceNotFoundException")
     public void whenDeleteMovieCalledWithNotExistedId_itShouldThrowResourceNotFoundException() {
         int id = 15;
 
@@ -298,7 +298,7 @@ public class MovieServiceImplTest {
     }
 
     @Test
-    @DisplayName("When GetLatestMovies Called It Should Return The MovieDto List")
+    @DisplayName("When getLatestMovies Called It Should Return The MovieDto List")
     public void whenGetLatestMoviesCalled_itShouldReturnTheMovieDtoList() {
         List<MovieDto> expected = Collections.singletonList(movieDtoList.get(0));
 
@@ -314,7 +314,7 @@ public class MovieServiceImplTest {
     }
 
     @Test
-    @DisplayName("When SearchMovies Called With Parameters It Should Return The MovieDto List")
+    @DisplayName("When searchMovies Called With Parameters It Should Return The MovieDto List")
     public void whenSearchMoviesCalledWithParameters_itShouldReturnTheMovieDtoList() {
         Movie movie = movieList.get(0);
         List<Movie> moviesList = Collections.singletonList(movie);
@@ -333,4 +333,25 @@ public class MovieServiceImplTest {
         verify(movieDtoConverter, times(1)).convert(any(Movie.class));
     }
 
+    @Test
+    @DisplayName("When calculateStatistics Called It Should Return Statistics")
+    public void whenCalculateStatisticsCalled_itShouldReturnStatistics() {
+        Statistics<String, String> expected = new Statistics<>();
+        expected.setTopic(ResourceNames.MOVIE);
+
+        String key = "mostRatedMovie";
+
+        Map<String, String> statisticsMap = new HashMap<>();
+        statisticsMap.put(key, movieList.get(0).getTitle());
+
+        expected.setResult(statisticsMap);
+
+        when(movieRepository.findAll()).thenReturn(movieList);
+
+        Statistics<String, String> actual = movieService.calculateStatistics();
+
+        assertEquals(expected.getResult().get(key), actual.getResult().get(key));
+
+        verify(movieRepository, times(1)).findAll();
+    }
 }
