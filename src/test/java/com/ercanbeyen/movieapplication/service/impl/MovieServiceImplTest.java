@@ -1,7 +1,7 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
 import com.ercanbeyen.movieapplication.constant.message.ActionMessages;
-import com.ercanbeyen.movieapplication.constant.message.ResourceNames;
+import com.ercanbeyen.movieapplication.constant.names.ResourceNames;
 import com.ercanbeyen.movieapplication.constant.message.ResponseMessages;
 import com.ercanbeyen.movieapplication.dto.MovieDto;
 import com.ercanbeyen.movieapplication.dto.converter.MovieDtoConverter;

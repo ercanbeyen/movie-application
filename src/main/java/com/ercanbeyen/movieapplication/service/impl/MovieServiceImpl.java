@@ -3,6 +3,7 @@ package com.ercanbeyen.movieapplication.service.impl;
 import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
 import com.ercanbeyen.movieapplication.constant.message.*;
 import com.ercanbeyen.movieapplication.constant.names.ParameterNames;
+import com.ercanbeyen.movieapplication.constant.names.ResourceNames;
 import com.ercanbeyen.movieapplication.dto.MovieDto;
 import com.ercanbeyen.movieapplication.dto.converter.MovieDtoConverter;
 import com.ercanbeyen.movieapplication.dto.option.filter.MovieFilteringOptions;
@@ -19,6 +20,7 @@ import com.ercanbeyen.movieapplication.service.MovieService;
 import com.ercanbeyen.movieapplication.dto.PageDto;
 import com.ercanbeyen.movieapplication.dto.Statistics;
 import com.ercanbeyen.movieapplication.util.StatisticsUtil;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -50,9 +52,9 @@ public class MovieServiceImpl implements MovieService {
 
         if (request.getDirectorId() != null) {
             director = directorService.findDirectorById(request.getDirectorId());
-            log.info(LogMessages.DIRECTOR_FOUND, request.getDirectorId());
+            log.info(LogMessages.RESOURCE_FOUND);
         } else {
-            log.warn(LogMessages.DIRECTOR_SEARCH_SKIPPED);
+            log.warn(LogMessages.SEARCH_SKIPPED, ResourceNames.DIRECTOR);
         }
 
         Movie newMovie = Movie.builder()
@@ -125,37 +127,39 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @CacheEvict(value = "movies", allEntries = true)
+    @Transactional
     @Override
     public MovieDto updateMovie(Integer id, UpdateMovieRequest request) {
         log.info(LogMessages.STARTED, "updateMovie");
 
-        Set<Actor> actorIds = new HashSet<>();
-
-        if (request.getActorIds() != null) {
-            for (Integer actorId : request.getActorIds()) {
-                Actor actorInDb = actorService.findActorById(actorId);
-                actorIds.add(actorInDb);
-            }
-        } else {
-            log.warn("actorIds list is null. So empty list is going to be used");
-        }
-
-        Director director = null;
-
-        if (request.getDirectorId() != null) {
-            director = directorService.findDirectorById(request.getDirectorId());
-            log.info(LogMessages.DIRECTOR_FOUND, request.getDirectorId());
-        } else {
-            log.warn(LogMessages.DIRECTOR_SEARCH_SKIPPED);
-        }
-
         Movie movieInDb = findMovieById(id);
         log.info(LogMessages.FETCHED, ResourceNames.MOVIE);
 
+        if (request.getDirectorId() != null) {
+            Director director = directorService.findDirectorById(request.getDirectorId());
+            movieInDb.setDirector(director);
+            log.info(LogMessages.RESOURCE_FOUND);
+        } else {
+            log.warn(LogMessages.SEARCH_SKIPPED, ResourceNames.DIRECTOR);
+        }
+
+        movieInDb.getActors().clear();
+
+        if (request.getActorIds() != null) {
+            Set<Actor> actorSet = new HashSet<>();
+            for (Integer actorId : request.getActorIds()) {
+                Actor actorInDb = actorService.findActorById(actorId);
+                actorInDb.getMoviesPlayed().add(movieInDb);
+                actorSet.add(actorInDb);
+                log.info(LogMessages.RESOURCE_FOUND);
+            }
+
+            movieInDb.setActors(actorSet);
+        } else {
+            log.warn(LogMessages.SEARCH_SKIPPED, ResourceNames.ACTOR);
+        }
 
         movieInDb.setTitle(request.getTitle());
-        movieInDb.setDirector(director);
-        movieInDb.setActors(actorIds);
         movieInDb.setGenre(request.getGenre());
         movieInDb.setLanguage(request.getLanguage());
         movieInDb.setReleaseYear(request.getReleaseYear());
@@ -227,7 +231,7 @@ public class MovieServiceImpl implements MovieService {
         log.info(LogMessages.STARTED, LogMessages.CALCULATE_STATISTICS);
         Statistics<String, String> statistics = new Statistics<>();
 
-        statistics.setTopic("Movie");
+        statistics.setTopic(ResourceNames.MOVIE);
 
         Map<String, String> statisticsMap = new HashMap<>();
         List<Movie> movieList = movieRepository.findAll();

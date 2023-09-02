@@ -9,5 +9,5 @@ import java.util.Set;
 @Getter
 @Setter
 public class UpdateActorRequest extends BaseActorRequest {
-    private Set<Integer> moviesPlayed;
+
 }

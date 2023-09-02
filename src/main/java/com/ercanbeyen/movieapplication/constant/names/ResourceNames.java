@@ -1,4 +1,4 @@
-package com.ercanbeyen.movieapplication.constant.message;
+package com.ercanbeyen.movieapplication.constant.names;
 
 public class ResourceNames {
     public static final String MOVIE = "Movie";

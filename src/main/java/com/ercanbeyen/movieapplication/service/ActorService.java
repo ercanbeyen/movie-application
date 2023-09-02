@@ -2,6 +2,7 @@ package com.ercanbeyen.movieapplication.service;
 
 import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
 import com.ercanbeyen.movieapplication.dto.ActorDto;
+import com.ercanbeyen.movieapplication.dto.Statistics;
 import com.ercanbeyen.movieapplication.dto.option.filter.ActorFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateActorRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateActorRequest;
@@ -21,4 +22,5 @@ public interface ActorService {
     List<ActorDto> getMostPopularActors();
     List<ActorDto> searchActors(String fullName);
     Actor findActorById(Integer id);
+
 }

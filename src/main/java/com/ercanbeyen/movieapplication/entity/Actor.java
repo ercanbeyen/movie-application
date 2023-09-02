@@ -18,15 +18,6 @@ public class Actor extends Base {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "actors_movies",
-            joinColumns = {
-                    @JoinColumn(name = "actor_id")
-            },
-            inverseJoinColumns = {
-                    @JoinColumn(name = "movie_id")
-            }
-    )
+    @ManyToMany(mappedBy = "actors", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Set<Movie> moviesPlayed = new HashSet<>();
 }

@@ -3,6 +3,7 @@ package com.ercanbeyen.movieapplication.service.impl;
 import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
 import com.ercanbeyen.movieapplication.constant.message.*;
 import com.ercanbeyen.movieapplication.constant.names.ParameterNames;
+import com.ercanbeyen.movieapplication.constant.names.ResourceNames;
 import com.ercanbeyen.movieapplication.dto.DirectorDto;
 import com.ercanbeyen.movieapplication.dto.Statistics;
 import com.ercanbeyen.movieapplication.dto.converter.DirectorDtoConverter;
@@ -181,7 +182,7 @@ public class DirectorServiceImpl implements DirectorService {
         log.info(LogMessages.STARTED, LogMessages.CALCULATE_STATISTICS);
 
         Statistics<String, String> statistics = new Statistics<>();
-        statistics.setTopic("Director");
+        statistics.setTopic(ResourceNames.DIRECTOR);
 
         Map<String, String> statisticsMap = new HashMap<>();
         List<Director> directorList = directorRepository.findAll();

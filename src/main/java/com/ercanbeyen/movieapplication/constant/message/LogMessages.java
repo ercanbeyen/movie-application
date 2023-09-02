@@ -20,7 +20,7 @@ public class LogMessages {
     public static final String RESPONSE_DISPLAYED = "Response: {}";
     public static final String REST_TEMPLATE_CLIENT_EXCEPTION = "Rest Template exception. Exception: {}";
     public static final String UNKNOWN_EXCEPTION = "Unknown exception. Exception: {}";
-    public static final String DIRECTOR_FOUND = "Director {} is found";
-    public static final String DIRECTOR_SEARCH_SKIPPED = "Director id is null. So findDirectorById method is skipped";
+    public static final String RESOURCE_FOUND = "Resource is found";
+    public static final String SEARCH_SKIPPED = "{} id is null. So findById method is skipped";
     public static final String CALCULATE_STATISTICS = "calculateStatistics";
 }
