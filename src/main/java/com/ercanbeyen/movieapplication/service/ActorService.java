@@ -22,5 +22,5 @@ public interface ActorService {
     List<ActorDto> getMostPopularActors();
     List<ActorDto> searchActors(String fullName);
     Actor findActorById(Integer id);
-
+    Statistics<String, String> calculateStatistics();
 }

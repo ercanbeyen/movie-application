@@ -173,6 +173,31 @@ public class ActorServiceImpl implements ActorService {
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ACTOR, id)));
     }
 
+    @Override
+    public Statistics<String, String> calculateStatistics() {
+        log.info(LogMessages.STARTED, LogMessages.CALCULATE_STATISTICS);
+
+        Statistics<String, String> statistics = new Statistics<>();
+        statistics.setTopic(ResourceNames.ACTOR);
+
+        Map<String, String> statisticsMap = new HashMap<>();
+        List<Actor> actorList = actorRepository.findAll();
+
+        DoubleSummaryStatistics summaryStatistics = actorList.stream()
+                .mapToDouble(actor -> actor.getMoviesPlayed().size())
+                .summaryStatistics();
+
+        statisticsMap.put("mostPlayedCount", String.valueOf(summaryStatistics.getMax()));
+        statisticsMap.put("leastPlayedCount", String.valueOf(summaryStatistics.getMin()));
+        statisticsMap.put("playedMovieSum", String.valueOf(summaryStatistics.getSum()));
+        statisticsMap.put("playedMovieAverage", String.valueOf(summaryStatistics.getAverage()));
+        statisticsMap.put("playerCount", String.valueOf(summaryStatistics.getCount()));
+
+        statistics.setResult(statisticsMap);
+
+        return statistics;
+    }
+
     private Actor getActorById(Integer id) {
         return actorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ACTOR, id)));

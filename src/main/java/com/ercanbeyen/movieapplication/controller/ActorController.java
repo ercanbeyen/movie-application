@@ -3,6 +3,7 @@ package com.ercanbeyen.movieapplication.controller;
 import com.ercanbeyen.movieapplication.constant.defaults.DefaultValues;
 import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
 import com.ercanbeyen.movieapplication.dto.ActorDto;
+import com.ercanbeyen.movieapplication.dto.Statistics;
 import com.ercanbeyen.movieapplication.dto.option.filter.ActorFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateActorRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateActorRequest;
@@ -65,6 +66,12 @@ public class ActorController {
     public ResponseEntity<?> searchActors(@RequestParam String fullName) {
         List<ActorDto> actorDtoList = actorService.searchActors(fullName);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, actorDtoList);
+    }
+
+    @GetMapping("/statistics")
+    public ResponseEntity<?> calculateStatistics() {
+        Statistics<String, String> statistics = actorService.calculateStatistics();
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, statistics);
     }
 
 }
