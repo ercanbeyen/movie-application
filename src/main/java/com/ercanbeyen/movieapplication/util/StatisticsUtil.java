@@ -27,7 +27,7 @@ public class StatisticsUtil {
         Map<T, Integer> occurrenceMap = calculateOccurrenceMap(itemList);
 
         T maximumItem = null;
-        Integer maximumOccurrence = 0;
+        Integer maximumOccurrence = Integer.MIN_VALUE;
 
         for (T item : occurrenceMap.keySet()) {
             if (occurrenceMap.get(item) > maximumOccurrence) {

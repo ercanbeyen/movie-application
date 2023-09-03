@@ -3,6 +3,7 @@ package com.ercanbeyen.movieapplication.scheduler;
 import com.ercanbeyen.movieapplication.constant.enums.Genre;
 import com.ercanbeyen.movieapplication.constant.message.LogMessages;
 import com.ercanbeyen.movieapplication.dto.MovieDto;
+import com.ercanbeyen.movieapplication.dto.Statistics;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateMovieRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateMovieRequest;
 import com.ercanbeyen.movieapplication.entity.Movie;
@@ -91,7 +92,7 @@ public class ScheduledTasks {
         log.info(LogMessages.TASK_COMPLETED, checkedMethod);
     }
 
-    @Scheduled(cron = "0/15 * * * * *") // Every 15 seconds
+    @Scheduled(cron = "*/15 * * * * *") // Every 15 seconds
     public void checkForGetMovie() {
         final String checkedMethod = "getMovie";
         log.info(LogMessages.TASK_STARTED, checkedMethod);
@@ -149,7 +150,7 @@ public class ScheduledTasks {
         log.info(LogMessages.TASK_COMPLETED, checkedMethod);
     }
 
-    @Scheduled(cron = "0 0/2 * * * *") // Every 2 minutes
+    @Scheduled(cron = "0 */2 * * * *") // Every 2 minutes
     public void checkForDelete() {
         final String checkedMethod = "deleteMovie";
         log.info(LogMessages.TASK_STARTED, checkedMethod);
@@ -164,6 +165,29 @@ public class ScheduledTasks {
             log.info(LogMessages.SUCCESS);
         } catch (RestClientException exception) {
             log.error(LogMessages.REST_TEMPLATE_CLIENT_EXCEPTION, exception.getMessage());
+        } catch (Exception exception) {
+            log.error(LogMessages.UNKNOWN_EXCEPTION, exception.getMessage());
+        } finally {
+            log.info(LogMessages.FINALLY);
+        }
+
+        log.info(LogMessages.AFTER_REQUEST);
+        log.info(LogMessages.TASK_COMPLETED, checkedMethod);
+    }
+
+    @Scheduled(cron = "0 0 0 1 * ?") // Every first day of the month
+    public void checkForCalculateStatistics() {
+        final String checkedMethod = "calculateStatistics";
+        log.info(LogMessages.TASK_STARTED, checkedMethod);
+
+        log.info(LogMessages.BEFORE_REQUEST);
+
+        try {
+            Map<String, Statistics<String, String>> response = restTemplate.getForObject(
+                    COLLECTION_URI + "/statistics", HashMap.class
+            );
+            log.info(LogMessages.SUCCESS);
+            log.info(LogMessages.RESPONSE_DISPLAYED, response);
         } catch (Exception exception) {
             log.error(LogMessages.UNKNOWN_EXCEPTION, exception.getMessage());
         } finally {
