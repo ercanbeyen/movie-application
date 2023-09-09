@@ -3,6 +3,7 @@ package com.ercanbeyen.movieapplication.controller;
 import com.ercanbeyen.movieapplication.constant.defaults.DefaultValues;
 import com.ercanbeyen.movieapplication.document.Cinema;
 import com.ercanbeyen.movieapplication.dto.CinemaDto;
+import com.ercanbeyen.movieapplication.dto.Statistics;
 import com.ercanbeyen.movieapplication.dto.option.filter.CinemaFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.option.search.CinemaSearchOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateCinemaRequest;
@@ -81,4 +82,11 @@ public class CinemaController {
         List<CinemaDto> cinemaDtoList = cinemaService.findCinemasByHallRange(lower, higher);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemaDtoList);
     }
+
+    @GetMapping("/statistics")
+    public ResponseEntity<?> getStatistics() {
+        Statistics<String, String> statistics = cinemaService.calculateStatistics();
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, statistics);
+    }
+
 }

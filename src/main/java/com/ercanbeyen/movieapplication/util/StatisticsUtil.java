@@ -2,6 +2,7 @@ package com.ercanbeyen.movieapplication.util;
 
 import com.ercanbeyen.movieapplication.constant.message.StatisticsMessages;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,12 @@ public class StatisticsUtil {
         }
 
         return minimumItem;
+    }
+
+    public static <T> List<T> convertIterableToList(Iterable<T> itemIterable) {
+        List<T> itemList = new ArrayList<>();
+        itemIterable.forEach(itemList::add);
+        return itemList;
     }
 
     public static String valueAssignmentToStringItem(String returnedValue) {

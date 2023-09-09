@@ -258,16 +258,13 @@ public class MovieServiceImpl implements MovieService {
 
         String mostPopularLanguage = StatisticsUtil.calculateMostOccurred(languageList);
         mostPopularLanguage = StatisticsUtil.valueAssignmentToStringItem(mostPopularLanguage);
-
         statisticsMap.put("mostPopularLanguage", mostPopularLanguage);
 
         String leastPopularLanguage = StatisticsUtil.calculateLeastOccurred(languageList);
         leastPopularLanguage = StatisticsUtil.valueAssignmentToStringItem(leastPopularLanguage);
-
         statisticsMap.put("leastPopularLanguage", leastPopularLanguage);
 
         statistics.setResult(statisticsMap);
-
         return statistics;
     }
 

@@ -3,6 +3,7 @@ package com.ercanbeyen.movieapplication.service.impl;
 import com.ercanbeyen.movieapplication.constant.message.*;
 import com.ercanbeyen.movieapplication.constant.names.ResourceNames;
 import com.ercanbeyen.movieapplication.dto.CinemaDto;
+import com.ercanbeyen.movieapplication.dto.Statistics;
 import com.ercanbeyen.movieapplication.dto.converter.CinemaDtoConverter;
 import com.ercanbeyen.movieapplication.dto.option.filter.CinemaFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.option.search.CinemaSearchOptions;
@@ -14,6 +15,7 @@ import com.ercanbeyen.movieapplication.repository.CinemaRepository;
 import com.ercanbeyen.movieapplication.service.CinemaService;
 import com.ercanbeyen.movieapplication.dto.PageDto;
 import com.ercanbeyen.movieapplication.dto.SearchHitDto;
+import com.ercanbeyen.movieapplication.util.StatisticsUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -26,8 +28,7 @@ import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -206,6 +207,61 @@ public class CinemaServiceImpl implements CinemaService {
         return cinemas.stream()
                 .map(cinemaDtoConverter::convert)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Statistics<String, String> calculateStatistics() {
+        log.info(LogMessages.STARTED, LogMessages.CALCULATE_STATISTICS);
+        Statistics<String, String> statistics = new Statistics<>();
+
+        statistics.setTopic(ResourceNames.CINEMA);
+
+        Map<String, String> statisticsMap = new HashMap<>();
+        List<Cinema> cinemaList = StatisticsUtil.convertIterableToList(cinemaRepository.findAll());
+
+        Comparator<Cinema> cinemaComparator = Comparator.comparing(Cinema::getNumberOfHalls);
+
+        String nameOfMostHallsHad = cinemaList.stream()
+                .max(cinemaComparator)
+                .map(Cinema::getName)
+                .orElse(StatisticsMessages.NOT_EXISTS);
+
+        statisticsMap.put("mostHallsHad", nameOfMostHallsHad);
+
+        String nameOfLeastHallsHad = cinemaList.stream()
+                .min(cinemaComparator)
+                .map(Cinema::getName)
+                .orElse(StatisticsMessages.NOT_EXISTS);
+
+        statisticsMap.put("leastHallsHad", nameOfLeastHallsHad);
+
+        List<String> countryList = cinemaList.stream()
+                .map(Cinema::getCountry)
+                .toList();
+
+        String mostOccurredCountry = StatisticsUtil.calculateMostOccurred(countryList);
+        mostOccurredCountry = StatisticsUtil.valueAssignmentToStringItem(mostOccurredCountry);
+        statisticsMap.put("mostOccurredCountry", mostOccurredCountry);
+
+        String leastOccurredCountry = StatisticsUtil.calculateLeastOccurred(countryList);
+        leastOccurredCountry = StatisticsUtil.valueAssignmentToStringItem(leastOccurredCountry);
+        statisticsMap.put("leastOccurredCountry", leastOccurredCountry);
+
+
+        List<String> cityList = cinemaList.stream()
+                .map(Cinema::getCity)
+                .toList();
+
+        String mostOccurredCity = StatisticsUtil.calculateMostOccurred(cityList);
+        mostOccurredCity = StatisticsUtil.valueAssignmentToStringItem(mostOccurredCity);
+        statisticsMap.put("mostOccurredCity", mostOccurredCity);
+
+        String leastOccurredCity = StatisticsUtil.calculateLeastOccurred(cityList);
+        leastOccurredCity = StatisticsUtil.valueAssignmentToStringItem(leastOccurredCity);
+        statisticsMap.put("leastOccurredCity", leastOccurredCity);
+
+        statistics.setResult(statisticsMap);
+        return statistics;
     }
 
 

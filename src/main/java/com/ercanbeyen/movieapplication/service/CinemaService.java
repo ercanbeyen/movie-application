@@ -2,6 +2,7 @@ package com.ercanbeyen.movieapplication.service;
 
 import com.ercanbeyen.movieapplication.document.Cinema;
 import com.ercanbeyen.movieapplication.dto.CinemaDto;
+import com.ercanbeyen.movieapplication.dto.Statistics;
 import com.ercanbeyen.movieapplication.dto.option.filter.CinemaFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.option.search.CinemaSearchOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateCinemaRequest;
@@ -22,4 +23,5 @@ public interface CinemaService {
     List<SearchHitDto<CinemaDto, Cinema>> getCinemasByAddressLike(String searchTerm);
     List<CinemaDto> searchCinemasByStatus(CinemaSearchOptions searchOptions);
     List<CinemaDto> findCinemasByHallRange(Integer lower, Integer higher);
+    Statistics<String, String> calculateStatistics();
 }
