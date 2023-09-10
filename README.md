@@ -22,6 +22,10 @@ Entities:
 - Each director and actor must have name, surname, nationality and birth year.
 - Directors and actors may appear in multiple movies.
 
+### Additional
+- If scheduling is enabled, then cron jobs work.
+- Statistical values can be observed for each entity and document.
+
 ### Tech Stack
 ---
 - Java 18
