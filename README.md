@@ -5,7 +5,6 @@
 ---
 
 ### Summary
-
 There are 3 entities and 1 document in this project
 
 Entities:
@@ -17,10 +16,13 @@ Entities:
  - Cinema
 
 ### Requirements
-
 - Each movie must have title, language, genre, release year, rating.
 - Each director and actor must have name, surname, nationality and birth year.
 - Directors and actors may appear in multiple movies.
+
+### Additionals
+- If scheduling is enabled, then cron jobs work.
+- Statistical values can be observed for each entity and document.
 
 ### Tech Stack
 ---
@@ -31,9 +33,6 @@ Entities:
 - PostgreSQL
 - Redis
 - Elasticsearch
-- Scheduler
-- OpenAPI Documentation
-
 
 ### Prerequisties
 ---
