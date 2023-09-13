@@ -73,6 +73,7 @@ public class MovieServiceImplTest {
 
         Movie movie1 = Movie.builder()
                 .id(id)
+                .imdbId("tt2964641")
                 .title(title)
                 .genre(genre)
                 .rating(3.4)
@@ -87,6 +88,7 @@ public class MovieServiceImplTest {
 
         Movie movie2 = Movie.builder()
                 .id(id)
+                .imdbId("tt2964642")
                 .title(title)
                 .genre(genre)
                 .rating(2.7)

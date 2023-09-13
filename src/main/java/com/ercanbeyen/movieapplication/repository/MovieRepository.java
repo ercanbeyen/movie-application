@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface MovieRepository extends JpaRepository<Movie, Integer> {
     List<Movie> findByTitleStartingWith(String title);
+    boolean existsByImdbId(String imdbId);
 }

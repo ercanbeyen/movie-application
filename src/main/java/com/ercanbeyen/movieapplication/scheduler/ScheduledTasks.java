@@ -69,6 +69,7 @@ public class ScheduledTasks {
         log.info(LogMessages.BEFORE_REQUEST);
 
         CreateMovieRequest request = new CreateMovieRequest();
+        request.setImdbId("tt2964642");
         request.setTitle("Test-movie");
         request.setGenre(Genre.ACTION);
         request.setDirectorId(null);
@@ -128,6 +129,7 @@ public class ScheduledTasks {
 
         UpdateMovieRequest request = new UpdateMovieRequest();
         request.setTitle("Test-movie");
+        request.setImdbId("tt2964642");
         request.setGenre(Genre.ACTION);
         request.setRating(3d);
         request.setLanguage("English");

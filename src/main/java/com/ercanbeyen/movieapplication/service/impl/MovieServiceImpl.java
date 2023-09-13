@@ -48,6 +48,9 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public MovieDto createMovie(CreateMovieRequest request) {
         log.info(LogMessages.STARTED, "createMovie");
+
+        checkImdbId(request.getImdbId());
+
         Director director = null;
 
         if (request.getDirectorId() != null) {
@@ -58,6 +61,7 @@ public class MovieServiceImpl implements MovieService {
         }
 
         Movie newMovie = Movie.builder()
+                .imdbId(request.getImdbId())
                 .title(request.getTitle())
                 .genre(request.getGenre())
                 .rating(request.getRating())
@@ -132,8 +136,12 @@ public class MovieServiceImpl implements MovieService {
     public MovieDto updateMovie(Integer id, UpdateMovieRequest request) {
         log.info(LogMessages.STARTED, "updateMovie");
 
+        checkImdbId(request.getImdbId());
+
         Movie movieInDb = findMovieById(id);
         log.info(LogMessages.FETCHED, ResourceNames.MOVIE);
+
+        movieInDb.setImdbId(request.getImdbId());
 
         if (request.getDirectorId() != null) {
             Director director = directorService.findDirectorById(request.getDirectorId());
@@ -266,6 +274,12 @@ public class MovieServiceImpl implements MovieService {
 
         statistics.setResult(statisticsMap);
         return statistics;
+    }
+
+    private void checkImdbId(String imdbId) {
+        if (movieRepository.existsByImdbId(imdbId)) {
+            throw new ResourceNotFoundException(String.format(ResponseMessages.ALREADY_EXISTS, ResourceNames.MOVIE + " with imdbId", imdbId));
+        }
     }
 
 }
