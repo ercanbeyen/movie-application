@@ -101,7 +101,7 @@ public class MovieServiceImpl implements MovieService {
         }
 
         Comparator<Movie> movieComparator = Comparator.comparing(Movie::getRating);
-        log.info(LogMessages.ORDER_BY_VALUE, orderBy.name());
+        log.info(LogMessages.ORDER_BY_VALUE, orderBy.getOrderByInfo());
 
         if (orderBy == OrderBy.DESC) {
             movieComparator = movieComparator.reversed();
