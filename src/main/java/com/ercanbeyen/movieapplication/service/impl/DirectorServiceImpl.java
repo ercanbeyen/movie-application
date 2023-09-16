@@ -79,7 +79,7 @@ public class DirectorServiceImpl implements DirectorService {
 
         Comparator<Director> directorComparator = Comparator.comparing(director -> director.getMoviesDirected().size());
 
-        log.info(LogMessages.ORDER_BY_VALUE, orderBy.name());
+        log.info(LogMessages.ORDER_BY_VALUE, orderBy.getOrderByInfo());
 
         if (orderBy == OrderBy.DESC) {
             directorComparator = directorComparator.reversed();

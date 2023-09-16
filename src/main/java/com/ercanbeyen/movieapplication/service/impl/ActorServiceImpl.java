@@ -78,7 +78,7 @@ public class ActorServiceImpl implements ActorService {
         }
 
         Comparator<Actor> actorComparator = Comparator.comparing(actor -> actor.getMoviesPlayed().size());
-        log.info(LogMessages.ORDER_BY_VALUE, orderBy.name());
+        log.info(LogMessages.ORDER_BY_VALUE, orderBy.getOrderByInfo());
 
         if (orderBy == OrderBy.DESC) {
             actorComparator = actorComparator.reversed();
