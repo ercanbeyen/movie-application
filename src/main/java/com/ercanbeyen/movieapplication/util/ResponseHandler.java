@@ -1,5 +1,6 @@
 package com.ercanbeyen.movieapplication.util;
 
+import com.ercanbeyen.movieapplication.constant.names.ParameterNames;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -12,16 +13,16 @@ public class ResponseHandler {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            response.put("status", httpStatus);
-            response.put("message", message);
-            response.put("data", data);
-            response.put("timestamp", LocalDateTime.now());
+            response.put(ParameterNames.STATUS, httpStatus);
+            response.put(ParameterNames.MESSAGE, message);
+            response.put(ParameterNames.DATA, data);
+            response.put(ParameterNames.TIMESTAMP, LocalDateTime.now());
         } catch (Exception exception) {
             response.clear();
-            response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-            response.put("message", exception.getMessage());
-            response.put("data", null);
-            response.put("timestamp", LocalDateTime.now());
+            response.put(ParameterNames.STATUS, HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.put(ParameterNames.MESSAGE, exception.getMessage());
+            response.put(ParameterNames.DATA, null);
+            response.put(ParameterNames.TIMESTAMP, LocalDateTime.now());
         }
 
         return new ResponseEntity<>(response, httpStatus);
