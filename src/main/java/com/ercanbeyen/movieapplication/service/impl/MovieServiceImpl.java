@@ -228,6 +228,14 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @Override
+    public MovieDto getMovie(String imdbId) {
+        Movie movie = movieRepository.findByImdbId(imdbId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE, imdbId)));
+
+        return movieDtoConverter.convert(movie);
+    }
+
+    @Override
     public Movie findMovieById(Integer id) {
         log.info(LogMessages.STARTED, "findMovieById");
         return movieRepository.findById(id)
@@ -278,7 +286,7 @@ public class MovieServiceImpl implements MovieService {
 
     private void checkImdbId(String imdbId) {
         if (movieRepository.existsByImdbId(imdbId)) {
-            throw new ResourceNotFoundException(String.format(ResponseMessages.ALREADY_EXISTS, ResourceNames.MOVIE + " with imdbId", imdbId));
+            throw new ResourceNotFoundException(String.format(ResponseMessages.ALREADY_EXISTS, ResourceNames.MOVIE, imdbId));
         }
     }
 

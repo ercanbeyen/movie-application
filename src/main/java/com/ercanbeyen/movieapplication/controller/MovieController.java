@@ -39,19 +39,19 @@ public class MovieController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getMovie(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> getMovie(@PathVariable Integer id) {
         MovieDto movieDto = movieService.getMovie(id);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDto);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateMovie(@PathVariable("id") Integer id, @RequestBody @Valid UpdateMovieRequest request) {
+    public ResponseEntity<?> updateMovie(@PathVariable Integer id, @RequestBody @Valid UpdateMovieRequest request) {
         MovieDto movieDto = movieService.updateMovie(id, request);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDto);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteMovie(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> deleteMovie(@PathVariable Integer id) {
         String message = movieService.deleteMovie(id);
         return ResponseHandler.generateResponse(HttpStatus.OK, message, null);
     }
@@ -67,6 +67,12 @@ public class MovieController {
     public ResponseEntity<?> searchMovies(@RequestParam String title) {
         List<MovieDto> movieDtoList = movieService.searchMovies(title);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDtoList);
+    }
+
+    @GetMapping("/find")
+    public ResponseEntity<?> getMovie(@RequestParam(name = "imdb") String imdbId) {
+        MovieDto movieDto = movieService.getMovie(imdbId);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDto);
     }
 
     @GetMapping("/statistics")
