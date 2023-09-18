@@ -13,6 +13,7 @@ public class MovieDtoConverter {
         if (movie.getDirector() == null) {
             return MovieDto.builder()
                     .id(movie.getId())
+                    .imdbId(movie.getImdbId())
                     .title(movie.getTitle())
                     .genre(movie.getGenre())
                     .rating(movie.getRating())
@@ -28,6 +29,7 @@ public class MovieDtoConverter {
 
         return MovieDto.builder()
                 .id(movie.getId())
+                .imdbId(movie.getImdbId())
                 .title(movie.getTitle())
                 .genre(movie.getGenre())
                 .rating(movie.getRating())

@@ -1,5 +1,6 @@
 package com.ercanbeyen.movieapplication.exception.advice;
 
+import com.ercanbeyen.movieapplication.exception.ResourceAlreadyExists;
 import com.ercanbeyen.movieapplication.util.ResponseHandler;
 import com.ercanbeyen.movieapplication.exception.ResourceNotFoundException;
 import org.springframework.http.HttpHeaders;
@@ -38,6 +39,11 @@ public class ExceptionAdvisor extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<?> handleResourceNotFoundException(Exception exception) {
         return ResponseHandler.generateResponse(HttpStatus.NOT_FOUND, exception.getMessage(), null);
+    }
+
+    @ExceptionHandler(ResourceAlreadyExists.class)
+    public ResponseEntity<?> handleResourceAlreadyExists(Exception exception) {
+        return ResponseHandler.generateResponse(HttpStatus.CONFLICT, exception.getMessage(), null);
     }
 
     @ExceptionHandler(Exception.class)

@@ -12,6 +12,7 @@ import java.util.Set;
 @Builder
 public class MovieDto implements Serializable {
     private Integer id;
+    private String imdbId;
     private String title;
     private String language;
     private Integer releaseYear;

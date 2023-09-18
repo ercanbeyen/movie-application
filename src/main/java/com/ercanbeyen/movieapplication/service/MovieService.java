@@ -20,6 +20,7 @@ public interface MovieService {
     String deleteMovie(Integer id);
     List<MovieDto> getLatestMovies();
     List<MovieDto> searchMovies(String title);
+    MovieDto getMovie(String imdbId);
     Movie findMovieById(Integer id);
     Statistics<String, String> calculateStatistics();
 }
