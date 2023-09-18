@@ -15,7 +15,6 @@ import org.hibernate.validator.constraints.Range;
 @MappedSuperclass
 public abstract class BaseMovieRequest {
     @ImdbIdRequest
-    @NotBlank(message = "ImdbId " + ValidationMessages.SHOULD_NOT_BLANK)
     private String imdbId;
     @NotBlank(message = "Title" + ValidationMessages.SHOULD_NOT_BLANK)
     private String title;
