@@ -49,7 +49,7 @@ public class MovieServiceImpl implements MovieService {
     public MovieDto createMovie(CreateMovieRequest request) {
         log.info(LogMessages.STARTED, "createMovie");
 
-        checkImdbId(request.getImdbId());
+        checkImdbId(null, request.getImdbId());
 
         Director director = null;
 
@@ -136,11 +136,10 @@ public class MovieServiceImpl implements MovieService {
     public MovieDto updateMovie(Integer id, UpdateMovieRequest request) {
         log.info(LogMessages.STARTED, "updateMovie");
 
-        checkImdbId(request.getImdbId());
-
         Movie movieInDb = findMovieById(id);
         log.info(LogMessages.FETCHED, ResourceNames.MOVIE);
 
+        checkImdbId(movieInDb.getImdbId(), request.getImdbId());
         movieInDb.setImdbId(request.getImdbId());
 
         if (request.getDirectorId() != null) {
@@ -284,10 +283,17 @@ public class MovieServiceImpl implements MovieService {
         return statistics;
     }
 
-    private void checkImdbId(String imdbId) {
-        if (movieRepository.existsByImdbId(imdbId)) {
-            throw new ResourceNotFoundException(String.format(ResponseMessages.ALREADY_EXISTS, ResourceNames.MOVIE, imdbId));
+    private void checkImdbId(String previousImdbId, String newImdbId) {
+        if (StringUtils.isNotBlank(previousImdbId) && newImdbId.equals(previousImdbId)) {
+            log.warn("Same imdbId is going to be assigned.");
+            return;
         }
+
+        if (movieRepository.existsByImdbId(newImdbId)) {
+            throw new ResourceNotFoundException(String.format(ResponseMessages.ALREADY_EXISTS, ResourceNames.MOVIE, newImdbId));
+        }
+
+        log.info("imdbId check is passed");
     }
 
 }
