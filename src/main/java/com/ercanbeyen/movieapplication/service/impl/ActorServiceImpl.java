@@ -60,8 +60,8 @@ public class ActorServiceImpl implements ActorService {
         Page<Actor> actorPage = actorRepository.findAll(pageable);
         log.info(LogMessages.FETCHED_ALL, ResourceNames.ACTOR);
 
-        Predicate<Actor> actorPredicate = (actor) -> ((filteringOptions.getMovieId() == null || filteringOptions.getMovieId().intValue() == filteringOptions.getMovieId().intValue())) && (StringUtils.isBlank(filteringOptions.getNationality()) || actor.getNationality().equals(filteringOptions.getNationality()))
-                && (filteringOptions.getBirthYear() == null || actor.getBirthYear().getYear() == filteringOptions.getBirthYear());
+        Predicate<Actor> actorPredicate = (actor) -> ((filteringOptions.movieId() == null || filteringOptions.movieId().intValue() == filteringOptions.movieId().intValue())) && (StringUtils.isBlank(filteringOptions.nationality()) || actor.getNationality().equals(filteringOptions.nationality()))
+                && (filteringOptions.birthYear() == null || actor.getBirthYear().getYear() == filteringOptions.birthYear());
 
         long maximumSize = Long.parseLong(limit);
 
@@ -177,9 +177,6 @@ public class ActorServiceImpl implements ActorService {
     public Statistics<String, String> calculateStatistics() {
         log.info(LogMessages.STARTED, LogMessages.CALCULATE_STATISTICS);
 
-        Statistics<String, String> statistics = new Statistics<>();
-        statistics.setTopic(ResourceNames.ACTOR);
-
         Map<String, String> statisticsMap = new HashMap<>();
         List<Actor> actorList = actorRepository.findAll();
 
@@ -193,9 +190,7 @@ public class ActorServiceImpl implements ActorService {
         statisticsMap.put("playedMovieAverage", String.valueOf(summaryStatistics.getAverage()));
         statisticsMap.put("playerCount", String.valueOf(summaryStatistics.getCount()));
 
-        statistics.setResult(statisticsMap);
-
-        return statistics;
+        return new Statistics<>(ResourceNames.ACTOR, statisticsMap);
     }
 
     private Actor getActorById(Integer id) {

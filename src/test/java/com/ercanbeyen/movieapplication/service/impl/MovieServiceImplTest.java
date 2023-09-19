@@ -116,15 +116,15 @@ public class MovieServiceImplTest {
     public void whenCreateMovieCalledWithValidRequest_itShouldReturnMovieDto() {
         Movie movie = movieList.get(0);
         MovieDto expected = movieDtoList.get(0);
-        int directorId = expected.getDirectorId();
+        int directorId = expected.directorId();
 
         CreateMovieRequest request = new CreateMovieRequest();
         request.setTitle(movie.getTitle());
         request.setGenre(movie.getGenre());
         request.setReleaseYear(movie.getReleaseYear());
         request.setLanguage(movie.getLanguage());
-        request.setDirectorId(expected.getDirectorId());
-        request.setRating(expected.getRating());
+        request.setDirectorId(expected.directorId());
+        request.setRating(expected.rating());
         request.setSummary(movie.getSummary());
 
 
@@ -149,7 +149,6 @@ public class MovieServiceImplTest {
         int id = movie.getId();
 
         MovieDto expected = movieDtoList.get(0);
-        expected.setId(id);
         Optional<Movie> optionalMovie = Optional.of(movie);
 
         when(movieRepository.findById(id)).thenReturn(optionalMovie);
@@ -197,8 +196,7 @@ public class MovieServiceImplTest {
         when(movieRepository.findAll(pageable)).thenReturn(moviePage);
         when(movieDtoConverter.convert(movieList.get(0))).thenReturn(movieDtoList.get(0));
 
-        MovieFilteringOptions movieFilteringOptions = new MovieFilteringOptions();
-        movieFilteringOptions.setLanguage(movieList.get(0).getLanguage());
+        MovieFilteringOptions movieFilteringOptions = new MovieFilteringOptions(movieList.get(0).getLanguage(), null, null);
 
         PageDto<Movie, MovieDto> actual = movieService.filterMovies(movieFilteringOptions, null, DefaultValues.DEFAULT_LIMIT_VALUE, pageable);
 
@@ -214,15 +212,15 @@ public class MovieServiceImplTest {
         Movie movie = movieList.get(0);
         MovieDto expected = movieDtoList.get(1);
         int id = movie.getId();
-        expected.setId(id);
 
         UpdateMovieRequest request = new UpdateMovieRequest();
-        request.setTitle(expected.getTitle());
-        request.setGenre(expected.getGenre());
-        request.setReleaseYear(expected.getReleaseYear());
-        request.setLanguage(expected.getLanguage());
-        request.setRating(expected.getRating());
-        request.setSummary(expected.getSummary());
+        request.setImdbId(expected.imdbId());
+        request.setTitle(expected.title());
+        request.setGenre(expected.genre());
+        request.setReleaseYear(expected.releaseYear());
+        request.setLanguage(expected.language());
+        request.setRating(expected.rating());
+        request.setSummary(expected.summary());
 
         when(movieRepository.findById(id)).thenReturn(Optional.of(movie));
         when(movieRepository.save(any(Movie.class))).thenReturn(movie);
@@ -338,21 +336,18 @@ public class MovieServiceImplTest {
     @Test
     @DisplayName("When calculateStatistics Called It Should Return Statistics")
     public void whenCalculateStatisticsCalled_itShouldReturnStatistics() {
-        Statistics<String, String> expected = new Statistics<>();
-        expected.setTopic(ResourceNames.MOVIE);
-
         String key = "mostRatedMovie";
 
         Map<String, String> statisticsMap = new HashMap<>();
         statisticsMap.put(key, movieList.get(0).getTitle());
 
-        expected.setResult(statisticsMap);
+        Statistics<String, String> expected = new Statistics<>(ResourceNames.MOVIE, statisticsMap);
 
         when(movieRepository.findAll()).thenReturn(movieList);
 
         Statistics<String, String> actual = movieService.calculateStatistics();
 
-        assertEquals(expected.getResult().get(key), actual.getResult().get(key));
+        assertEquals(expected.result().get(key), actual.result().get(key));
 
         verify(movieRepository, times(1)).findAll();
     }

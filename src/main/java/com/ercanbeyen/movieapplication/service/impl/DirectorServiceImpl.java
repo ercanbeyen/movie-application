@@ -60,8 +60,8 @@ public class DirectorServiceImpl implements DirectorService {
         Page<Director> directorPage = directorRepository.findAll(pageable);
         log.info(LogMessages.FETCHED_ALL, ResourceNames.DIRECTOR);
 
-        Predicate<Director> directorPredicate = (director) -> ((StringUtils.isBlank(filteringOptions.getNationality()) || director.getNationality().equals(filteringOptions.getNationality()))
-                && (filteringOptions.getBirthYear() == null || director.getBirthYear().getYear() == filteringOptions.getBirthYear()));
+        Predicate<Director> directorPredicate = (director) -> ((StringUtils.isBlank(filteringOptions.nationality()) || director.getNationality().equals(filteringOptions.nationality()))
+                && (filteringOptions.birthYear() == null || director.getBirthYear().getYear() == filteringOptions.birthYear()));
 
         long maximumSize = Long.parseLong(limit);
 
@@ -181,9 +181,6 @@ public class DirectorServiceImpl implements DirectorService {
     public Statistics<String, String> calculateStatistics() {
         log.info(LogMessages.STARTED, LogMessages.CALCULATE_STATISTICS);
 
-        Statistics<String, String> statistics = new Statistics<>();
-        statistics.setTopic(ResourceNames.DIRECTOR);
-
         Map<String, String> statisticsMap = new HashMap<>();
         List<Director> directorList = directorRepository.findAll();
 
@@ -197,9 +194,7 @@ public class DirectorServiceImpl implements DirectorService {
         statisticsMap.put("directedMovieAverage", String.valueOf(summaryStatistics.getAverage()));
         statisticsMap.put("directorCount", String.valueOf(summaryStatistics.getCount()));
 
-        statistics.setResult(statisticsMap);
-
-        return statistics;
+        return new Statistics<>(ResourceNames.DIRECTOR, statisticsMap);
     }
 
 }

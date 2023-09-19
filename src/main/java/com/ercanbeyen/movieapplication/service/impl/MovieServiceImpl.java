@@ -86,9 +86,9 @@ public class MovieServiceImpl implements MovieService {
         log.info(LogMessages.FETCHED_ALL, ResourceNames.MOVIE);
 
         Predicate<Movie> moviePredicate = (movie) -> (
-                (filteringOptions.getGenres() == null || filteringOptions.getGenres().isEmpty() || filteringOptions.getGenres().contains(movie.getGenre())) &&
-                (StringUtils.isBlank(filteringOptions.getLanguage()) || movie.getLanguage().equals(filteringOptions.getLanguage())) &&
-                (filteringOptions.getReleaseYear() == null || movie.getReleaseYear().intValue() == filteringOptions.getReleaseYear().intValue()));
+                (filteringOptions.genres() == null || filteringOptions.genres().isEmpty() || filteringOptions.genres().contains(movie.getGenre())) &&
+                (StringUtils.isBlank(filteringOptions.language()) || movie.getLanguage().equals(filteringOptions.language())) &&
+                (filteringOptions.releaseYear() == null || movie.getReleaseYear().intValue() == filteringOptions.releaseYear().intValue()));
 
         long maximumSize = Long.parseLong(limit);
 
@@ -244,9 +244,6 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public Statistics<String, String> calculateStatistics() {
         log.info(LogMessages.STARTED, LogMessages.CALCULATE_STATISTICS);
-        Statistics<String, String> statistics = new Statistics<>();
-
-        statistics.setTopic(ResourceNames.MOVIE);
 
         Map<String, String> statisticsMap = new HashMap<>();
         List<Movie> movieList = movieRepository.findAll();
@@ -279,8 +276,7 @@ public class MovieServiceImpl implements MovieService {
         leastPopularLanguage = StatisticsUtil.valueAssignmentToStringItem(leastPopularLanguage);
         statisticsMap.put("leastPopularLanguage", leastPopularLanguage);
 
-        statistics.setResult(statisticsMap);
-        return statistics;
+        return new Statistics<>(ResourceNames.MOVIE, statisticsMap);
     }
 
     private void checkImdbId(String previousImdbId, String newImdbId) {
