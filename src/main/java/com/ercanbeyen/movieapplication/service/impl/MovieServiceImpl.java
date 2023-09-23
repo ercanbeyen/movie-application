@@ -91,32 +91,32 @@ public class MovieServiceImpl implements MovieService {
                 (filteringOptions.releaseYear() == null || movie.getReleaseYear().intValue() == filteringOptions.releaseYear().intValue()));
 
         long maximumSize = Long.parseLong(limit);
+        List<MovieDto> movieDtoList;
 
         if (orderBy == null) {
             log.info(LogMessages.REQUEST_PARAMETER_NULL, ParameterNames.ORDER_BY);
 
-            List<MovieDto> movieDtoList = moviePage.stream()
+            movieDtoList = moviePage.stream()
                     .filter(moviePredicate)
                     .limit(maximumSize)
                     .map(movieDtoConverter::convert)
                     .toList();
+        } else {
+            log.info(LogMessages.ORDER_BY_VALUE, orderBy.getOrderByInfo());
+            Comparator<Movie> movieAscendingComparator = Comparator.comparing(Movie::getRating);
 
-            return new PageDto<>(moviePage, movieDtoList);
+            Comparator<Movie> movieComparator = switch (orderBy) {
+                case ASC -> movieAscendingComparator;
+                case DESC -> movieAscendingComparator.reversed();
+            };
+
+            movieDtoList = moviePage.stream()
+                    .filter(moviePredicate)
+                    .sorted(movieComparator)
+                    .limit(maximumSize)
+                    .map(movieDtoConverter::convert)
+                    .toList();
         }
-
-        Comparator<Movie> movieComparator = Comparator.comparing(Movie::getRating);
-        log.info(LogMessages.ORDER_BY_VALUE, orderBy.getOrderByInfo());
-
-        if (orderBy == OrderBy.DESC) {
-            movieComparator = movieComparator.reversed();
-        }
-
-        List<MovieDto> movieDtoList = moviePage.stream()
-                .filter(moviePredicate)
-                .sorted(movieComparator)
-                .limit(maximumSize)
-                .map(movieDtoConverter::convert)
-                .toList();
 
         return new PageDto<>(moviePage, movieDtoList);
     }

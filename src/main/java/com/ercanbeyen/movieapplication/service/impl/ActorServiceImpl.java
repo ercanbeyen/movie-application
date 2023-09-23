@@ -64,32 +64,32 @@ public class ActorServiceImpl implements ActorService {
                 && (filteringOptions.birthYear() == null || actor.getBirthYear().getYear() == filteringOptions.birthYear());
 
         long maximumSize = Long.parseLong(limit);
+        List<ActorDto> actorDtoList;
 
         if (orderBy == null) {
             log.info(LogMessages.REQUEST_PARAMETER_NULL, ParameterNames.ORDER_BY);
 
-            List<ActorDto> actorDtoList = actorPage.stream()
+            actorDtoList = actorPage.stream()
                     .filter(actorPredicate)
                     .limit(maximumSize)
                     .map(actorDtoConverter::convert)
                     .toList();
+        } else {
+            log.info(LogMessages.ORDER_BY_VALUE, orderBy.getOrderByInfo());
+            Comparator<Actor> actorAscendingComparator = Comparator.comparing(actor -> actor.getMoviesPlayed().size());
 
-            return new PageDto<>(actorPage, actorDtoList);
+            Comparator<Actor> actorComparator = switch (orderBy) {
+                case ASC -> actorAscendingComparator;
+                case DESC -> actorAscendingComparator.reversed();
+            };
+
+            actorDtoList = actorPage.stream()
+                    .filter(actorPredicate)
+                    .sorted(actorComparator)
+                    .limit(maximumSize)
+                    .map(actorDtoConverter::convert)
+                    .toList();
         }
-
-        Comparator<Actor> actorComparator = Comparator.comparing(actor -> actor.getMoviesPlayed().size());
-        log.info(LogMessages.ORDER_BY_VALUE, orderBy.getOrderByInfo());
-
-        if (orderBy == OrderBy.DESC) {
-            actorComparator = actorComparator.reversed();
-        }
-
-        List<ActorDto> actorDtoList = actorPage.stream()
-                .filter(actorPredicate)
-                .sorted(actorComparator)
-                .limit(maximumSize)
-                .map(actorDtoConverter::convert)
-                .toList();
 
         return new PageDto<>(actorPage, actorDtoList);
     }

@@ -64,35 +64,34 @@ public class DirectorServiceImpl implements DirectorService {
                 && (filteringOptions.birthYear() == null || director.getBirthYear().getYear() == filteringOptions.birthYear()));
 
         long maximumSize = Long.parseLong(limit);
+        List<DirectorDto> directorDtoList;
 
         if (orderBy == null) {
             log.info(LogMessages.REQUEST_PARAMETER_NULL, ParameterNames.ORDER_BY);
 
-            List<DirectorDto> directorDtoList = directorPage.stream()
+            directorDtoList = directorPage.stream()
                     .filter(directorPredicate)
                     .limit(maximumSize)
                     .map(directorDtoConverter::convert)
                     .toList();
+        } else {
+            log.info(LogMessages.ORDER_BY_VALUE, orderBy.getOrderByInfo());
+            Comparator<Director> directorAscendingComparator = Comparator.comparing(director -> director.getMoviesDirected().size());
 
-            return new PageDto<>(directorPage, directorDtoList);
+            Comparator<Director> directorComparator = switch (orderBy) {
+                case ASC -> directorAscendingComparator;
+                case DESC -> directorAscendingComparator.reversed();
+            };
+
+            directorDtoList = directorPage.stream()
+                    .filter(directorPredicate)
+                    .sorted(directorComparator)
+                    .limit(maximumSize)
+                    .map(directorDtoConverter::convert)
+                    .toList();
         }
 
-        Comparator<Director> directorComparator = Comparator.comparing(director -> director.getMoviesDirected().size());
-
-        log.info(LogMessages.ORDER_BY_VALUE, orderBy.getOrderByInfo());
-
-        if (orderBy == OrderBy.DESC) {
-            directorComparator = directorComparator.reversed();
-        }
-
-        List<DirectorDto> directorList = directorPage.stream()
-                .filter(directorPredicate)
-                .sorted(directorComparator)
-                .limit(maximumSize)
-                .map(directorDtoConverter::convert)
-                .toList();
-
-        return new PageDto<>(directorPage, directorList);
+        return new PageDto<>(directorPage, directorDtoList);
     }
 
     @Cacheable(value = "directors", key = "#id", unless = "#result.moviesDirected.size() < 2")
