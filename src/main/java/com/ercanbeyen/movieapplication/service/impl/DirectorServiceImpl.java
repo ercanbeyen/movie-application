@@ -60,39 +60,38 @@ public class DirectorServiceImpl implements DirectorService {
         Page<Director> directorPage = directorRepository.findAll(pageable);
         log.info(LogMessages.FETCHED_ALL, ResourceNames.DIRECTOR);
 
-        Predicate<Director> directorPredicate = (director) -> ((StringUtils.isBlank(filteringOptions.getNationality()) || director.getNationality().equals(filteringOptions.getNationality()))
-                && (filteringOptions.getBirthYear() == null || director.getBirthYear().getYear() == filteringOptions.getBirthYear()));
+        Predicate<Director> directorPredicate = (director) -> ((StringUtils.isBlank(filteringOptions.nationality()) || director.getNationality().equals(filteringOptions.nationality()))
+                && (filteringOptions.birthYear() == null || director.getBirthYear().getYear() == filteringOptions.birthYear()));
 
         long maximumSize = Long.parseLong(limit);
+        List<DirectorDto> directorDtoList;
 
         if (orderBy == null) {
             log.info(LogMessages.REQUEST_PARAMETER_NULL, ParameterNames.ORDER_BY);
 
-            List<DirectorDto> directorDtoList = directorPage.stream()
+            directorDtoList = directorPage.stream()
                     .filter(directorPredicate)
                     .limit(maximumSize)
                     .map(directorDtoConverter::convert)
                     .toList();
+        } else {
+            log.info(LogMessages.ORDER_BY_VALUE, orderBy.getOrderByInfo());
+            Comparator<Director> directorAscendingComparator = Comparator.comparing(director -> director.getMoviesDirected().size());
 
-            return new PageDto<>(directorPage, directorDtoList);
+            Comparator<Director> directorComparator = switch (orderBy) {
+                case ASC -> directorAscendingComparator;
+                case DESC -> directorAscendingComparator.reversed();
+            };
+
+            directorDtoList = directorPage.stream()
+                    .filter(directorPredicate)
+                    .sorted(directorComparator)
+                    .limit(maximumSize)
+                    .map(directorDtoConverter::convert)
+                    .toList();
         }
 
-        Comparator<Director> directorComparator = Comparator.comparing(director -> director.getMoviesDirected().size());
-
-        log.info(LogMessages.ORDER_BY_VALUE, orderBy.getOrderByInfo());
-
-        if (orderBy == OrderBy.DESC) {
-            directorComparator = directorComparator.reversed();
-        }
-
-        List<DirectorDto> directorList = directorPage.stream()
-                .filter(directorPredicate)
-                .sorted(directorComparator)
-                .limit(maximumSize)
-                .map(directorDtoConverter::convert)
-                .toList();
-
-        return new PageDto<>(directorPage, directorList);
+        return new PageDto<>(directorPage, directorDtoList);
     }
 
     @Cacheable(value = "directors", key = "#id", unless = "#result.moviesDirected.size() < 2")
@@ -181,9 +180,6 @@ public class DirectorServiceImpl implements DirectorService {
     public Statistics<String, String> calculateStatistics() {
         log.info(LogMessages.STARTED, LogMessages.CALCULATE_STATISTICS);
 
-        Statistics<String, String> statistics = new Statistics<>();
-        statistics.setTopic(ResourceNames.DIRECTOR);
-
         Map<String, String> statisticsMap = new HashMap<>();
         List<Director> directorList = directorRepository.findAll();
 
@@ -197,9 +193,7 @@ public class DirectorServiceImpl implements DirectorService {
         statisticsMap.put("directedMovieAverage", String.valueOf(summaryStatistics.getAverage()));
         statisticsMap.put("directorCount", String.valueOf(summaryStatistics.getCount()));
 
-        statistics.setResult(statisticsMap);
-
-        return statistics;
+        return new Statistics<>(ResourceNames.DIRECTOR, statisticsMap);
     }
 
 }

@@ -1,10 +1,5 @@
 package com.ercanbeyen.movieapplication.dto.option.filter;
 
-import lombok.Data;
+public record ActorFilteringOptions(String nationality, Integer birthYear, Integer movieId) {
 
-@Data
-public class ActorFilteringOptions {
-    String nationality;
-    Integer birthYear;
-    Integer movieId;
 }

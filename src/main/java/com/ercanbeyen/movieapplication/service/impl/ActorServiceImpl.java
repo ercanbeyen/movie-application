@@ -60,36 +60,36 @@ public class ActorServiceImpl implements ActorService {
         Page<Actor> actorPage = actorRepository.findAll(pageable);
         log.info(LogMessages.FETCHED_ALL, ResourceNames.ACTOR);
 
-        Predicate<Actor> actorPredicate = (actor) -> ((filteringOptions.getMovieId() == null || filteringOptions.getMovieId().intValue() == filteringOptions.getMovieId().intValue())) && (StringUtils.isBlank(filteringOptions.getNationality()) || actor.getNationality().equals(filteringOptions.getNationality()))
-                && (filteringOptions.getBirthYear() == null || actor.getBirthYear().getYear() == filteringOptions.getBirthYear());
+        Predicate<Actor> actorPredicate = (actor) -> ((filteringOptions.movieId() == null || filteringOptions.movieId().intValue() == filteringOptions.movieId().intValue())) && (StringUtils.isBlank(filteringOptions.nationality()) || actor.getNationality().equals(filteringOptions.nationality()))
+                && (filteringOptions.birthYear() == null || actor.getBirthYear().getYear() == filteringOptions.birthYear());
 
         long maximumSize = Long.parseLong(limit);
+        List<ActorDto> actorDtoList;
 
         if (orderBy == null) {
             log.info(LogMessages.REQUEST_PARAMETER_NULL, ParameterNames.ORDER_BY);
 
-            List<ActorDto> actorDtoList = actorPage.stream()
+            actorDtoList = actorPage.stream()
                     .filter(actorPredicate)
                     .limit(maximumSize)
                     .map(actorDtoConverter::convert)
                     .toList();
+        } else {
+            log.info(LogMessages.ORDER_BY_VALUE, orderBy.getOrderByInfo());
+            Comparator<Actor> actorAscendingComparator = Comparator.comparing(actor -> actor.getMoviesPlayed().size());
 
-            return new PageDto<>(actorPage, actorDtoList);
+            Comparator<Actor> actorComparator = switch (orderBy) {
+                case ASC -> actorAscendingComparator;
+                case DESC -> actorAscendingComparator.reversed();
+            };
+
+            actorDtoList = actorPage.stream()
+                    .filter(actorPredicate)
+                    .sorted(actorComparator)
+                    .limit(maximumSize)
+                    .map(actorDtoConverter::convert)
+                    .toList();
         }
-
-        Comparator<Actor> actorComparator = Comparator.comparing(actor -> actor.getMoviesPlayed().size());
-        log.info(LogMessages.ORDER_BY_VALUE, orderBy.getOrderByInfo());
-
-        if (orderBy == OrderBy.DESC) {
-            actorComparator = actorComparator.reversed();
-        }
-
-        List<ActorDto> actorDtoList = actorPage.stream()
-                .filter(actorPredicate)
-                .sorted(actorComparator)
-                .limit(maximumSize)
-                .map(actorDtoConverter::convert)
-                .toList();
 
         return new PageDto<>(actorPage, actorDtoList);
     }
@@ -177,9 +177,6 @@ public class ActorServiceImpl implements ActorService {
     public Statistics<String, String> calculateStatistics() {
         log.info(LogMessages.STARTED, LogMessages.CALCULATE_STATISTICS);
 
-        Statistics<String, String> statistics = new Statistics<>();
-        statistics.setTopic(ResourceNames.ACTOR);
-
         Map<String, String> statisticsMap = new HashMap<>();
         List<Actor> actorList = actorRepository.findAll();
 
@@ -193,9 +190,7 @@ public class ActorServiceImpl implements ActorService {
         statisticsMap.put("playedMovieAverage", String.valueOf(summaryStatistics.getAverage()));
         statisticsMap.put("playerCount", String.valueOf(summaryStatistics.getCount()));
 
-        statistics.setResult(statisticsMap);
-
-        return statistics;
+        return new Statistics<>(ResourceNames.ACTOR, statisticsMap);
     }
 
     private Actor getActorById(Integer id) {

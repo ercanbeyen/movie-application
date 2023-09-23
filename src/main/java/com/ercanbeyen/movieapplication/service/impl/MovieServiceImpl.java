@@ -86,37 +86,37 @@ public class MovieServiceImpl implements MovieService {
         log.info(LogMessages.FETCHED_ALL, ResourceNames.MOVIE);
 
         Predicate<Movie> moviePredicate = (movie) -> (
-                (filteringOptions.getGenres() == null || filteringOptions.getGenres().isEmpty() || filteringOptions.getGenres().contains(movie.getGenre())) &&
-                (StringUtils.isBlank(filteringOptions.getLanguage()) || movie.getLanguage().equals(filteringOptions.getLanguage())) &&
-                (filteringOptions.getReleaseYear() == null || movie.getReleaseYear().intValue() == filteringOptions.getReleaseYear().intValue()));
+                (filteringOptions.genres() == null || filteringOptions.genres().isEmpty() || filteringOptions.genres().contains(movie.getGenre())) &&
+                (StringUtils.isBlank(filteringOptions.language()) || movie.getLanguage().equals(filteringOptions.language())) &&
+                (filteringOptions.releaseYear() == null || movie.getReleaseYear().intValue() == filteringOptions.releaseYear().intValue()));
 
         long maximumSize = Long.parseLong(limit);
+        List<MovieDto> movieDtoList;
 
         if (orderBy == null) {
             log.info(LogMessages.REQUEST_PARAMETER_NULL, ParameterNames.ORDER_BY);
 
-            List<MovieDto> movieDtoList = moviePage.stream()
+            movieDtoList = moviePage.stream()
                     .filter(moviePredicate)
                     .limit(maximumSize)
                     .map(movieDtoConverter::convert)
                     .toList();
+        } else {
+            log.info(LogMessages.ORDER_BY_VALUE, orderBy.getOrderByInfo());
+            Comparator<Movie> movieAscendingComparator = Comparator.comparing(Movie::getRating);
 
-            return new PageDto<>(moviePage, movieDtoList);
+            Comparator<Movie> movieComparator = switch (orderBy) {
+                case ASC -> movieAscendingComparator;
+                case DESC -> movieAscendingComparator.reversed();
+            };
+
+            movieDtoList = moviePage.stream()
+                    .filter(moviePredicate)
+                    .sorted(movieComparator)
+                    .limit(maximumSize)
+                    .map(movieDtoConverter::convert)
+                    .toList();
         }
-
-        Comparator<Movie> movieComparator = Comparator.comparing(Movie::getRating);
-        log.info(LogMessages.ORDER_BY_VALUE, orderBy.getOrderByInfo());
-
-        if (orderBy == OrderBy.DESC) {
-            movieComparator = movieComparator.reversed();
-        }
-
-        List<MovieDto> movieDtoList = moviePage.stream()
-                .filter(moviePredicate)
-                .sorted(movieComparator)
-                .limit(maximumSize)
-                .map(movieDtoConverter::convert)
-                .toList();
 
         return new PageDto<>(moviePage, movieDtoList);
     }
@@ -244,9 +244,6 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public Statistics<String, String> calculateStatistics() {
         log.info(LogMessages.STARTED, LogMessages.CALCULATE_STATISTICS);
-        Statistics<String, String> statistics = new Statistics<>();
-
-        statistics.setTopic(ResourceNames.MOVIE);
 
         Map<String, String> statisticsMap = new HashMap<>();
         List<Movie> movieList = movieRepository.findAll();
@@ -279,8 +276,7 @@ public class MovieServiceImpl implements MovieService {
         leastPopularLanguage = StatisticsUtil.valueAssignmentToStringItem(leastPopularLanguage);
         statisticsMap.put("leastPopularLanguage", leastPopularLanguage);
 
-        statistics.setResult(statisticsMap);
-        return statistics;
+        return new Statistics<>(ResourceNames.MOVIE, statisticsMap);
     }
 
     private void checkImdbId(String previousImdbId, String newImdbId) {

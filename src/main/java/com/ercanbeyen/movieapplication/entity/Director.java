@@ -12,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @SuperBuilder(toBuilder = true)
 @Entity
-public class Director extends Base {
+public final class Director extends Base {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

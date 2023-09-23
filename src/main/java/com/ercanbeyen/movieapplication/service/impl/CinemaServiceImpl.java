@@ -169,12 +169,12 @@ public class CinemaServiceImpl implements CinemaService {
         }
 
         Predicate<Cinema> cinemaPredicate = (cinema) -> (isCountryBlank || cinema.getCountry().equals(country))
-                && (StringUtils.isBlank(filteringOptions.getCity()) || cinema.getCity().equals(filteringOptions.getCity()))
-                && (filteringOptions.getReservation_with_phone() == null || cinema.isReservation_with_phone() == filteringOptions.getReservation_with_phone())
-                && (filteringOptions.getThreeD_animation() == null || cinema.isThreeD_animation() == filteringOptions.getThreeD_animation())
-                && (filteringOptions.getParking_place() == null || cinema.isParking_place() == filteringOptions.getParking_place())
-                && (filteringOptions.getAir_conditioning() == null || cinema.isAir_conditioning() == filteringOptions.getAir_conditioning())
-                && (filteringOptions.getCafe_food() == null || cinema.isCafe_food() == filteringOptions.getCafe_food());
+                && (StringUtils.isBlank(filteringOptions.city()) || cinema.getCity().equals(filteringOptions.city()))
+                && (filteringOptions.reservation_with_phone() == null || cinema.isReservation_with_phone() == filteringOptions.reservation_with_phone())
+                && (filteringOptions.threeD_animation() == null || cinema.isThreeD_animation() == filteringOptions.threeD_animation())
+                && (filteringOptions.parking_place() == null || cinema.isParking_place() == filteringOptions.parking_place())
+                && (filteringOptions.air_conditioning() == null || cinema.isAir_conditioning() == filteringOptions.air_conditioning())
+                && (filteringOptions.cafe_food() == null || cinema.isCafe_food() == filteringOptions.cafe_food());
 
         long maximumSize = Long.parseLong(limit);
 
@@ -212,9 +212,6 @@ public class CinemaServiceImpl implements CinemaService {
     @Override
     public Statistics<String, String> calculateStatistics() {
         log.info(LogMessages.STARTED, LogMessages.CALCULATE_STATISTICS);
-        Statistics<String, String> statistics = new Statistics<>();
-
-        statistics.setTopic(ResourceNames.CINEMA);
 
         Map<String, String> statisticsMap = new HashMap<>();
         List<Cinema> cinemaList = StatisticsUtil.convertIterableToList(cinemaRepository.findAll());
@@ -260,8 +257,7 @@ public class CinemaServiceImpl implements CinemaService {
         leastOccurredCity = StatisticsUtil.valueAssignmentToStringItem(leastOccurredCity);
         statisticsMap.put("leastOccurredCity", leastOccurredCity);
 
-        statistics.setResult(statisticsMap);
-        return statistics;
+        return new Statistics<>(ResourceNames.CINEMA, statisticsMap);
     }
 
 

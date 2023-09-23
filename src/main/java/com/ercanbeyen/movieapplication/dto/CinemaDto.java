@@ -1,23 +1,14 @@
 package com.ercanbeyen.movieapplication.dto;
 
 import lombok.Builder;
-import lombok.Data;
 
 import java.io.Serializable;
 
-@Data
 @Builder
-public class CinemaDto implements Serializable {
-    private String id;
-    private String name;
-    private String country;
-    private String city;
-    private String address;
-    private String contactNumber;
-    private int numberOfHalls;
-    private boolean reservation_with_phone;
-    private boolean threeD_animation;
-    private boolean parking_place;
-    private boolean air_conditioning;
-    private boolean cafe_food;
+public record CinemaDto(
+        String id, String name, String country, String city,
+        String address, String contactNumber, int numberOfHalls,
+        boolean reservation_with_phone, boolean threeD_animation,
+        boolean parking_place, boolean air_conditioning, boolean cafe_food) implements Serializable {
+
 }
