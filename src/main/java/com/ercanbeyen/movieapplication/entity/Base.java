@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @SuperBuilder(toBuilder = true)
 @MappedSuperclass
-public sealed abstract class Base implements Serializable permits Actor, Director {
+public sealed abstract class Base implements Serializable permits Actor, Director, Audience {
     private String name;
     private String surname;
     private String nationality;
