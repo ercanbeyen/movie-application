@@ -14,6 +14,7 @@ import java.util.Set;
 @AllArgsConstructor
 @SuperBuilder(toBuilder = true)
 @Entity
+@Table(name = "actors")
 public final class Actor extends Base {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
