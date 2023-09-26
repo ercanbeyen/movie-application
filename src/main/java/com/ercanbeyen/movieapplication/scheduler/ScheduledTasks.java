@@ -18,6 +18,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,8 +45,14 @@ public class ScheduledTasks {
         log.info(LogMessages.BEFORE_REQUEST);
 
         try {
+            UriComponents uriComponents = UriComponentsBuilder
+                    .fromUriString(COLLECTION_URI)
+                    .queryParam("page", pageable.getPageNumber())
+                    .queryParam("size", pageable.getPageSize())
+                    .build();
+
             Map<String, PageDto<Movie, MovieDto>> response = restTemplate.getForObject(
-                    COLLECTION_URI + "?page=" + pageable.getPageNumber() + "&size=" + pageable.getPageSize(), HashMap.class
+                    uriComponents.toUriString(), HashMap.class
             );
 
             log.info(LogMessages.SUCCESS);

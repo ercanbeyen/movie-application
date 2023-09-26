@@ -12,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @SuperBuilder(toBuilder = true)
 @Entity
+@Table(name = "directors")
 public final class Director extends Base {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
