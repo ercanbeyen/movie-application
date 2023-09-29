@@ -1,6 +1,7 @@
 package com.ercanbeyen.movieapplication.dto.request.base;
 
 import com.ercanbeyen.movieapplication.constant.message.ValidationMessages;
+import com.ercanbeyen.movieapplication.constant.names.FieldNames;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -12,7 +13,7 @@ import lombok.Setter;
 @Setter
 @MappedSuperclass
 public abstract class BaseCinemaRequest {
-    @NotBlank(message = "Name" + ValidationMessages.SHOULD_NOT_BLANK)
+    @NotBlank(message = FieldNames.NAME + ValidationMessages.SHOULD_NOT_BLANK)
     private String name;
     @NotBlank(message = "Country" + ValidationMessages.SHOULD_NOT_BLANK)
     private String country;

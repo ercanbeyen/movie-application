@@ -26,10 +26,10 @@ import java.util.Map;
 
 @Component
 @Async
-//@EnableScheduling
+@EnableScheduling
 @RequiredArgsConstructor
 @Slf4j
-//@SuppressWarnings({"unchecked"})
+@SuppressWarnings({"unchecked"})
 public class ScheduledTasks {
     private final RestTemplate restTemplate;
     private static final String COLLECTION_URI = "http://localhost:8080/api/v1/movies";
