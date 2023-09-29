@@ -12,6 +12,10 @@ import java.time.LocalDate;
 @Setter
 @MappedSuperclass
 public class BaseAudienceRequest {
+    @NotBlank(message = "Username" + ValidationMessages.SHOULD_NOT_BLANK)
+    private String username;
+    @NotBlank(message = "Password" + ValidationMessages.SHOULD_NOT_BLANK)
+    private String password;
     @NotBlank(message = "Name" + ValidationMessages.SHOULD_NOT_BLANK)
     private String name;
     @NotBlank(message = "Surname" + ValidationMessages.SHOULD_NOT_BLANK)
