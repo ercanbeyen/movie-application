@@ -39,19 +39,19 @@ public class DirectorController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getDirector(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> getDirector(@PathVariable Integer id) {
         DirectorDto directorDto = directorService.getDirector(id);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, directorDto);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateDirector(@PathVariable("id") Integer id, @RequestBody @Valid UpdateDirectorRequest request) {
+    public ResponseEntity<?> updateDirector(@PathVariable Integer id, @RequestBody @Valid UpdateDirectorRequest request) {
         DirectorDto directorDto = directorService.updateDirector(id, request);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, directorDto);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteDirector(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> deleteDirector(@PathVariable Integer id) {
         String message = directorService.deleteDirector(id);
         return ResponseHandler.generateResponse(HttpStatus.OK, message, null);
     }

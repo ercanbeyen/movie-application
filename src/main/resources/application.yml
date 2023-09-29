@@ -21,3 +21,8 @@ spring:
     elasticsearch:
       cluster-name: elastic-cluster
       url: https://localhost:9200
+  session:
+    jdbc:
+      initialize-schema: always
+    #store-type: jdbc
+    timeout: 30m

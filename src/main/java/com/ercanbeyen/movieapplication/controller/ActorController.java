@@ -39,19 +39,19 @@ public class ActorController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getActor(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> getActor(@PathVariable Integer id) {
         ActorDto actorDto = actorService.getActor(id);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, actorDto);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateActor(@PathVariable("id") Integer id, @RequestBody @Valid UpdateActorRequest request) {
+    public ResponseEntity<?> updateActor(@PathVariable Integer id, @RequestBody @Valid UpdateActorRequest request) {
         ActorDto actorDto = actorService.updateActor(id, request);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, actorDto);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteActor(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> deleteActor(@PathVariable Integer id) {
         String message = actorService.deleteActor(id);
         return ResponseHandler.generateResponse(HttpStatus.OK, message, null);
     }

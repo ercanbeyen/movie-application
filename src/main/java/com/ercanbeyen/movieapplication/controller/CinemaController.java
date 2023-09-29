@@ -40,19 +40,19 @@ public class CinemaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getCinema(@PathVariable("id") String id) {
+    public ResponseEntity<?> getCinema(@PathVariable String id) {
         CinemaDto cinemaDto = cinemaService.getCinema(id);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemaDto);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateCinema(@PathVariable("id") String id, @RequestBody @Valid UpdateCinemaRequest request) {
+    public ResponseEntity<?> updateCinema(@PathVariable String id, @RequestBody @Valid UpdateCinemaRequest request) {
         CinemaDto cinemaDto = cinemaService.updateCinema(id, request);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemaDto);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteCinema(@PathVariable("id") String id) {
+    public ResponseEntity<?> deleteCinema(@PathVariable String id) {
         String message = cinemaService.deleteCinema(id);
         return ResponseHandler.generateResponse(HttpStatus.OK, message, null);
     }
