@@ -17,12 +17,6 @@ import org.springframework.web.bind.annotation.*;
 public class AudienceController {
     private final AudienceService audienceService;
 
-    @PostMapping
-    public ResponseEntity<?> createAudience(@RequestBody @Valid CreateAudienceRequest request) {
-        AudienceDto audienceDto = audienceService.createAudience(request);
-        return ResponseHandler.generateResponse(HttpStatus.CREATED, null, audienceDto);
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<?> getActor(@PathVariable Integer id) {
         AudienceDto audienceDto = audienceService.getAudience(id);
