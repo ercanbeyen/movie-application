@@ -5,17 +5,26 @@
 ---
 
 ### Summary
-There are 3 entities and 1 document in this project
+It is a movie based entartainment application which uses session based authentication.<br/>
+There are 5 entities and 1 document in this project
 
 Entities:
 - Movie
 - Director
 - Actor
+- Audience
+- Role
 
  Documents:
  - Cinema
 
+There are 2 roles among audiences
+- Admin
+- User
+
 ### Requirements
+- Audiences must login to use the application.
+- Each audience must have a unique username.
 - Each movie must have title, language, genre, release year, rating.
 - Each director and actor must have name, surname, nationality and birth year.
 - Directors and actors may appear in multiple movies.
@@ -29,6 +38,7 @@ Entities:
 ---
 - Java 18
 - Spring Boot
+- Spring Security
 - Spring Data JPA
 - JUnit 5
 - PostgreSQL

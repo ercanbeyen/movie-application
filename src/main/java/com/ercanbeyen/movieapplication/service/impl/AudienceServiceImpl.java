@@ -6,14 +6,14 @@ import com.ercanbeyen.movieapplication.constant.message.ResponseMessages;
 import com.ercanbeyen.movieapplication.constant.names.ResourceNames;
 import com.ercanbeyen.movieapplication.dto.AudienceDto;
 import com.ercanbeyen.movieapplication.dto.converter.AudienceDtoConverter;
-import com.ercanbeyen.movieapplication.dto.request.create.CreateAudienceRequest;
+import com.ercanbeyen.movieapplication.dto.request.auth.RegistrationRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateAudienceRequest;
 import com.ercanbeyen.movieapplication.entity.Audience;
 import com.ercanbeyen.movieapplication.entity.Role;
 import com.ercanbeyen.movieapplication.exception.ResourceNotFoundException;
 import com.ercanbeyen.movieapplication.repository.AudienceRepository;
-import com.ercanbeyen.movieapplication.repository.RoleRepository;
 import com.ercanbeyen.movieapplication.service.AudienceService;
+import com.ercanbeyen.movieapplication.service.RoleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.User;
@@ -32,25 +32,23 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
     private final AudienceRepository audienceRepository;
     private final AudienceDtoConverter audienceDtoConverter;
     private final PasswordEncoder passwordEncoder;
-    private final RoleRepository roleRepository;
+    private final RoleService roleService;
 
     @Override
-    public AudienceDto createAudience(CreateAudienceRequest request) {
+    public AudienceDto createAudience(RegistrationRequest request) {
         log.info(LogMessages.STARTED, "createAudience");
-        Role role = new Role();
-        role.setRoleName(RoleName.USER);
-        roleRepository.save(role);
+        Role role = roleService.getRoleByRoleName(RoleName.USER);
         Set<Role> roleSet = Set.of(role);
 
         Audience newAudience = Audience.builder()
-                .username(request.getUsername())
-                .password(passwordEncoder.encode(request.getPassword()))
+                .username(request.username())
+                .password(passwordEncoder.encode(request.password()))
                 .roles(roleSet)
-                .name(request.getName())
-                .surname(request.getSurname())
-                .nationality(request.getNationality())
-                .birthYear(request.getBirthYear())
-                .biography(request.getBiography())
+                .name(request.name())
+                .surname(request.surname())
+                .nationality(request.nationality())
+                .birthYear(request.birthYear())
+                .biography(request.biography())
                 .build();
 
         Audience savedAudience = audienceRepository.save(newAudience);
