@@ -17,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -28,27 +30,16 @@ public class RoleServiceImpl implements RoleService {
     public RoleDto createRole(CreateRoleRequest request) {
         log.info(LogMessages.STARTED, "createRole");
 
-        RoleName roleName;
+        RoleName roleName = request.getRoleName();
+        Optional<Role> roleInDb = roleRepository.findByRoleName(roleName);
 
-        try {
-            roleName = RoleName.valueOf(request.getRole().toUpperCase());
-        } catch (Exception exception) {
-            log.error("{} {} is not found", ResourceNames.ROLE, request.getRole());
-            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ROLE, request.getRole()));
+        if (roleInDb.isPresent()) {
+            throw new ResourceAlreadyExists(String.format(ResponseMessages.ALREADY_EXISTS, ResourceNames.ROLE, request.getRoleName()));
         }
-
-        request.setRole(request.getRole().toUpperCase());
 
         Role newRole = new Role();
         newRole.setRoleName(roleName);
-        Role createdRole;
-        try {
-            createdRole = roleRepository.save(newRole);
-            log.info(LogMessages.SAVED, ResourceNames.ROLE);
-        } catch (Exception exception) {
-            log.error("{} {} is not found", ResourceNames.ROLE, request.getRole());
-            throw new ResourceAlreadyExists(String.format(ResponseMessages.ALREADY_EXISTS, ResourceNames.ROLE, request.getRole()));
-        }
+        Role createdRole = roleRepository.save(newRole);
 
         return roleDtoConverter.convert(createdRole);
     }
@@ -58,15 +49,7 @@ public class RoleServiceImpl implements RoleService {
         Role roleInDb = roleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ROLE, id)));
 
-        RoleName roleName;
-
-        try {
-            roleName = RoleName.valueOf(request.getRole().toUpperCase());
-        } catch (Exception exception) {
-            log.error("{} {} is not found", ResourceNames.ROLE, request.getRole());
-            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ROLE, request.getRole()));
-        }
-
+        RoleName roleName = request.getRoleName();
         Role updatedRole;
 
         try {
@@ -74,8 +57,8 @@ public class RoleServiceImpl implements RoleService {
             updatedRole = roleRepository.save(roleInDb);
             log.info(LogMessages.SAVED, ResourceNames.ROLE);
         } catch (Exception exception) {
-            log.error("{} {} is not found", ResourceNames.ROLE, request.getRole());
-            throw new ResourceAlreadyExists(String.format(ResponseMessages.ALREADY_EXISTS, ResourceNames.ROLE, request.getRole()));
+            log.error("{} {} is not found", ResourceNames.ROLE, request.getRoleName());
+            throw new ResourceAlreadyExists(String.format(ResponseMessages.ALREADY_EXISTS, ResourceNames.ROLE, request.getRoleName()));
         }
 
         return roleDtoConverter.convert(updatedRole);
