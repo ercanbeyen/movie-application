@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -43,6 +44,22 @@ public class RoleServiceImpl implements RoleService {
         Role createdRole = roleRepository.save(newRole);
 
         return roleDtoConverter.convert(createdRole);
+    }
+
+    @Override
+    public List<RoleDto> getRoles() {
+        log.info(LogMessages.STARTED, "getRoles");
+        return roleRepository.findAll()
+                .stream()
+                .map(roleDtoConverter::convert)
+                .toList();
+    }
+
+    @Override
+    public RoleDto getRole(Integer id) {
+        log.info(LogMessages.STARTED, "getRole");
+        Role roleInDb = findRoleById(id);
+        return roleDtoConverter.convert(roleInDb);
     }
 
     @Override

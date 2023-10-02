@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/roles")
 @RequiredArgsConstructor
@@ -19,6 +21,18 @@ public class RoleController {
     @PostMapping
     public ResponseEntity<?> createRole(@RequestBody CreateRoleRequest request) {
         RoleDto roleDto = roleService.createRole(request);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, roleDto);
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getRoles() {
+        List<RoleDto> roleDtoList = roleService.getRoles();
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, roleDtoList);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getRole(@PathVariable Integer id) {
+        RoleDto roleDto = roleService.getRole(id);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, roleDto);
     }
 

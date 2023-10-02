@@ -1,7 +1,6 @@
 package com.ercanbeyen.movieapplication.controller;
 
 import com.ercanbeyen.movieapplication.dto.AudienceDto;
-import com.ercanbeyen.movieapplication.dto.request.create.CreateAudienceRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateAudienceRequest;
 import com.ercanbeyen.movieapplication.service.AudienceService;
 import com.ercanbeyen.movieapplication.util.ResponseHandler;
@@ -18,7 +17,7 @@ public class AudienceController {
     private final AudienceService audienceService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getActor(@PathVariable Integer id) {
+    public ResponseEntity<?> getAudience(@PathVariable Integer id) {
         AudienceDto audienceDto = audienceService.getAudience(id);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, audienceDto);
     }
