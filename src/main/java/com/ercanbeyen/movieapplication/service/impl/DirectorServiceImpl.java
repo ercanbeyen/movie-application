@@ -1,6 +1,7 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
 import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
+import com.ercanbeyen.movieapplication.constant.enums.RoleName;
 import com.ercanbeyen.movieapplication.constant.message.*;
 import com.ercanbeyen.movieapplication.constant.names.ParameterNames;
 import com.ercanbeyen.movieapplication.constant.names.ResourceNames;
@@ -13,6 +14,7 @@ import com.ercanbeyen.movieapplication.dto.request.update.UpdateDirectorRequest;
 import com.ercanbeyen.movieapplication.entity.Director;
 import com.ercanbeyen.movieapplication.exception.ResourceNotFoundException;
 import com.ercanbeyen.movieapplication.repository.DirectorRepository;
+import com.ercanbeyen.movieapplication.service.AuthenticationService;
 import com.ercanbeyen.movieapplication.service.DirectorService;
 import com.ercanbeyen.movieapplication.dto.PageDto;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,7 @@ import java.util.stream.Collectors;
 public class DirectorServiceImpl implements DirectorService {
     private final DirectorRepository directorRepository;
     private final DirectorDtoConverter directorDtoConverter;
+    private final AuthenticationService authenticationService;
 
     @Override
     public DirectorDto createDirector(CreateDirectorRequest request) {
@@ -56,6 +59,10 @@ public class DirectorServiceImpl implements DirectorService {
 
     @Override
     public PageDto<Director, DirectorDto> filterDirectors(DirectorFilteringOptions filteringOptions, OrderBy orderBy, String limit, Pageable pageable) {
+        String loggedInAudienceUsername = authenticationService.getUsername();
+        List<RoleName> loggedInAudienceRoles = authenticationService.getRoles();
+        log.info("Username: {} - Roles: {}", loggedInAudienceUsername, loggedInAudienceRoles);
+
         log.info(LogMessages.STARTED, "filterDirectors");
         Page<Director> directorPage = directorRepository.findAll(pageable);
         log.info(LogMessages.FETCHED_ALL, ResourceNames.DIRECTOR);

@@ -4,11 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 
 @NoArgsConstructor
@@ -42,16 +40,7 @@ public non-sealed class Audience extends Base implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Set<GrantedAuthority> authorities = new HashSet<>();
-
-        roles.forEach(
-                role -> {
-                    SimpleGrantedAuthority authority = new SimpleGrantedAuthority(role.getRoleName().name());
-                    authorities.add(authority);
-                }
-        );
-
-        return authorities;
+        return roles;
     }
 
     @Override
