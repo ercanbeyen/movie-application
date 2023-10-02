@@ -1,6 +1,7 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
 import com.ercanbeyen.movieapplication.constant.enums.RoleName;
+import com.ercanbeyen.movieapplication.constant.message.ActionMessages;
 import com.ercanbeyen.movieapplication.constant.message.LogMessages;
 import com.ercanbeyen.movieapplication.constant.message.ResponseMessages;
 import com.ercanbeyen.movieapplication.constant.names.ResourceNames;
@@ -9,7 +10,7 @@ import com.ercanbeyen.movieapplication.dto.converter.RoleDtoConverter;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateRoleRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateRoleRequest;
 import com.ercanbeyen.movieapplication.entity.Role;
-import com.ercanbeyen.movieapplication.exception.ResourceAlreadyExists;
+import com.ercanbeyen.movieapplication.exception.ResourceConflictException;
 import com.ercanbeyen.movieapplication.exception.ResourceNotFoundException;
 import com.ercanbeyen.movieapplication.repository.RoleRepository;
 import com.ercanbeyen.movieapplication.service.RoleService;
@@ -34,7 +35,7 @@ public class RoleServiceImpl implements RoleService {
         Optional<Role> roleInDb = roleRepository.findByRoleName(roleName);
 
         if (roleInDb.isPresent()) {
-            throw new ResourceAlreadyExists(String.format(ResponseMessages.ALREADY_EXISTS, ResourceNames.ROLE, request.getRoleName()));
+            throw new ResourceConflictException(String.format(ResponseMessages.ALREADY_EXISTS, ResourceNames.ROLE, request.getRoleName()));
         }
 
         Role newRole = new Role();
@@ -46,9 +47,8 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public RoleDto updateRole(Integer id, UpdateRoleRequest request) {
-        Role roleInDb = roleRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ROLE, id)));
-
+        log.info(LogMessages.STARTED, "updateRole");
+        Role roleInDb = findRoleById(id);
         RoleName roleName = request.getRoleName();
         Role updatedRole;
 
@@ -58,16 +58,37 @@ public class RoleServiceImpl implements RoleService {
             log.info(LogMessages.SAVED, ResourceNames.ROLE);
         } catch (Exception exception) {
             log.error("{} {} is not found", ResourceNames.ROLE, request.getRoleName());
-            throw new ResourceAlreadyExists(String.format(ResponseMessages.ALREADY_EXISTS, ResourceNames.ROLE, request.getRoleName()));
+            throw new ResourceConflictException(String.format(ResponseMessages.ALREADY_EXISTS, ResourceNames.ROLE, request.getRoleName()));
         }
 
         return roleDtoConverter.convert(updatedRole);
     }
 
     @Override
-    public Role getRoleByRoleName(RoleName roleName) {
-        log.info(LogMessages.STARTED, "getRoleByRoleName");
+    public String deleteRole(Integer id) {
+        log.info(LogMessages.STARTED, "deleteRole");
+        Role roleInDb = findRoleById(id);
+
+        if (!roleInDb.getAudienceSet().isEmpty()) {
+            log.error("{} {} includes {}s", ResourceNames.ROLE, id, ResourceNames.AUDIENCE);
+            throw new ResourceConflictException(ResourceNames.ROLE + " cannot be deleted unless it does not include any " + ResourceNames.AUDIENCE);
+        }
+
+        roleRepository.deleteById(id);
+
+        return String.format(ResponseMessages.SUCCESS, ResourceNames.ROLE, id, ActionMessages.DELETED);
+    }
+
+    @Override
+    public Role findRoleByRoleName(RoleName roleName) {
+        log.info(LogMessages.STARTED, "findRoleByRoleName");
         return roleRepository.findByRoleName(roleName)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ROLE, roleName)));
+    }
+
+    private Role findRoleById(Integer id) {
+        log.info(LogMessages.STARTED, "findRoleById");
+        return roleRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ROLE, id)));
     }
 }

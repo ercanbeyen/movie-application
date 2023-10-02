@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -22,4 +23,6 @@ public class Role implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(unique = true, nullable = false)
     private RoleName roleName;
+    @ManyToMany(mappedBy = "roles", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    private Set<Audience> audienceSet;
 }

@@ -22,13 +22,22 @@ public non-sealed class Audience extends Base implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     @Setter
-    @Column(unique = true)
+    @Column(unique = true, length = 100)
     private String username;
     @Setter
     private String password;
     @Setter
     @Getter
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @JoinTable(
+            name = "audience_roles",
+            joinColumns = {
+                    @JoinColumn(name = "audience_id")
+            },
+            inverseJoinColumns = {
+                    @JoinColumn(name = "role_id")
+            }
+    )
     private Set<Role> roles;
 
     @Override

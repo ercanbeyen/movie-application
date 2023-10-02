@@ -27,4 +27,10 @@ public class RoleController {
         RoleDto roleDto = roleService.updateRole(id, request);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, roleDto);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteRole(@PathVariable Integer id) {
+        String message = roleService.deleteRole(id);
+        return ResponseHandler.generateResponse(HttpStatus.OK, message, null);
+    }
 }

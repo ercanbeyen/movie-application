@@ -9,5 +9,6 @@ import com.ercanbeyen.movieapplication.entity.Role;
 public interface RoleService {
     RoleDto createRole(CreateRoleRequest request);
     RoleDto updateRole(Integer id, UpdateRoleRequest request);
-    Role getRoleByRoleName(RoleName roleName);
+    String deleteRole(Integer id);
+    Role findRoleByRoleName(RoleName roleName);
 }

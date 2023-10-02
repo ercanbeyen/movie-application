@@ -36,7 +36,7 @@ There are 2 roles among audiences
 
 ### Tech Stack
 ---
-- Java 18
+- Java 21
 - Spring Boot
 - Spring Security
 - Spring Data JPA

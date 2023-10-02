@@ -37,7 +37,7 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
     @Override
     public AudienceDto createAudience(RegistrationRequest request) {
         log.info(LogMessages.STARTED, "createAudience");
-        Role role = roleService.getRoleByRoleName(RoleName.USER);
+        Role role = roleService.findRoleByRoleName(RoleName.USER);
         Set<Role> roleSet = Set.of(role);
 
         Audience newAudience = Audience.builder()

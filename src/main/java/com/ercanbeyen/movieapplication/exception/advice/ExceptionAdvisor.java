@@ -1,12 +1,13 @@
 package com.ercanbeyen.movieapplication.exception.advice;
 
-import com.ercanbeyen.movieapplication.exception.ResourceAlreadyExists;
+import com.ercanbeyen.movieapplication.exception.ResourceConflictException;
 import com.ercanbeyen.movieapplication.util.ResponseHandler;
 import com.ercanbeyen.movieapplication.exception.ResourceNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -21,7 +22,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class ExceptionAdvisor extends ResponseEntityExceptionHandler {
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, @NonNull HttpHeaders headers, @NonNull HttpStatusCode status, @NonNull WebRequest request) {
         Map<String, String> errors = new HashMap<>();
 
         ex.getBindingResult()
@@ -41,7 +42,7 @@ public class ExceptionAdvisor extends ResponseEntityExceptionHandler {
         return ResponseHandler.generateResponse(HttpStatus.NOT_FOUND, exception.getMessage(), null);
     }
 
-    @ExceptionHandler(ResourceAlreadyExists.class)
+    @ExceptionHandler(ResourceConflictException.class)
     public ResponseEntity<?> handleResourceAlreadyExists(Exception exception) {
         return ResponseHandler.generateResponse(HttpStatus.CONFLICT, exception.getMessage(), null);
     }
