@@ -26,7 +26,7 @@ public class SecurityConfig {
                 .csrf().disable()
                 .authorizeHttpRequests()
                 .requestMatchers("/api/v1/registration", "/login").permitAll()
-                .requestMatchers("/api/v1/movies/**", "/api/v1/directors/**", "/api/v1/actors/**", "/api/v1/cinemas/**", "/api/v1/audiences/**").hasAnyAuthority(RoleName.USER.name())
+                .requestMatchers("/api/v1/movies/**", "/api/v1/directors/**", "/api/v1/actors/**", "/api/v1/cinemas/**", "/api/v1/audiences/**").hasAnyAuthority(RoleName.USER.name(), RoleName.ADMIN.name())
                 .requestMatchers("/api/v1/roles/**").hasAnyAuthority(RoleName.ADMIN.name())
                 .anyRequest().authenticated()
                 .and()

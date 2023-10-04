@@ -10,6 +10,7 @@ import com.ercanbeyen.movieapplication.dto.request.auth.RegistrationRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateAudienceRequest;
 import com.ercanbeyen.movieapplication.entity.Audience;
 import com.ercanbeyen.movieapplication.entity.Role;
+import com.ercanbeyen.movieapplication.exception.ResourceForbiddenException;
 import com.ercanbeyen.movieapplication.exception.ResourceNotFoundException;
 import com.ercanbeyen.movieapplication.repository.AudienceRepository;
 import com.ercanbeyen.movieapplication.service.AudienceService;
@@ -66,12 +67,17 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
     }
 
     @Override
-    public AudienceDto updateAudience(Integer id, UpdateAudienceRequest request) {
+    public AudienceDto updateAudience(Integer id, UpdateAudienceRequest request, UserDetails userDetails) {
         log.info(LogMessages.STARTED, "updateAudience");
-        Audience audienceInDb = audienceRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.AUDIENCE, id)));
+        Audience audienceInDb = findAudienceById(id);
         log.info(LogMessages.FETCHED, ResourceNames.AUDIENCE);
 
+        if (!audienceInDb.getUsername().equals(userDetails.getUsername())) {
+            throw new ResourceForbiddenException(ResponseMessages.FORBIDDEN);
+        }
+
+        audienceInDb.setUsername(request.getUsername());
+        audienceInDb.setPassword(passwordEncoder.encode(request.getPassword()));
         audienceInDb.setName(request.getName());
         audienceInDb.setSurname(request.getSurname());
         audienceInDb.setNationality(request.getNationality());
@@ -86,12 +92,12 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
     }
 
     @Override
-    public void deleteAudience(Integer id) {
+    public void deleteAudience(Integer id, UserDetails userDetails) {
         log.info(LogMessages.STARTED, "deleteAudience");
-        boolean audienceExists = audienceRepository.existsById(id);
+        Audience audienceInDb = findAudienceById(id);
 
-        if (!audienceExists) {
-            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.AUDIENCE, id));
+        if (!audienceInDb.getUsername().equals(userDetails.getUsername())) {
+            throw new ResourceForbiddenException(ResponseMessages.FORBIDDEN);
         }
 
         log.info(LogMessages.EXISTS, ResourceNames.AUDIENCE);
@@ -105,5 +111,11 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.AUDIENCE, username)));
 
         return new User(username, audience.getPassword(), audience.getAuthorities());
+    }
+
+    private Audience findAudienceById(Integer id) {
+        log.info(LogMessages.STARTED, "findAudienceById");
+        return audienceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.AUDIENCE, id)));
     }
 }

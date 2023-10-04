@@ -1,6 +1,7 @@
 package com.ercanbeyen.movieapplication.exception.advice;
 
 import com.ercanbeyen.movieapplication.exception.ResourceConflictException;
+import com.ercanbeyen.movieapplication.exception.ResourceForbiddenException;
 import com.ercanbeyen.movieapplication.util.ResponseHandler;
 import com.ercanbeyen.movieapplication.exception.ResourceNotFoundException;
 import org.springframework.http.HttpHeaders;
@@ -35,6 +36,11 @@ public class ExceptionAdvisor extends ResponseEntityExceptionHandler {
                         });
 
         return ResponseHandler.generateResponse(HttpStatus.BAD_REQUEST, null, errors);
+    }
+
+    @ExceptionHandler(ResourceForbiddenException.class)
+    public ResponseEntity<?> handleResourceForbiddenException(Exception exception) {
+        return ResponseHandler.generateResponse(HttpStatus.FORBIDDEN, exception.getMessage(), null);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)

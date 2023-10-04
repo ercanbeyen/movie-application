@@ -8,6 +8,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,14 +25,14 @@ public class AudienceController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateAudience(@PathVariable Integer id, @RequestBody @Valid UpdateAudienceRequest request) {
-        AudienceDto audienceDto = audienceService.updateAudience(id, request);
+    public ResponseEntity<?> updateAudience(@PathVariable Integer id, @RequestBody @Valid UpdateAudienceRequest request, @AuthenticationPrincipal UserDetails userDetails) {
+        AudienceDto audienceDto = audienceService.updateAudience(id, request, userDetails);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, audienceDto);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteAudience(@PathVariable Integer id) {
-        audienceService.deleteAudience(id);
+    public ResponseEntity<?> deleteAudience(@PathVariable Integer id, @AuthenticationPrincipal UserDetails userDetails) {
+        audienceService.deleteAudience(id, userDetails);
         return ResponseHandler.generateResponse(HttpStatus.NO_CONTENT, null, null);
     }
 }
