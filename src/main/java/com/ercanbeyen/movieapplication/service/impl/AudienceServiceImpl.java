@@ -10,11 +10,11 @@ import com.ercanbeyen.movieapplication.dto.request.auth.RegistrationRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateAudienceRequest;
 import com.ercanbeyen.movieapplication.entity.Audience;
 import com.ercanbeyen.movieapplication.entity.Role;
-import com.ercanbeyen.movieapplication.exception.ResourceForbiddenException;
 import com.ercanbeyen.movieapplication.exception.ResourceNotFoundException;
 import com.ercanbeyen.movieapplication.repository.AudienceRepository;
 import com.ercanbeyen.movieapplication.service.AudienceService;
 import com.ercanbeyen.movieapplication.service.RoleService;
+import com.ercanbeyen.movieapplication.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.User;
@@ -62,7 +62,7 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
     public AudienceDto getAudience(Integer id) {
         log.info(LogMessages.STARTED, "getAudience");
         Audience audienceInDb = audienceRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.AUDIENCE, id)));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ACTOR)));
         return audienceDtoConverter.convert(audienceInDb);
     }
 
@@ -70,11 +70,8 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
     public AudienceDto updateAudience(Integer id, UpdateAudienceRequest request, UserDetails userDetails) {
         log.info(LogMessages.STARTED, "updateAudience");
         Audience audienceInDb = findAudienceById(id);
-        log.info(LogMessages.FETCHED, ResourceNames.AUDIENCE);
 
-        if (!audienceInDb.getUsername().equals(userDetails.getUsername())) {
-            throw new ResourceForbiddenException(ResponseMessages.FORBIDDEN);
-        }
+        SecurityUtil.checkUserLoggedIn(audienceInDb, userDetails);
 
         audienceInDb.setUsername(request.getUsername());
         audienceInDb.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -96,9 +93,7 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
         log.info(LogMessages.STARTED, "deleteAudience");
         Audience audienceInDb = findAudienceById(id);
 
-        if (!audienceInDb.getUsername().equals(userDetails.getUsername())) {
-            throw new ResourceForbiddenException(ResponseMessages.FORBIDDEN);
-        }
+        SecurityUtil.checkUserLoggedIn(audienceInDb, userDetails);
 
         log.info(LogMessages.EXISTS, ResourceNames.AUDIENCE);
         audienceRepository.deleteById(id);
