@@ -24,6 +24,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -36,7 +37,7 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
     private final RoleService roleService;
 
     @Override
-    public AudienceDto createAudience(RegistrationRequest request) {
+    public void createAudience(RegistrationRequest request) {
         log.info(LogMessages.STARTED, "createAudience");
         Role role = roleService.findRoleByRoleName(RoleName.USER);
         Set<Role> roleSet = Set.of(role);
@@ -52,17 +53,14 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
                 .biography(request.biography())
                 .build();
 
-        Audience savedAudience = audienceRepository.save(newAudience);
+        audienceRepository.save(newAudience);
         log.info(LogMessages.SAVED, ResourceNames.AUDIENCE);
-
-        return audienceDtoConverter.convert(savedAudience);
     }
 
     @Override
     public AudienceDto getAudience(Integer id) {
         log.info(LogMessages.STARTED, "getAudience");
-        Audience audienceInDb = audienceRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ACTOR)));
+        Audience audienceInDb = findAudienceById(id);
         return audienceDtoConverter.convert(audienceInDb);
     }
 
@@ -103,14 +101,21 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Audience audience = audienceRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.AUDIENCE, username)));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.AUDIENCE)));
 
         return new User(username, audience.getPassword(), audience.getAuthorities());
     }
 
     private Audience findAudienceById(Integer id) {
         log.info(LogMessages.STARTED, "findAudienceById");
-        return audienceRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.AUDIENCE, id)));
+        Optional<Audience> optionalAudience = audienceRepository.findById(id);
+
+        if (optionalAudience.isEmpty()) {
+            log.error(LogMessages.RESOURCE_NOT_FOUND, ResourceNames.AUDIENCE, id);
+            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.AUDIENCE));
+        }
+
+        log.info(LogMessages.RESOURCE_FOUND, ResourceNames.AUDIENCE, id);
+        return optionalAudience.get();
     }
 }

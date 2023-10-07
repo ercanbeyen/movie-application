@@ -74,7 +74,6 @@ public class CinemaServiceImpl implements CinemaService {
                 searchOptions.getParking_place(),
                 searchOptions.getAir_conditioning(),
                 searchOptions.getCafe_food());
-        log.info(LogMessages.FETCHED, ResourceNames.CINEMA);
 
         return cinemas.stream()
                 .map(cinemaDtoConverter::convert)
@@ -85,7 +84,6 @@ public class CinemaServiceImpl implements CinemaService {
     public CinemaDto getCinema(String id) {
         log.info(LogMessages.STARTED, "getCinema");
         Cinema cinemaInDb = findCinemaById(id);
-        log.info(LogMessages.FETCHED, ResourceNames.CINEMA);
         return cinemaDtoConverter.convert(cinemaInDb);
     }
 
@@ -93,7 +91,6 @@ public class CinemaServiceImpl implements CinemaService {
     public CinemaDto updateCinema(String id, UpdateCinemaRequest request) {
         log.info(LogMessages.STARTED, "updateCinema");
         Cinema cinemaInDb = findCinemaById(id);
-        log.info(LogMessages.FETCHED, ResourceNames.CINEMA);
 
         cinemaInDb.setName(request.getName());
         cinemaInDb.setCountry(request.getCountry());
@@ -120,14 +117,14 @@ public class CinemaServiceImpl implements CinemaService {
         boolean cinemaExists = cinemaRepository.existsById(id);
 
         if (!cinemaExists) {
-            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE, id));
+            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE));
         }
 
         log.info(LogMessages.EXISTS, ResourceNames.CINEMA);
         cinemaRepository.deleteById(id);
         log.info(LogMessages.DELETED, ResourceNames.CINEMA);
 
-        return String.format(ResponseMessages.SUCCESS, ResourceNames.CINEMA, id, ActionMessages.DELETED);
+        return ResponseMessages.SUCCESS;
     }
 
     @Override
@@ -277,7 +274,15 @@ public class CinemaServiceImpl implements CinemaService {
     }
 
     private Cinema findCinemaById(String id) {
-        return cinemaRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.CINEMA, id)));
+        log.info(LogMessages.STARTED, "findCinemaById");
+        Optional<Cinema> optionalCinema = cinemaRepository.findById(id);
+
+        if (optionalCinema.isEmpty()) {
+            log.error(LogMessages.RESOURCE_NOT_FOUND, ResourceNames.CINEMA, id);
+            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.CINEMA));
+        }
+
+        log.info(LogMessages.RESOURCE_FOUND, ResourceNames.CINEMA, id);
+        return optionalCinema.get();
     }
 }

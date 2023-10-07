@@ -1,7 +1,6 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
 import com.ercanbeyen.movieapplication.constant.enums.RoleName;
-import com.ercanbeyen.movieapplication.constant.message.ActionMessages;
 import com.ercanbeyen.movieapplication.constant.message.LogMessages;
 import com.ercanbeyen.movieapplication.constant.message.ResponseMessages;
 import com.ercanbeyen.movieapplication.constant.names.ResourceNames;
@@ -36,7 +35,7 @@ public class RoleServiceImpl implements RoleService {
         Optional<Role> roleInDb = roleRepository.findByRoleName(roleName);
 
         if (roleInDb.isPresent()) {
-            throw new ResourceConflictException(String.format(ResponseMessages.ALREADY_EXISTS, ResourceNames.ROLE, request.getRoleName()));
+            throw new ResourceConflictException(String.format(ResponseMessages.ALREADY_EXISTS, ResourceNames.ROLE));
         }
 
         Role newRole = new Role();
@@ -75,7 +74,7 @@ public class RoleServiceImpl implements RoleService {
             log.info(LogMessages.SAVED, ResourceNames.ROLE);
         } catch (Exception exception) {
             log.error("{} {} is not found", ResourceNames.ROLE, request.getRoleName());
-            throw new ResourceConflictException(String.format(ResponseMessages.ALREADY_EXISTS, ResourceNames.ROLE, request.getRoleName()));
+            throw new ResourceConflictException(String.format(ResponseMessages.ALREADY_EXISTS, ResourceNames.ROLE));
         }
 
         return roleDtoConverter.convert(updatedRole);
@@ -93,19 +92,19 @@ public class RoleServiceImpl implements RoleService {
 
         roleRepository.deleteById(id);
 
-        return String.format(ResponseMessages.SUCCESS, ResourceNames.ROLE, id, ActionMessages.DELETED);
+        return ResponseMessages.SUCCESS;
     }
 
     @Override
     public Role findRoleByRoleName(RoleName roleName) {
         log.info(LogMessages.STARTED, "findRoleByRoleName");
         return roleRepository.findByRoleName(roleName)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ROLE, roleName)));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ROLE)));
     }
 
     private Role findRoleById(Integer id) {
         log.info(LogMessages.STARTED, "findRoleById");
         return roleRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ROLE, id)));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ROLE)));
     }
 }

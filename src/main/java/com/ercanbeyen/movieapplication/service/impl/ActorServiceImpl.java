@@ -98,8 +98,7 @@ public class ActorServiceImpl implements ActorService {
     @Override
     public ActorDto getActor(Integer id) {
         log.info(LogMessages.STARTED, "getActor");
-        Actor actorInDb = getActorById(id);
-        log.info(LogMessages.FETCHED, ResourceNames.ACTOR);
+        Actor actorInDb = findActorById(id);
         return actorDtoConverter.convert(actorInDb);
     }
 
@@ -107,8 +106,7 @@ public class ActorServiceImpl implements ActorService {
     @Override
     public ActorDto updateActor(Integer id, UpdateActorRequest request) {
         log.info(LogMessages.STARTED, "updateActor");
-        Actor actorInDb = getActorById(id);
-        log.info(LogMessages.FETCHED, ResourceNames.ACTOR);
+        Actor actorInDb = findActorById(id);
 
         actorInDb.setName(request.getName());
         actorInDb.setSurname(request.getSurname());
@@ -130,14 +128,14 @@ public class ActorServiceImpl implements ActorService {
         boolean actorExists = actorRepository.existsById(id);
 
         if (!actorExists) {
-            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ACTOR, id));
+            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ACTOR));
         }
 
         log.info(LogMessages.EXISTS, ResourceNames.ACTOR);
         actorRepository.deleteById(id);
         log.info(LogMessages.DELETED, ResourceNames.ACTOR);
 
-        return String.format(ResponseMessages.SUCCESS, ResourceNames.ACTOR, id, ActionMessages.DELETED);
+        return ResponseMessages.SUCCESS;
     }
 
     @Cacheable(value = "actors")
@@ -165,12 +163,18 @@ public class ActorServiceImpl implements ActorService {
                 .toList();
     }
 
-
     @Override
     public Actor findActorById(Integer id) {
         log.info(LogMessages.STARTED, "findActorById");
-        return actorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ACTOR, id)));
+        Optional<Actor> optionalActor = actorRepository.findById(id);
+
+        if (optionalActor.isEmpty()) {
+            log.error(LogMessages.RESOURCE_NOT_FOUND, ResourceNames.ACTOR, id);
+            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ACTOR));
+        }
+
+        log.info(LogMessages.RESOURCE_FOUND, ResourceNames.ACTOR, id);
+        return optionalActor.get();
     }
 
     @Override
@@ -193,8 +197,4 @@ public class ActorServiceImpl implements ActorService {
         return new Statistics<>(ResourceNames.ACTOR, statisticsMap);
     }
 
-    private Actor getActorById(Integer id) {
-        return actorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ACTOR, id)));
-    }
 }

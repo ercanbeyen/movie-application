@@ -1,7 +1,6 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
 import com.ercanbeyen.movieapplication.constant.defaults.DefaultValues;
-import com.ercanbeyen.movieapplication.constant.message.ActionMessages;
 import com.ercanbeyen.movieapplication.constant.names.ResourceNames;
 import com.ercanbeyen.movieapplication.constant.message.ResponseMessages;
 import com.ercanbeyen.movieapplication.dto.MovieDto;
@@ -173,7 +172,7 @@ public class MovieServiceImplTest {
         RuntimeException exception = assertThrows(ResourceNotFoundException.class, () -> movieService.getMovie(id));
         String expected = exception.getMessage();
 
-        String actual = String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE, id);
+        String actual = String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE);
 
         assertEquals(expected, actual);
 
@@ -247,7 +246,7 @@ public class MovieServiceImplTest {
         request.setRating(2d);
         request.setSummary("Test-summary");
 
-        String expected = String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE, id);
+        String expected = String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE);
 
         when(movieRepository.findById(id)).thenReturn(movieOptional);
 
@@ -267,7 +266,7 @@ public class MovieServiceImplTest {
         Movie movie = movieList.get(0);
         int id = movie.getId();
 
-        String expected = String.format(ResponseMessages.SUCCESS, ResourceNames.MOVIE, id, ActionMessages.DELETED);
+        String expected = ResponseMessages.SUCCESS;
 
         when(movieRepository.existsById(id)).thenReturn(true);
 
@@ -284,7 +283,7 @@ public class MovieServiceImplTest {
     public void whenDeleteMovieCalledWithNotExistedId_itShouldThrowResourceNotFoundException() {
         int id = 15;
 
-        String expected = String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE, id);
+        String expected = String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE);
 
         when(movieRepository.existsById(id)).thenReturn(false);
 

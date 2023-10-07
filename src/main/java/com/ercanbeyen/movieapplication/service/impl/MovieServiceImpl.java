@@ -55,7 +55,7 @@ public class MovieServiceImpl implements MovieService {
 
         if (request.getDirectorId() != null) {
             director = directorService.findDirectorById(request.getDirectorId());
-            log.info(LogMessages.RESOURCE_FOUND);
+            log.info(LogMessages.RESOURCE_FOUND, ResourceNames.DIRECTOR, request.getDirectorId());
         } else {
             log.warn(LogMessages.SEARCH_SKIPPED, ResourceNames.DIRECTOR);
         }
@@ -126,7 +126,6 @@ public class MovieServiceImpl implements MovieService {
     public MovieDto getMovie(Integer id) {
         log.info(LogMessages.STARTED, "getMovie");
         Movie movieInDb = findMovieById(id);
-        log.info(LogMessages.FETCHED, ResourceNames.MOVIE);
         return movieDtoConverter.convert(movieInDb);
     }
 
@@ -137,7 +136,6 @@ public class MovieServiceImpl implements MovieService {
         log.info(LogMessages.STARTED, "updateMovie");
 
         Movie movieInDb = findMovieById(id);
-        log.info(LogMessages.FETCHED, ResourceNames.MOVIE);
 
         checkImdbId(movieInDb.getImdbId(), request.getImdbId());
         movieInDb.setImdbId(request.getImdbId());
@@ -145,7 +143,7 @@ public class MovieServiceImpl implements MovieService {
         if (request.getDirectorId() != null) {
             Director director = directorService.findDirectorById(request.getDirectorId());
             movieInDb.setDirector(director);
-            log.info(LogMessages.RESOURCE_FOUND);
+            log.info(LogMessages.RESOURCE_FOUND, ResourceNames.DIRECTOR, id);
         } else {
             log.warn(LogMessages.SEARCH_SKIPPED, ResourceNames.DIRECTOR);
         }
@@ -158,7 +156,7 @@ public class MovieServiceImpl implements MovieService {
                 Actor actorInDb = actorService.findActorById(actorId);
                 actorInDb.getMoviesPlayed().add(movieInDb);
                 actorSet.add(actorInDb);
-                log.info(LogMessages.RESOURCE_FOUND);
+                log.info(LogMessages.RESOURCE_FOUND, ResourceNames.ACTOR, id);
             }
 
             movieInDb.setActors(actorSet);
@@ -188,14 +186,14 @@ public class MovieServiceImpl implements MovieService {
         boolean movieExists = movieRepository.existsById(id);
 
         if (!movieExists) {
-            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE, id));
+            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE));
         }
 
         log.info(LogMessages.EXISTS, ResourceNames.MOVIE);
         movieRepository.deleteById(id);
         log.info(LogMessages.DELETED, ResourceNames.MOVIE);
 
-        return String.format(ResponseMessages.SUCCESS, ResourceNames.MOVIE, id, ActionMessages.DELETED);
+        return ResponseMessages.SUCCESS;
     }
 
     @Cacheable(value = "movies")
@@ -229,7 +227,7 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public MovieDto getMovie(String imdbId) {
         Movie movie = movieRepository.findByImdbId(imdbId)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE, imdbId)));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE)));
 
         return movieDtoConverter.convert(movie);
     }
@@ -237,8 +235,15 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public Movie findMovieById(Integer id) {
         log.info(LogMessages.STARTED, "findMovieById");
-        return movieRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE, id)));
+        Optional<Movie> optionalMovie = movieRepository.findById(id);
+
+        if (optionalMovie.isEmpty()) {
+            log.error(LogMessages.RESOURCE_NOT_FOUND, ResourceNames.MOVIE, id);
+            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE));
+        }
+
+        log.info(LogMessages.RESOURCE_FOUND, ResourceNames.MOVIE, id);
+        return optionalMovie.get();
     }
 
     @Override
@@ -286,7 +291,7 @@ public class MovieServiceImpl implements MovieService {
         }
 
         if (movieRepository.existsByImdbId(newImdbId)) {
-            throw new ResourceNotFoundException(String.format(ResponseMessages.ALREADY_EXISTS, ResourceNames.MOVIE, newImdbId));
+            throw new ResourceNotFoundException(String.format(ResponseMessages.ALREADY_EXISTS, ResourceNames.MOVIE));
         }
 
         log.info("imdbId check is passed");
