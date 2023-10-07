@@ -131,7 +131,7 @@ public class ActorServiceImpl implements ActorService {
             throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ACTOR));
         }
 
-        log.info(LogMessages.EXISTS, ResourceNames.ACTOR);
+        log.info(LogMessages.RESOURCE_FOUND, ResourceNames.ACTOR);
         actorRepository.deleteById(id);
         log.info(LogMessages.DELETED, ResourceNames.ACTOR);
 

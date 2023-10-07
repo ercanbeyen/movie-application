@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class RegistrationController {
     private final RegistrationService registrationService;
+
     @PostMapping
     public ResponseEntity<?> registerAudience(@RequestBody @Valid RegistrationRequest request) {
         String registrationResponse = registrationService.registerAudience(request);

@@ -120,7 +120,7 @@ public class CinemaServiceImpl implements CinemaService {
             throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE));
         }
 
-        log.info(LogMessages.EXISTS, ResourceNames.CINEMA);
+        log.info(LogMessages.RESOURCE_FOUND, ResourceNames.CINEMA);
         cinemaRepository.deleteById(id);
         log.info(LogMessages.DELETED, ResourceNames.CINEMA);
 

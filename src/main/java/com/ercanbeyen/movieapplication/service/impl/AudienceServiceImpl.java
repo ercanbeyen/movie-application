@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -93,9 +94,26 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
 
         SecurityUtil.checkUserLoggedIn(audienceInDb, userDetails);
 
-        log.info(LogMessages.EXISTS, ResourceNames.AUDIENCE);
         audienceRepository.deleteById(id);
         log.info(LogMessages.DELETED, ResourceNames.AUDIENCE);
+    }
+
+    @Override
+    public String updateRolesOfAudience(Integer id, Set<RoleName> roleNames) {
+        log.info(LogMessages.STARTED, "updateRolesOfAudience");
+        Audience audienceInDb = findAudienceById(id);
+
+        Set<Role> roleSet = roleNames.stream()
+                .map(roleService::findRoleByRoleName)
+                .collect(Collectors.toSet());
+
+        audienceInDb.setRoles(roleSet);
+        log.info(LogMessages.FIELDS_SET);
+
+        audienceRepository.save(audienceInDb);
+        log.info(LogMessages.SAVED, ResourceNames.AUDIENCE);
+
+        return ResponseMessages.SUCCESS;
     }
 
     @Override

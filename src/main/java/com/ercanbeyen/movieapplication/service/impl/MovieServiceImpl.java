@@ -189,7 +189,7 @@ public class MovieServiceImpl implements MovieService {
             throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE));
         }
 
-        log.info(LogMessages.EXISTS, ResourceNames.MOVIE);
+        log.info(LogMessages.RESOURCE_FOUND, ResourceNames.MOVIE);
         movieRepository.deleteById(id);
         log.info(LogMessages.DELETED, ResourceNames.MOVIE);
 

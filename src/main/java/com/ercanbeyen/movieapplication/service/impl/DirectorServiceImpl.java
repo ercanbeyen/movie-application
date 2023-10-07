@@ -133,7 +133,7 @@ public class DirectorServiceImpl implements DirectorService {
             throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.DIRECTOR));
         }
 
-        log.info(LogMessages.EXISTS, ResourceNames.DIRECTOR);
+        log.info(LogMessages.RESOURCE_FOUND, ResourceNames.DIRECTOR);
         directorRepository.deleteById(id);
         log.info(LogMessages.DELETED, ResourceNames.DIRECTOR);
 
