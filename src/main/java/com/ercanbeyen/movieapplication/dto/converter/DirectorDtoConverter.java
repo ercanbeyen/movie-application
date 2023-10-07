@@ -13,7 +13,7 @@ public class DirectorDtoConverter {
                 .name(director.getName())
                 .surname(director.getSurname())
                 .nationality(director.getNationality())
-                .birthYear(director.getBirthYear())
+                .birthDate(director.getBirthDate())
                 .biography(director.getBiography())
                 .moviesDirected(director.getMoviesDirected()
                         .stream()

@@ -10,7 +10,7 @@ import java.util.Set;
 @Builder
 public record ActorDto(
         Integer id, String name, String surname, String nationality,
-        @JsonFormat(pattern = "yyyy-MM-dd") LocalDate birthYear,
+        @JsonFormat(pattern = "yyyy-MM-dd") LocalDate birthDate,
         Set<Integer> moviesPlayed) implements Serializable {
 
 }

@@ -10,6 +10,7 @@ import com.ercanbeyen.movieapplication.dto.request.auth.RegistrationRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateAudienceRequest;
 import com.ercanbeyen.movieapplication.entity.Audience;
 import com.ercanbeyen.movieapplication.entity.Role;
+import com.ercanbeyen.movieapplication.exception.ResourceConflictException;
 import com.ercanbeyen.movieapplication.exception.ResourceNotFoundException;
 import com.ercanbeyen.movieapplication.repository.AudienceRepository;
 import com.ercanbeyen.movieapplication.service.AudienceService;
@@ -50,7 +51,7 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
                 .name(request.name())
                 .surname(request.surname())
                 .nationality(request.nationality())
-                .birthYear(request.birthYear())
+                .birthDate(request.birthDate())
                 .biography(request.biography())
                 .build();
 
@@ -77,7 +78,7 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
         audienceInDb.setName(request.getName());
         audienceInDb.setSurname(request.getSurname());
         audienceInDb.setNationality(request.getNationality());
-        audienceInDb.setBirthYear(request.getBirthYear());
+        audienceInDb.setBirthDate(request.getBirthDate());
         audienceInDb.setBiography(request.getBiography());
         log.info(LogMessages.FIELDS_SET);
 
@@ -99,9 +100,18 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
     }
 
     @Override
-    public String updateRolesOfAudience(Integer id, Set<RoleName> roleNames) {
+    public String updateRolesOfAudience(Integer id, Set<RoleName> roleNames, UserDetails userDetails) {
         log.info(LogMessages.STARTED, "updateRolesOfAudience");
+
+        if (!roleNames.contains(RoleName.USER)) {
+            throw new ResourceConflictException(ResourceNames.ROLE + " " + RoleName.USER + " is mandatory");
+        }
+
         Audience audienceInDb = findAudienceById(id);
+
+        if (audienceInDb.getUsername().equals(userDetails.getUsername()) && !roleNames.contains(RoleName.ADMIN)) {
+            throw new ResourceConflictException("You cannot remove your " + RoleName.ADMIN + " " + ResourceNames.ROLE.toLowerCase());
+        }
 
         Set<Role> roleSet = roleNames.stream()
                 .map(roleService::findRoleByRoleName)

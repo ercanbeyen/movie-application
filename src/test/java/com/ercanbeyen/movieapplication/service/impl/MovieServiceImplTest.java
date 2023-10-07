@@ -55,7 +55,7 @@ public class MovieServiceImplTest {
                 .id(1)
                 .name("Test-name")
                 .surname("Test-surname")
-                .birthYear(LocalDate.of(2005, 2, 12))
+                .birthDate(LocalDate.of(2005, 2, 12))
                 .nationality("Test-nationality")
                 .biography("Test-biography")
                 .moviesDirected(new ArrayList<>())

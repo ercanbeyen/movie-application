@@ -43,7 +43,7 @@ public class ActorServiceImpl implements ActorService {
                 .name(request.getName())
                 .surname(request.getSurname())
                 .nationality(request.getNationality())
-                .birthYear(request.getBirthYear())
+                .birthDate(request.getBirthDate())
                 .biography(request.getBiography())
                 .moviesPlayed(new HashSet<>())
                 .build();
@@ -61,7 +61,7 @@ public class ActorServiceImpl implements ActorService {
         log.info(LogMessages.FETCHED_ALL, ResourceNames.ACTOR);
 
         Predicate<Actor> actorPredicate = (actor) -> ((filteringOptions.movieId() == null || filteringOptions.movieId().intValue() == filteringOptions.movieId().intValue())) && (StringUtils.isBlank(filteringOptions.nationality()) || actor.getNationality().equals(filteringOptions.nationality()))
-                && (filteringOptions.birthYear() == null || actor.getBirthYear().getYear() == filteringOptions.birthYear());
+                && (filteringOptions.birthYear() == null || actor.getBirthDate().getYear() == filteringOptions.birthYear());
 
         long maximumSize = Long.parseLong(limit);
         List<ActorDto> actorDtoList;
@@ -111,7 +111,7 @@ public class ActorServiceImpl implements ActorService {
         actorInDb.setName(request.getName());
         actorInDb.setSurname(request.getSurname());
         actorInDb.setNationality(request.getNationality());
-        actorInDb.setBirthYear(request.getBirthYear());
+        actorInDb.setBirthDate(request.getBirthDate());
         actorInDb.setBiography(request.getBiography());
         log.info(LogMessages.FIELDS_SET);
 

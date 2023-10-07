@@ -12,6 +12,6 @@ public record RegistrationRequest(
         @NotBlank(message = FieldNames.NAME + ValidationMessages.SHOULD_NOT_BLANK) String name,
         @NotBlank(message = FieldNames.SURNAME + ValidationMessages.SHOULD_NOT_BLANK) String surname,
         @NotBlank(message = FieldNames.NATIONALITY + ValidationMessages.SHOULD_NOT_BLANK) String nationality,
-        LocalDate birthYear, String biography) {
+        LocalDate birthDate, String biography) {
 
 }

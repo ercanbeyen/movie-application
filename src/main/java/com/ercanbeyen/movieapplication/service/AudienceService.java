@@ -13,5 +13,5 @@ public interface AudienceService {
     AudienceDto getAudience(Integer id);
     AudienceDto updateAudience(Integer id, UpdateAudienceRequest request, UserDetails userDetails);
     void deleteAudience(Integer id, UserDetails userDetails);
-    String updateRolesOfAudience(Integer id, Set<RoleName> roleNames);
+    String updateRolesOfAudience(Integer id, Set<RoleName> roleNames, UserDetails userDetails);
 }

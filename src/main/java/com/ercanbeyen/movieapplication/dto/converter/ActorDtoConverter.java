@@ -15,7 +15,7 @@ public class ActorDtoConverter {
                 .name(actor.getName())
                 .surname(actor.getSurname())
                 .nationality(actor.getNationality())
-                .birthYear(actor.getBirthYear())
+                .birthDate(actor.getBirthDate())
                 .moviesPlayed(actor.getMoviesPlayed()
                         .stream()
                         .map(Movie::getId)

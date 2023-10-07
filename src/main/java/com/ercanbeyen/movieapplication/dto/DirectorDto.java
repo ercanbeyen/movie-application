@@ -11,7 +11,7 @@ import java.util.List;
 public record DirectorDto(
         Integer id, String name,
         String surname, String nationality,
-        @JsonFormat(pattern = "yyyy-MM-dd") LocalDate birthYear,
+        @JsonFormat(pattern = "yyyy-MM-dd") LocalDate birthDate,
         String biography, List<Integer> moviesDirected) implements Serializable {
 
 }

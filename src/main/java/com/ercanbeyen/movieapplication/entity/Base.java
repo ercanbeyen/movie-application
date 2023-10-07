@@ -23,7 +23,7 @@ public sealed abstract class Base implements Serializable permits Actor, Directo
     @Column(length = 100)
     private String nationality;
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate birthYear;
+    private LocalDate birthDate;
     @Column(length = 1024)
     private String biography;
 }

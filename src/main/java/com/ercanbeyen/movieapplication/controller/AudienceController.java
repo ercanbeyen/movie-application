@@ -40,8 +40,8 @@ public class AudienceController {
     }
 
     @PutMapping("/{id}/roles")
-    public ResponseEntity<?> updateRolesOfAudience(@PathVariable Integer id, @RequestBody Set<RoleName> roleNames) {
-        String message = audienceService.updateRolesOfAudience(id, roleNames);
+    public ResponseEntity<?> updateRolesOfAudience(@PathVariable Integer id, @RequestBody Set<RoleName> roleNames, @AuthenticationPrincipal UserDetails userDetails) {
+        String message = audienceService.updateRolesOfAudience(id, roleNames, userDetails);
         return ResponseHandler.generateResponse(HttpStatus.OK, message, null);
     }
 }

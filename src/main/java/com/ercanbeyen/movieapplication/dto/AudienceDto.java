@@ -9,6 +9,6 @@ import java.time.LocalDate;
 @Builder
 public record AudienceDto(
         Integer id, String name, String surname, String nationality,
-        @JsonFormat(pattern = "yyyy-MM-dd") LocalDate birthYear) implements Serializable {
+        @JsonFormat(pattern = "yyyy-MM-dd") LocalDate birthDate) implements Serializable {
 
 }

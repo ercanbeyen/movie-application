@@ -43,7 +43,7 @@ public class DirectorServiceImpl implements DirectorService {
                 .name(request.getName())
                 .surname(request.getSurname())
                 .nationality(request.getNationality())
-                .birthYear(request.getBirthYear())
+                .birthDate(request.getBirthDate())
                 .biography(request.getBiography())
                 .moviesDirected(new ArrayList<>())
                 .build();
@@ -61,7 +61,7 @@ public class DirectorServiceImpl implements DirectorService {
         log.info(LogMessages.FETCHED_ALL, ResourceNames.DIRECTOR);
 
         Predicate<Director> directorPredicate = (director) -> ((StringUtils.isBlank(filteringOptions.nationality()) || director.getNationality().equals(filteringOptions.nationality()))
-                && (filteringOptions.birthYear() == null || director.getBirthYear().getYear() == filteringOptions.birthYear()));
+                && (filteringOptions.birthYear() == null || director.getBirthDate().getYear() == filteringOptions.birthYear()));
 
         long maximumSize = Long.parseLong(limit);
         List<DirectorDto> directorDtoList;
@@ -112,7 +112,7 @@ public class DirectorServiceImpl implements DirectorService {
         directorInDb.setName(request.getName());
         directorInDb.setSurname(request.getSurname());
         directorInDb.setNationality(request.getNationality());
-        directorInDb.setBirthYear(request.getBirthYear());
+        directorInDb.setBirthDate(request.getBirthDate());
         directorInDb.setBiography(request.getBiography());
         log.info(LogMessages.FIELDS_SET);
 
