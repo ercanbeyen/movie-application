@@ -4,6 +4,7 @@ import com.ercanbeyen.movieapplication.constant.enums.RoleName;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -26,7 +27,12 @@ public class SecurityConfig {
                 .csrf().disable()
                 .authorizeHttpRequests()
                 .requestMatchers("/api/v1/registration", "/login").permitAll()
-                .requestMatchers("/api/v1/movies/**", "/api/v1/directors/**", "/api/v1/actors/**", "/api/v1/cinemas/**", "/api/v1/audiences/**").hasAnyAuthority(RoleName.USER.name())
+                .requestMatchers("/api/v1/audience/{id}/roles").hasAnyAuthority(RoleName.ADMIN.name())
+                .requestMatchers("/api/v1/audiences/**").hasAnyAuthority(RoleName.USER.name())
+                .requestMatchers(HttpMethod.GET, "/api/v1/movies/**", "/api/v1/directors/**", "/api/v1/actors/**", "/api/v1/cinemas/**", "/api/v1/audiences/**").hasAnyAuthority(RoleName.USER.name())
+                .requestMatchers(HttpMethod.POST, "/api/v1/movies/**", "/api/v1/directors/**", "/api/v1/actors/**", "/api/v1/cinemas/**").hasAnyAuthority(RoleName.ADMIN.name())
+                .requestMatchers(HttpMethod.PUT, "/api/v1/movies/**", "/api/v1/directors/**", "/api/v1/actors/**", "/api/v1/cinemas/**").hasAnyAuthority(RoleName.ADMIN.name())
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/movies/**", "/api/v1/directors/**", "/api/v1/actors/**", "/api/v1/cinemas/**").hasAnyAuthority(RoleName.ADMIN.name())
                 .requestMatchers("/api/v1/roles/**").hasAnyAuthority(RoleName.ADMIN.name())
                 .anyRequest().authenticated()
                 .and()

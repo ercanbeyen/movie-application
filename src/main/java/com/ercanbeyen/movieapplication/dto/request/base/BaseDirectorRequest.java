@@ -19,6 +19,6 @@ public abstract class BaseDirectorRequest {
     private String surname;
     @NotBlank(message = FieldNames.NATIONALITY + ValidationMessages.SHOULD_NOT_BLANK)
     private String nationality;
-    private LocalDate birthYear;
+    private LocalDate birthDate;
     private String biography;
 }

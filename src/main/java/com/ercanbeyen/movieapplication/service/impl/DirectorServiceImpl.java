@@ -43,7 +43,7 @@ public class DirectorServiceImpl implements DirectorService {
                 .name(request.getName())
                 .surname(request.getSurname())
                 .nationality(request.getNationality())
-                .birthYear(request.getBirthYear())
+                .birthDate(request.getBirthDate())
                 .biography(request.getBiography())
                 .moviesDirected(new ArrayList<>())
                 .build();
@@ -61,7 +61,7 @@ public class DirectorServiceImpl implements DirectorService {
         log.info(LogMessages.FETCHED_ALL, ResourceNames.DIRECTOR);
 
         Predicate<Director> directorPredicate = (director) -> ((StringUtils.isBlank(filteringOptions.nationality()) || director.getNationality().equals(filteringOptions.nationality()))
-                && (filteringOptions.birthYear() == null || director.getBirthYear().getYear() == filteringOptions.birthYear()));
+                && (filteringOptions.birthYear() == null || director.getBirthDate().getYear() == filteringOptions.birthYear()));
 
         long maximumSize = Long.parseLong(limit);
         List<DirectorDto> directorDtoList;
@@ -99,7 +99,6 @@ public class DirectorServiceImpl implements DirectorService {
     public DirectorDto getDirector(Integer id) {
         log.info(LogMessages.STARTED, "getDirector");
         Director directorInDb = findDirectorById(id);
-        log.info(LogMessages.FETCHED, ResourceNames.DIRECTOR);
         return directorDtoConverter.convert(directorInDb);
     }
 
@@ -109,12 +108,11 @@ public class DirectorServiceImpl implements DirectorService {
         log.info(LogMessages.STARTED, "updateDirector");
 
         Director directorInDb = findDirectorById(id);
-        log.info(LogMessages.FETCHED, ResourceNames.DIRECTOR);
 
         directorInDb.setName(request.getName());
         directorInDb.setSurname(request.getSurname());
         directorInDb.setNationality(request.getNationality());
-        directorInDb.setBirthYear(request.getBirthYear());
+        directorInDb.setBirthDate(request.getBirthDate());
         directorInDb.setBiography(request.getBiography());
         log.info(LogMessages.FIELDS_SET);
 
@@ -132,14 +130,14 @@ public class DirectorServiceImpl implements DirectorService {
         boolean directorExists = directorRepository.existsById(id);
 
         if (!directorExists) {
-            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.DIRECTOR, id));
+            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.DIRECTOR));
         }
 
-        log.info(LogMessages.EXISTS, ResourceNames.DIRECTOR);
+        log.info(LogMessages.RESOURCE_FOUND, ResourceNames.DIRECTOR);
         directorRepository.deleteById(id);
         log.info(LogMessages.DELETED, ResourceNames.DIRECTOR);
 
-        return String.format(ResponseMessages.SUCCESS, ResourceNames.DIRECTOR, id, ActionMessages.DELETED);
+        return ResponseMessages.SUCCESS;
     }
 
     @Cacheable(value = "directors")
@@ -172,8 +170,15 @@ public class DirectorServiceImpl implements DirectorService {
     @Override
     public Director findDirectorById(Integer id) {
         log.info(LogMessages.STARTED, "findDirectorById");
-        return directorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.DIRECTOR, id)));
+        Optional<Director> optionalDirector = directorRepository.findById(id);
+
+        if (optionalDirector.isEmpty()) {
+            log.error(LogMessages.RESOURCE_NOT_FOUND, ResourceNames.DIRECTOR, id);
+            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.DIRECTOR));
+        }
+
+        log.info(LogMessages.RESOURCE_FOUND, ResourceNames.DIRECTOR, id);
+        return optionalDirector.get();
     }
 
     @Override

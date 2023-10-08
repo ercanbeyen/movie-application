@@ -4,11 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 
 @NoArgsConstructor
@@ -22,27 +20,27 @@ public non-sealed class Audience extends Base implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     @Setter
-    @Column(unique = true)
+    @Column(unique = true, length = 100)
     private String username;
     @Setter
     private String password;
     @Setter
     @Getter
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @JoinTable(
+            name = "audiences_roles",
+            joinColumns = {
+                    @JoinColumn(name = "audience_id")
+            },
+            inverseJoinColumns = {
+                    @JoinColumn(name = "role_id")
+            }
+    )
     private Set<Role> roles;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Set<GrantedAuthority> authorities = new HashSet<>();
-
-        roles.forEach(
-                role -> {
-                    SimpleGrantedAuthority authority = new SimpleGrantedAuthority(role.getRoleName().name());
-                    authorities.add(authority);
-                }
-        );
-
-        return authorities;
+        return roles;
     }
 
     @Override

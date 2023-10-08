@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.0.1</version>
+		<version>3.1.4</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.ercanbeyen</groupId>
@@ -14,12 +14,12 @@
 	<name>movie-application</name>
 	<description>Movie Application project for Spring Boot</description>
 	<properties>
-		<java.version>18</java.version>
-		<jedis.version>4.4.0-m1</jedis.version>
-		<openapi.version>2.0.2</openapi.version>
+		<java.version>21</java.version>
+		<jedis.version>4.4.3</jedis.version>
+		<openapi.version>2.2.0</openapi.version>
 		<elasticsearch.version>5.0.3</elasticsearch.version>
-		<elasticsearch-client.version>7.17.9</elasticsearch-client.version>
-		<junit.version>5.9.2</junit.version>
+		<elasticsearch-client.version>7.17.13</elasticsearch-client.version>
+		<junit.version>5.10.0</junit.version>
 		<jakson.version>2.15.2</jakson.version>
 		<spring-session-jdbc.version>3.1.2</spring-session-jdbc.version>
 	</properties>
@@ -114,7 +114,6 @@
 			<artifactId>spring-session-jdbc</artifactId>
 			<version>${spring-session-jdbc.version}</version>
 		</dependency>
-
 	</dependencies>
 
 	<build>

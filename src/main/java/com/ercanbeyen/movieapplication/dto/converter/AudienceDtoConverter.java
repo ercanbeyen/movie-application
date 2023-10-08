@@ -12,7 +12,7 @@ public class AudienceDtoConverter {
                 .name(audience.getName())
                 .surname(audience.getSurname())
                 .nationality(audience.getNationality())
-                .birthYear(audience.getBirthYear())
+                .birthDate(audience.getBirthDate())
                 .build();
     }
 }

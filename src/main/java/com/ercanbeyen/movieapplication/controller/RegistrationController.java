@@ -1,8 +1,6 @@
 package com.ercanbeyen.movieapplication.controller;
 
-import com.ercanbeyen.movieapplication.dto.AudienceDto;
 import com.ercanbeyen.movieapplication.dto.request.auth.RegistrationRequest;
-import com.ercanbeyen.movieapplication.dto.request.create.CreateAudienceRequest;
 import com.ercanbeyen.movieapplication.service.RegistrationService;
 import com.ercanbeyen.movieapplication.util.ResponseHandler;
 import jakarta.validation.Valid;
@@ -19,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class RegistrationController {
     private final RegistrationService registrationService;
+
     @PostMapping
     public ResponseEntity<?> registerAudience(@RequestBody @Valid RegistrationRequest request) {
         String registrationResponse = registrationService.registerAudience(request);

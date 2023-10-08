@@ -1,10 +1,7 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
-import com.ercanbeyen.movieapplication.constant.message.ActionMessages;
 import com.ercanbeyen.movieapplication.constant.message.LogMessages;
 import com.ercanbeyen.movieapplication.constant.message.ResponseMessages;
-import com.ercanbeyen.movieapplication.constant.names.ResourceNames;
-import com.ercanbeyen.movieapplication.dto.AudienceDto;
 import com.ercanbeyen.movieapplication.dto.request.auth.RegistrationRequest;
 import com.ercanbeyen.movieapplication.service.AudienceService;
 import com.ercanbeyen.movieapplication.service.RegistrationService;
@@ -21,7 +18,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     @Override
     public String registerAudience(RegistrationRequest request) {
         log.info(LogMessages.STARTED, "registerAudience");
-        AudienceDto audienceDto = audienceService.createAudience(request);
-        return String.format(ResponseMessages.SUCCESS, ResourceNames.AUDIENCE, audienceDto.id(), ActionMessages.REGISTERED);
+        audienceService.createAudience(request);
+        return ResponseMessages.SUCCESS;
     }
 }
