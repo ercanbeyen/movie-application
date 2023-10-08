@@ -39,7 +39,7 @@ public class AudienceController {
         return ResponseHandler.generateResponse(HttpStatus.NO_CONTENT, null, null);
     }
 
-    @PutMapping("/{id}/roles")
+    @PatchMapping("/{id}/roles")
     public ResponseEntity<?> updateRolesOfAudience(@PathVariable Integer id, @RequestBody Set<RoleName> roleNames, @AuthenticationPrincipal UserDetails userDetails) {
         String message = audienceService.updateRolesOfAudience(id, roleNames, userDetails);
         return ResponseHandler.generateResponse(HttpStatus.OK, message, null);

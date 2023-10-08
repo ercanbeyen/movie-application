@@ -28,7 +28,7 @@ public non-sealed class Audience extends Base implements UserDetails {
     @Getter
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(
-            name = "audience_roles",
+            name = "audiences_roles",
             joinColumns = {
                     @JoinColumn(name = "audience_id")
             },
