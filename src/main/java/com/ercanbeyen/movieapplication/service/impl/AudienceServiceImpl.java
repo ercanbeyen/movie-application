@@ -15,7 +15,6 @@ import com.ercanbeyen.movieapplication.exception.ResourceNotFoundException;
 import com.ercanbeyen.movieapplication.repository.AudienceRepository;
 import com.ercanbeyen.movieapplication.service.AudienceService;
 import com.ercanbeyen.movieapplication.service.RoleService;
-import com.ercanbeyen.movieapplication.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.User;
@@ -71,8 +70,6 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
         log.info(LogMessages.STARTED, "updateAudience");
         Audience audienceInDb = findAudienceById(id);
 
-        SecurityUtil.checkUserLoggedIn(audienceInDb, userDetails);
-
         audienceInDb.setUsername(request.getUsername());
         audienceInDb.setPassword(passwordEncoder.encode(request.getPassword()));
         audienceInDb.setName(request.getName());
@@ -92,9 +89,6 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
     public void deleteAudience(Integer id, UserDetails userDetails) {
         log.info(LogMessages.STARTED, "deleteAudience");
         Audience audienceInDb = findAudienceById(id);
-
-        SecurityUtil.checkUserLoggedIn(audienceInDb, userDetails);
-
         audienceRepository.deleteById(id);
         log.info(LogMessages.DELETED, ResourceNames.AUDIENCE);
     }

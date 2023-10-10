@@ -1,5 +1,6 @@
 package com.ercanbeyen.movieapplication.controller;
 
+import com.ercanbeyen.movieapplication.constant.annotation.CheckSelfAuthentication;
 import com.ercanbeyen.movieapplication.constant.enums.RoleName;
 import com.ercanbeyen.movieapplication.dto.AudienceDto;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateAudienceRequest;
@@ -27,14 +28,16 @@ public class AudienceController {
         return ResponseHandler.generateResponse(HttpStatus.OK, null, audienceDto);
     }
 
+    @CheckSelfAuthentication
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateAudience(@PathVariable Integer id, @RequestBody @Valid UpdateAudienceRequest request, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<?> updateAudience(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Integer id, @RequestBody @Valid UpdateAudienceRequest request) {
         AudienceDto audienceDto = audienceService.updateAudience(id, request, userDetails);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, audienceDto);
     }
 
+    @CheckSelfAuthentication
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteAudience(@PathVariable Integer id, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<?> deleteAudience(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Integer id) {
         audienceService.deleteAudience(id, userDetails);
         return ResponseHandler.generateResponse(HttpStatus.NO_CONTENT, null, null);
     }
