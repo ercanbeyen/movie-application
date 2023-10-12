@@ -43,8 +43,6 @@ public class CinemaServiceImpl implements CinemaService {
 
     @Override
     public CinemaDto createCinema(CreateCinemaRequest request) {
-        log.info(LogMessages.STARTED, "createCinema");
-
         Cinema newCinema = Cinema.builder()
                 .name(request.getName())
                 .country(request.getCountry())
@@ -67,7 +65,6 @@ public class CinemaServiceImpl implements CinemaService {
 
     @Override
     public List<CinemaDto> searchCinemasByStatus(CinemaSearchOptions searchOptions) {
-        log.info(LogMessages.STARTED, "searchCinemasByStatus");
         List<Cinema> cinemas = cinemaRepository.findByStatuses(
                 searchOptions.getReservation_with_phone(),
                 searchOptions.getThreeD_animation(),
@@ -82,14 +79,12 @@ public class CinemaServiceImpl implements CinemaService {
 
     @Override
     public CinemaDto getCinema(String id) {
-        log.info(LogMessages.STARTED, "getCinema");
         Cinema cinemaInDb = findCinemaById(id);
         return cinemaDtoConverter.convert(cinemaInDb);
     }
 
     @Override
     public CinemaDto updateCinema(String id, UpdateCinemaRequest request) {
-        log.info(LogMessages.STARTED, "updateCinema");
         Cinema cinemaInDb = findCinemaById(id);
 
         cinemaInDb.setName(request.getName());
@@ -113,7 +108,6 @@ public class CinemaServiceImpl implements CinemaService {
 
     @Override
     public String deleteCinema(String id) {
-        log.info(LogMessages.STARTED, "deleteCinema");
         boolean cinemaExists = cinemaRepository.existsById(id);
 
         if (!cinemaExists) {
@@ -129,8 +123,6 @@ public class CinemaServiceImpl implements CinemaService {
 
     @Override
     public List<SearchHitDto<CinemaDto, Cinema>> getCinemasByName(String searchTerm) {
-        log.info(LogMessages.STARTED, "getCinemasByName");
-
         List<SearchHit<Cinema>> searchHits = cinemaRepository.findByName(searchTerm)
                 .getSearchHits();
         log.info(LogMessages.FETCHED_ALL, ResourceNames.CINEMA);
@@ -140,8 +132,6 @@ public class CinemaServiceImpl implements CinemaService {
 
     @Override
     public List<SearchHitDto<CinemaDto, Cinema>> getCinemasByAddressLike(String searchTerm) {
-        log.info(LogMessages.STARTED, "getCinemasByAddressLike");
-
         Criteria criteria = new Criteria("address").expression("*" + searchTerm + "*");
         CriteriaQuery criteriaQuery = new CriteriaQuery(criteria);
 
@@ -154,8 +144,6 @@ public class CinemaServiceImpl implements CinemaService {
 
     @Override
     public PageDto<Cinema, CinemaDto> filterCinemas(CinemaFilteringOptions filteringOptions, String limit, Pageable pageable, String country) {
-        log.info(LogMessages.STARTED, "filterCinemas");
-
         Page<Cinema> cinemaPage = cinemaRepository.findAll(pageable);
         log.info(LogMessages.FETCHED_ALL, ResourceNames.CINEMA);
 
@@ -187,7 +175,6 @@ public class CinemaServiceImpl implements CinemaService {
 
     @Override
     public List<CinemaDto> findCinemasByHallRange(Integer lower, Integer higher) {
-        log.info(LogMessages.STARTED, "findCinemasByHallRange");
         List<Cinema> cinemas = new ArrayList<>();
 
         if (lower != null && higher != null) {
@@ -208,8 +195,6 @@ public class CinemaServiceImpl implements CinemaService {
 
     @Override
     public Statistics<String, String> calculateStatistics() {
-        log.info(LogMessages.STARTED, LogMessages.CALCULATE_STATISTICS);
-
         Map<String, String> statisticsMap = new HashMap<>();
         List<Cinema> cinemaList = StatisticsUtil.convertIterableToList(cinemaRepository.findAll());
 
@@ -259,7 +244,6 @@ public class CinemaServiceImpl implements CinemaService {
 
 
     public List<SearchHitDto<CinemaDto, Cinema>> convertSearchHitList(List<SearchHit<Cinema>> searchHits) {
-        log.info(LogMessages.STARTED, "convertSearchHitList");
         List<SearchHitDto<CinemaDto, Cinema>> searchHitDtoList = new ArrayList<>();
 
         searchHits.forEach(
@@ -274,7 +258,6 @@ public class CinemaServiceImpl implements CinemaService {
     }
 
     private Cinema findCinemaById(String id) {
-        log.info(LogMessages.STARTED, "findCinemaById");
         Optional<Cinema> optionalCinema = cinemaRepository.findById(id);
 
         if (optionalCinema.isEmpty()) {

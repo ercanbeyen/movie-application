@@ -15,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
 @Slf4j
 @Aspect
 @Component
@@ -23,10 +25,10 @@ public class AspectManagement {
     private final AudienceRepository audienceRepository;
 
     @Around("@annotation(com.ercanbeyen.movieapplication.constant.annotation.CheckSelfAuthentication) && target(bean)")
-    public ResponseEntity<?> checkSelfAuthentication(ProceedingJoinPoint joinPoint, Object bean) throws Throwable {
-        final String className = bean.getClass().getSimpleName();
-        final String methodName = joinPoint.getSignature().getName();
-        final Object[] args = joinPoint.getArgs();
+    public ResponseEntity<?> checkSelfAuthentication(ProceedingJoinPoint proceedingJoinPoint, Object bean) throws Throwable {
+        final String className = getClassName(bean);
+        final String methodName = getMethodName(proceedingJoinPoint);
+        final Object[] args = getArguments(proceedingJoinPoint);
 
         log.info("Class name: {} - method name: {}", className, methodName);
 
@@ -46,11 +48,41 @@ public class AspectManagement {
         message.append("same");
         log.info(message.toString());
 
-        Object result = joinPoint.proceed(args);
+        Object result = proceedingJoinPoint.proceed(args);
         ResponseEntity<?> response = (ResponseEntity<?>) result;
 
         log.info("Recent --> status: {}, body: {}", response.getStatusCode(), response.getBody());
 
         return response;
+    }
+
+    @Around("execution(* com.ercanbeyen.movieapplication.service..*(..)) && target(bean)")
+    public Object logStartAndEnd(ProceedingJoinPoint proceedingJoinPoint, Object bean) throws Throwable {
+        final String className = getClassName(bean);
+        final String methodName = getMethodName(proceedingJoinPoint);
+        Object[] args = getArguments(proceedingJoinPoint);
+
+        log.info("Starting method: {} in class {} with args: {}", methodName, className, args);
+        final Object result = proceedingJoinPoint.proceed();
+
+        if (Objects.nonNull(result)) {
+            log.info("End method: {} in class: {} return value: {}", methodName, className, result);
+        } else {
+            log.info("End void method: {} in class: {}", methodName, className);
+        }
+
+        return result;
+    }
+
+    String getClassName(Object object) {
+        return object.getClass().getSimpleName();
+    }
+
+    String getMethodName(ProceedingJoinPoint proceedingJoinPoint) {
+        return proceedingJoinPoint.getSignature().getName();
+    }
+
+    Object[] getArguments(ProceedingJoinPoint proceedingJoinPoint) {
+        return proceedingJoinPoint.getArgs();
     }
 }

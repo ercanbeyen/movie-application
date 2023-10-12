@@ -39,7 +39,6 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
 
     @Override
     public void createAudience(RegistrationRequest request) {
-        log.info(LogMessages.STARTED, "createAudience");
         Role role = roleService.findRoleByRoleName(RoleName.USER);
         Set<Role> roleSet = Set.of(role);
 
@@ -60,14 +59,12 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
 
     @Override
     public AudienceDto getAudience(Integer id) {
-        log.info(LogMessages.STARTED, "getAudience");
         Audience audienceInDb = findAudienceById(id);
         return audienceDtoConverter.convert(audienceInDb);
     }
 
     @Override
     public AudienceDto updateAudience(Integer id, UpdateAudienceRequest request, UserDetails userDetails) {
-        log.info(LogMessages.STARTED, "updateAudience");
         Audience audienceInDb = findAudienceById(id);
 
         audienceInDb.setUsername(request.getUsername());
@@ -87,7 +84,6 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
 
     @Override
     public void deleteAudience(Integer id, UserDetails userDetails) {
-        log.info(LogMessages.STARTED, "deleteAudience");
         Audience audienceInDb = findAudienceById(id);
         audienceRepository.deleteById(id);
         log.info(LogMessages.DELETED, ResourceNames.AUDIENCE);
@@ -95,8 +91,6 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
 
     @Override
     public String updateRolesOfAudience(Integer id, Set<RoleName> roleNames, UserDetails userDetails) {
-        log.info(LogMessages.STARTED, "updateRolesOfAudience");
-
         if (!roleNames.contains(RoleName.USER)) {
             throw new ResourceConflictException(ResourceNames.ROLE + " " + RoleName.USER + " is mandatory");
         }
@@ -129,7 +123,6 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
     }
 
     private Audience findAudienceById(Integer id) {
-        log.info(LogMessages.STARTED, "findAudienceById");
         Optional<Audience> optionalAudience = audienceRepository.findById(id);
 
         if (optionalAudience.isEmpty()) {

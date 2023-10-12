@@ -47,8 +47,6 @@ public class MovieServiceImpl implements MovieService {
     @CachePut(value = "movies", key = "#result.id")
     @Override
     public MovieDto createMovie(CreateMovieRequest request) {
-        log.info(LogMessages.STARTED, "createMovie");
-
         checkImdbId(null, request.getImdbId());
 
         Director director = null;
@@ -81,7 +79,6 @@ public class MovieServiceImpl implements MovieService {
     @CacheEvict(value = "movies", allEntries = true)
     @Override
     public PageDto<Movie, MovieDto> filterMovies(MovieFilteringOptions filteringOptions, OrderBy orderBy, String limit, Pageable pageable) {
-        log.info(LogMessages.STARTED, "filterMovies");
         Page<Movie> moviePage = movieRepository.findAll(pageable);
         log.info(LogMessages.FETCHED_ALL, ResourceNames.MOVIE);
 
@@ -124,7 +121,6 @@ public class MovieServiceImpl implements MovieService {
     @Cacheable(value = "movies", key = "#id", unless = "#result.releaseYear < 2020")
     @Override
     public MovieDto getMovie(Integer id) {
-        log.info(LogMessages.STARTED, "getMovie");
         Movie movieInDb = findMovieById(id);
         return movieDtoConverter.convert(movieInDb);
     }
@@ -133,8 +129,6 @@ public class MovieServiceImpl implements MovieService {
     @Transactional
     @Override
     public MovieDto updateMovie(Integer id, UpdateMovieRequest request) {
-        log.info(LogMessages.STARTED, "updateMovie");
-
         Movie movieInDb = findMovieById(id);
 
         checkImdbId(movieInDb.getImdbId(), request.getImdbId());
@@ -181,8 +175,6 @@ public class MovieServiceImpl implements MovieService {
     @CacheEvict(value = "movies", key = "#id")
     @Override
     public String deleteMovie(Integer id) {
-        log.info(LogMessages.STARTED, "deleteMovie");
-
         boolean movieExists = movieRepository.existsById(id);
 
         if (!movieExists) {
@@ -199,8 +191,6 @@ public class MovieServiceImpl implements MovieService {
     @Cacheable(value = "movies")
     @Override
     public List<MovieDto> getLatestMovies() {
-        log.info(LogMessages.STARTED, "getLatestMovies");
-
         List<Movie> movies = movieRepository.findAll();
         log.info(LogMessages.FETCHED_ALL, ResourceNames.MOVIE);
         int year = 2020;
@@ -213,8 +203,6 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public List<MovieDto> searchMovies(String title) {
-        log.info(LogMessages.STARTED, "searchMovies");
-
         List<Movie> movies = movieRepository.findByTitleStartingWith(title);
         log.info(LogMessages.FETCHED_ALL, ResourceNames.MOVIE);
 
@@ -234,7 +222,6 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public Movie findMovieById(Integer id) {
-        log.info(LogMessages.STARTED, "findMovieById");
         Optional<Movie> optionalMovie = movieRepository.findById(id);
 
         if (optionalMovie.isEmpty()) {
@@ -248,8 +235,6 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public Statistics<String, String> calculateStatistics() {
-        log.info(LogMessages.STARTED, LogMessages.CALCULATE_STATISTICS);
-
         Map<String, String> statisticsMap = new HashMap<>();
         List<Movie> movieList = movieRepository.findAll();
 
