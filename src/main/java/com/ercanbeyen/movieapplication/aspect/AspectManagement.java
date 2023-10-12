@@ -1,11 +1,9 @@
 package com.ercanbeyen.movieapplication.aspect;
 
 import com.ercanbeyen.movieapplication.constant.message.ResponseMessages;
-import com.ercanbeyen.movieapplication.constant.names.ResourceNames;
 import com.ercanbeyen.movieapplication.entity.Audience;
 import com.ercanbeyen.movieapplication.exception.ResourceForbiddenException;
-import com.ercanbeyen.movieapplication.exception.ResourceNotFoundException;
-import com.ercanbeyen.movieapplication.repository.AudienceRepository;
+import com.ercanbeyen.movieapplication.service.AudienceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -22,21 +20,19 @@ import java.util.Objects;
 @Component
 @RequiredArgsConstructor
 public class AspectManagement {
-    private final AudienceRepository audienceRepository;
+    private final AudienceService audienceService;
 
     @Around("@annotation(com.ercanbeyen.movieapplication.constant.annotation.CheckSelfAuthentication) && target(bean)")
-    public ResponseEntity<?> checkSelfAuthentication(ProceedingJoinPoint proceedingJoinPoint, Object bean) throws Throwable {
+    public Object checkSelfAuthentication(ProceedingJoinPoint proceedingJoinPoint, Object bean) throws Throwable {
         final String className = getClassName(bean);
         final String methodName = getMethodName(proceedingJoinPoint);
         final Object[] args = getArguments(proceedingJoinPoint);
 
         log.info("Class name: {} - method name: {}", className, methodName);
 
-       Integer id = (Integer) args[1];
-       UserDetails userDetails = (UserDetails) args[0];
-        Audience audience = audienceRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.AUDIENCE)));
-
+        Integer id = (Integer) args[1];
+        UserDetails userDetails = (UserDetails) args[0];
+        Audience audience = audienceService.findAudienceById(id);
         StringBuilder message = new StringBuilder("User in database and logged in user are ");
 
         if (!audience.getUsername().equals(userDetails.getUsername())) {

@@ -84,7 +84,6 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
 
     @Override
     public void deleteAudience(Integer id, UserDetails userDetails) {
-        Audience audienceInDb = findAudienceById(id);
         audienceRepository.deleteById(id);
         log.info(LogMessages.DELETED, ResourceNames.AUDIENCE);
     }
@@ -122,7 +121,7 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
         return new User(username, audience.getPassword(), audience.getAuthorities());
     }
 
-    private Audience findAudienceById(Integer id) {
+    public Audience findAudienceById(Integer id) {
         Optional<Audience> optionalAudience = audienceRepository.findById(id);
 
         if (optionalAudience.isEmpty()) {
