@@ -29,12 +29,13 @@ There are 2 roles among audiences
 - Each director and actor must have name, surname, nationality and birth year.
 - Each role's name must be unique.
 - Each cinema must have a name, country, city, address, contact number, hall amount and statuses (reservation, 3-D animation, parking place, air conditioning and cafe & food)
+- Admins may apply DML statements to movies only in allowed time periods.
 
 ### Additionals
 - If scheduling is enabled, then cron jobs work.
 - Statistical values can be observed for each entity and document. 
 - Directors and actors may appear in multiple movies.
-- Only admins may create, update or delete movie, actor, director and cinema entities.
+- Only admins may apply DML statement to movies, actors, directors and cinemas.
 - Admins may update roles of users.
 
 ### Tech Stack
@@ -43,6 +44,7 @@ There are 2 roles among audiences
 - Spring Boot
 - Spring Security
 - Spring Data JPA
+- Spring AOP
 - JUnit 5
 - PostgreSQL
 - Redis
