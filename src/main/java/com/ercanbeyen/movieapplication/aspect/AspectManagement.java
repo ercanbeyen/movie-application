@@ -2,6 +2,7 @@ package com.ercanbeyen.movieapplication.aspect;
 
 import com.ercanbeyen.movieapplication.constant.message.ResponseMessages;
 import com.ercanbeyen.movieapplication.entity.Audience;
+import com.ercanbeyen.movieapplication.exception.ResourceConflictException;
 import com.ercanbeyen.movieapplication.exception.ResourceForbiddenException;
 import com.ercanbeyen.movieapplication.service.AudienceService;
 import lombok.RequiredArgsConstructor;
@@ -9,11 +10,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 
 @Slf4j
@@ -84,6 +89,16 @@ public class AspectManagement {
         final long executionTime = stopWatch.getTotalTimeMillis();
         log.info("Execution time {} ms for method: {} in class: {}", executionTime, methodName, className);
         return result;
+    }
+
+    @Before("@annotation(com.ercanbeyen.movieapplication.constant.annotation.DMLAllowed)")
+    public void checkDMLStatementConditions() {
+        LocalDate currentDate = LocalDate.now();
+        List<DayOfWeek> allowedDayList = List.of(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY);
+
+        if (!allowedDayList.contains(currentDate.getDayOfWeek())) {
+            throw new ResourceConflictException("DML statements can only be applied in " + allowedDayList);
+        }
     }
 
     String getClassName(Object object) {

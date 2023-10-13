@@ -1,4 +1,4 @@
-package com.ercanbeyen.movieapplication.exception.advice;
+package com.ercanbeyen.movieapplication.advice;
 
 import com.ercanbeyen.movieapplication.exception.ResourceConflictException;
 import com.ercanbeyen.movieapplication.exception.ResourceForbiddenException;
@@ -49,7 +49,7 @@ public class ExceptionAdvisor extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(ResourceConflictException.class)
-    public ResponseEntity<?> handleResourceAlreadyExists(Exception exception) {
+    public ResponseEntity<?> handleResourceConflictException(Exception exception) {
         return ResponseHandler.generateResponse(HttpStatus.CONFLICT, exception.getMessage(), null);
     }
 

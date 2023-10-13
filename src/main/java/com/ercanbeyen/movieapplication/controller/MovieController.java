@@ -1,5 +1,6 @@
 package com.ercanbeyen.movieapplication.controller;
 
+import com.ercanbeyen.movieapplication.constant.annotation.DMLAllowed;
 import com.ercanbeyen.movieapplication.constant.annotation.LogExecutionTime;
 import com.ercanbeyen.movieapplication.constant.defaults.DefaultValues;
 import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
@@ -27,6 +28,7 @@ import java.util.List;
 public class MovieController {
     private final MovieService movieService;
 
+    @DMLAllowed
     @PostMapping
     public ResponseEntity<?> createMovie(@RequestBody @Valid CreateMovieRequest request) {
         MovieDto movieDto = movieService.createMovie(request);
@@ -46,12 +48,14 @@ public class MovieController {
         return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDto);
     }
 
+    @DMLAllowed
     @PutMapping("/{id}")
     public ResponseEntity<?> updateMovie(@PathVariable Integer id, @RequestBody @Valid UpdateMovieRequest request) {
         MovieDto movieDto = movieService.updateMovie(id, request);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDto);
     }
 
+    @DMLAllowed
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteMovie(@PathVariable Integer id) {
         String message = movieService.deleteMovie(id);
