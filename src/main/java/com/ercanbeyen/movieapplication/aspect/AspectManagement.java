@@ -12,6 +12,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StopWatch;
 
 import java.util.Objects;
 
@@ -22,7 +23,7 @@ import java.util.Objects;
 public class AspectManagement {
     private final AudienceService audienceService;
 
-    @Around("@annotation(com.ercanbeyen.movieapplication.constant.annotation.CheckSelfAuthentication) && target(bean)")
+    @Around("@annotation(com.ercanbeyen.movieapplication.constant.annotation.SelfAuthentication) && target(bean)")
     public Object checkSelfAuthentication(ProceedingJoinPoint proceedingJoinPoint, Object bean) throws Throwable {
         final String className = getClassName(bean);
         final String methodName = getMethodName(proceedingJoinPoint);
@@ -67,6 +68,21 @@ public class AspectManagement {
             log.info("End void method: {} in class: {}", methodName, className);
         }
 
+        return result;
+    }
+
+    @Around("@annotation(com.ercanbeyen.movieapplication.constant.annotation.LogExecutionTime) && target(bean)")
+    public Object measureLogPerformance(ProceedingJoinPoint proceedingJoinPoint, Object bean) throws Throwable {
+        final String className = getClassName(bean);
+        final String methodName = getMethodName(proceedingJoinPoint);
+
+        final StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+        Object result = proceedingJoinPoint.proceed();
+        stopWatch.stop();
+
+        final long executionTime = stopWatch.getTotalTimeMillis();
+        log.info("Execution time {} ms for method: {} in class: {}", executionTime, methodName, className);
         return result;
     }
 

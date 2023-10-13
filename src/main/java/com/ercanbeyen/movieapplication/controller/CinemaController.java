@@ -1,5 +1,6 @@
 package com.ercanbeyen.movieapplication.controller;
 
+import com.ercanbeyen.movieapplication.constant.annotation.LogExecutionTime;
 import com.ercanbeyen.movieapplication.constant.defaults.DefaultValues;
 import com.ercanbeyen.movieapplication.document.Cinema;
 import com.ercanbeyen.movieapplication.dto.CinemaDto;
@@ -33,6 +34,7 @@ public class CinemaController {
         return ResponseHandler.generateResponse(HttpStatus.CREATED, null, cinemaDto);
     }
 
+    @LogExecutionTime
     @GetMapping({"", "/filter"})
     public ResponseEntity<?> filterCinemas(CinemaFilteringOptions filteringOptions, @RequestParam(required = false, defaultValue = DefaultValues.DEFAULT_LIMIT_VALUE) String limit, Pageable pageable, @RequestHeader(name = "Country", required = false) String country) {
         PageDto<Cinema, CinemaDto> cinemaDtoPage = cinemaService.filterCinemas(filteringOptions, limit, pageable, country);
