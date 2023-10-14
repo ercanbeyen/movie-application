@@ -1,6 +1,6 @@
 package com.ercanbeyen.movieapplication.controller;
 
-import com.ercanbeyen.movieapplication.constant.annotation.LogExecutionTime;
+import com.ercanbeyen.movieapplication.annotation.LogExecutionTime;
 import com.ercanbeyen.movieapplication.constant.defaults.DefaultValues;
 import com.ercanbeyen.movieapplication.document.Cinema;
 import com.ercanbeyen.movieapplication.dto.CinemaDto;

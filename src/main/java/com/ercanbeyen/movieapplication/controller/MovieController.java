@@ -1,7 +1,7 @@
 package com.ercanbeyen.movieapplication.controller;
 
-import com.ercanbeyen.movieapplication.constant.annotation.DMLAllowed;
-import com.ercanbeyen.movieapplication.constant.annotation.LogExecutionTime;
+import com.ercanbeyen.movieapplication.annotation.DMLAllowed;
+import com.ercanbeyen.movieapplication.annotation.LogExecutionTime;
 import com.ercanbeyen.movieapplication.constant.defaults.DefaultValues;
 import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
 import com.ercanbeyen.movieapplication.dto.MovieDto;

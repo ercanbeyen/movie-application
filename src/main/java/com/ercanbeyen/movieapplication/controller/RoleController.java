@@ -1,6 +1,6 @@
 package com.ercanbeyen.movieapplication.controller;
 
-import com.ercanbeyen.movieapplication.constant.annotation.LogExecutionTime;
+import com.ercanbeyen.movieapplication.annotation.LogExecutionTime;
 import com.ercanbeyen.movieapplication.dto.RoleDto;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateRoleRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateRoleRequest;

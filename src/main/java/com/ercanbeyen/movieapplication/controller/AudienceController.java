@@ -1,6 +1,6 @@
 package com.ercanbeyen.movieapplication.controller;
 
-import com.ercanbeyen.movieapplication.constant.annotation.SelfAuthentication;
+import com.ercanbeyen.movieapplication.annotation.SelfAuthentication;
 import com.ercanbeyen.movieapplication.constant.enums.RoleName;
 import com.ercanbeyen.movieapplication.dto.AudienceDto;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateAudienceRequest;
@@ -14,6 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -26,6 +27,12 @@ public class AudienceController {
     public ResponseEntity<?> getAudience(@PathVariable Integer id) {
         AudienceDto audienceDto = audienceService.getAudience(id);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, audienceDto);
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getAudiences() {
+        List<AudienceDto> audienceDtoList = audienceService.getAudiences();
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, audienceDtoList);
     }
 
     @SelfAuthentication

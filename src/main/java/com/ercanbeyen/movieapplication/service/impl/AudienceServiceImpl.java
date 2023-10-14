@@ -24,6 +24,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -61,6 +62,14 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
     public AudienceDto getAudience(Integer id) {
         Audience audienceInDb = findAudienceById(id);
         return audienceDtoConverter.convert(audienceInDb);
+    }
+
+    @Override
+    public List<AudienceDto> getAudiences() {
+        return audienceRepository.findAll()
+                .stream()
+                .map(audienceDtoConverter::convert)
+                .toList();
     }
 
     @Override

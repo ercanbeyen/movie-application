@@ -1,4 +1,4 @@
-package com.ercanbeyen.movieapplication.constant.annotation;
+package com.ercanbeyen.movieapplication.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,6 +7,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface LogExecutionTime {
+public @interface DMLAllowed {
 
 }

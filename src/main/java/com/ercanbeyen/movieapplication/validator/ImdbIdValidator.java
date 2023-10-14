@@ -1,6 +1,6 @@
 package com.ercanbeyen.movieapplication.validator;
 
-import com.ercanbeyen.movieapplication.constant.annotation.ImdbIdRequest;
+import com.ercanbeyen.movieapplication.annotation.ImdbIdRequest;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.StringUtils;
