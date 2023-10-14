@@ -37,8 +37,6 @@ public class ActorServiceImpl implements ActorService {
 
     @Override
     public ActorDto createActor(CreateActorRequest request) {
-        log.info(LogMessages.STARTED, "createActor");
-
         Actor newActor = Actor.builder()
                 .name(request.getName())
                 .surname(request.getSurname())
@@ -56,7 +54,6 @@ public class ActorServiceImpl implements ActorService {
 
     @Override
     public PageDto<Actor, ActorDto> filterActors(ActorFilteringOptions filteringOptions, OrderBy orderBy, String limit, Pageable pageable) {
-        log.info(LogMessages.STARTED, "filterActors");
         Page<Actor> actorPage = actorRepository.findAll(pageable);
         log.info(LogMessages.FETCHED_ALL, ResourceNames.ACTOR);
 
@@ -97,7 +94,6 @@ public class ActorServiceImpl implements ActorService {
     @Cacheable(value = "actors", key = "#id", unless = "#result.moviesPlayed.size() < 2")
     @Override
     public ActorDto getActor(Integer id) {
-        log.info(LogMessages.STARTED, "getActor");
         Actor actorInDb = findActorById(id);
         return actorDtoConverter.convert(actorInDb);
     }
@@ -105,7 +101,6 @@ public class ActorServiceImpl implements ActorService {
     @CacheEvict(value = "actors", allEntries = true)
     @Override
     public ActorDto updateActor(Integer id, UpdateActorRequest request) {
-        log.info(LogMessages.STARTED, "updateActor");
         Actor actorInDb = findActorById(id);
 
         actorInDb.setName(request.getName());
@@ -124,7 +119,6 @@ public class ActorServiceImpl implements ActorService {
     @CacheEvict(value = "actors", key = "#id")
     @Override
     public String deleteActor(Integer id) {
-        log.info(LogMessages.STARTED, "deleteActor");
         boolean actorExists = actorRepository.existsById(id);
 
         if (!actorExists) {
@@ -141,7 +135,6 @@ public class ActorServiceImpl implements ActorService {
     @Cacheable(value = "actors")
     @Override
     public List<ActorDto> getMostPopularActors() {
-        log.info(LogMessages.STARTED, "getMostPopularActors");
         List<Actor> actors = actorRepository.findAll();
         log.info(LogMessages.FETCHED_ALL, ResourceNames.ACTOR);
         int numberOfMovies = 2;
@@ -154,7 +147,6 @@ public class ActorServiceImpl implements ActorService {
 
     @Override
     public List<ActorDto> searchActors(String fullName) {
-        log.info(LogMessages.STARTED, "searchActors");
         List<Actor> actors = actorRepository.findByFullName(fullName);
         log.info(LogMessages.FETCHED_ALL, ResourceNames.ACTOR);
 
@@ -165,7 +157,6 @@ public class ActorServiceImpl implements ActorService {
 
     @Override
     public Actor findActorById(Integer id) {
-        log.info(LogMessages.STARTED, "findActorById");
         Optional<Actor> optionalActor = actorRepository.findById(id);
 
         if (optionalActor.isEmpty()) {
@@ -179,8 +170,6 @@ public class ActorServiceImpl implements ActorService {
 
     @Override
     public Statistics<String, String> calculateStatistics() {
-        log.info(LogMessages.STARTED, LogMessages.CALCULATE_STATISTICS);
-
         Map<String, String> statisticsMap = new HashMap<>();
         List<Actor> actorList = actorRepository.findAll();
 

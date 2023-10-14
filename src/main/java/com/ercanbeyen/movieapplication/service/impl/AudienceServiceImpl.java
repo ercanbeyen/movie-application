@@ -15,7 +15,6 @@ import com.ercanbeyen.movieapplication.exception.ResourceNotFoundException;
 import com.ercanbeyen.movieapplication.repository.AudienceRepository;
 import com.ercanbeyen.movieapplication.service.AudienceService;
 import com.ercanbeyen.movieapplication.service.RoleService;
-import com.ercanbeyen.movieapplication.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.User;
@@ -40,7 +39,6 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
 
     @Override
     public void createAudience(RegistrationRequest request) {
-        log.info(LogMessages.STARTED, "createAudience");
         Role role = roleService.findRoleByRoleName(RoleName.USER);
         Set<Role> roleSet = Set.of(role);
 
@@ -61,17 +59,13 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
 
     @Override
     public AudienceDto getAudience(Integer id) {
-        log.info(LogMessages.STARTED, "getAudience");
         Audience audienceInDb = findAudienceById(id);
         return audienceDtoConverter.convert(audienceInDb);
     }
 
     @Override
     public AudienceDto updateAudience(Integer id, UpdateAudienceRequest request, UserDetails userDetails) {
-        log.info(LogMessages.STARTED, "updateAudience");
         Audience audienceInDb = findAudienceById(id);
-
-        SecurityUtil.checkUserLoggedIn(audienceInDb, userDetails);
 
         audienceInDb.setUsername(request.getUsername());
         audienceInDb.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -90,19 +84,12 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
 
     @Override
     public void deleteAudience(Integer id, UserDetails userDetails) {
-        log.info(LogMessages.STARTED, "deleteAudience");
-        Audience audienceInDb = findAudienceById(id);
-
-        SecurityUtil.checkUserLoggedIn(audienceInDb, userDetails);
-
         audienceRepository.deleteById(id);
         log.info(LogMessages.DELETED, ResourceNames.AUDIENCE);
     }
 
     @Override
     public String updateRolesOfAudience(Integer id, Set<RoleName> roleNames, UserDetails userDetails) {
-        log.info(LogMessages.STARTED, "updateRolesOfAudience");
-
         if (!roleNames.contains(RoleName.USER)) {
             throw new ResourceConflictException(ResourceNames.ROLE + " " + RoleName.USER + " is mandatory");
         }
@@ -134,8 +121,7 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
         return new User(username, audience.getPassword(), audience.getAuthorities());
     }
 
-    private Audience findAudienceById(Integer id) {
-        log.info(LogMessages.STARTED, "findAudienceById");
+    public Audience findAudienceById(Integer id) {
         Optional<Audience> optionalAudience = audienceRepository.findById(id);
 
         if (optionalAudience.isEmpty()) {

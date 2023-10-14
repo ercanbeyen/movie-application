@@ -1,5 +1,6 @@
 package com.ercanbeyen.movieapplication.controller;
 
+import com.ercanbeyen.movieapplication.constant.annotation.LogExecutionTime;
 import com.ercanbeyen.movieapplication.constant.defaults.DefaultValues;
 import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
 import com.ercanbeyen.movieapplication.dto.ActorDto;
@@ -32,6 +33,7 @@ public class ActorController {
         return ResponseHandler.generateResponse(HttpStatus.CREATED, null, createdActor);
     }
 
+    @LogExecutionTime
     @GetMapping({"", "/filter"})
     public ResponseEntity<?> getActors(ActorFilteringOptions actorFilteringOptions, @RequestParam(required = false) OrderBy orderBy, @RequestParam(required = false, defaultValue = DefaultValues.DEFAULT_LIMIT_VALUE) String limit, Pageable pageable) {
         PageDto<Actor, ActorDto> actorDtoList = actorService.filterActors(actorFilteringOptions, orderBy, limit, pageable);

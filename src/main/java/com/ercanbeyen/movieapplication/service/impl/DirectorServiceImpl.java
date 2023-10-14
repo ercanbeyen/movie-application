@@ -37,8 +37,6 @@ public class DirectorServiceImpl implements DirectorService {
 
     @Override
     public DirectorDto createDirector(CreateDirectorRequest request) {
-        log.info(LogMessages.STARTED, "createDirector");
-
         Director newDirector = Director.builder()
                 .name(request.getName())
                 .surname(request.getSurname())
@@ -56,7 +54,6 @@ public class DirectorServiceImpl implements DirectorService {
 
     @Override
     public PageDto<Director, DirectorDto> filterDirectors(DirectorFilteringOptions filteringOptions, OrderBy orderBy, String limit, Pageable pageable) {
-        log.info(LogMessages.STARTED, "filterDirectors");
         Page<Director> directorPage = directorRepository.findAll(pageable);
         log.info(LogMessages.FETCHED_ALL, ResourceNames.DIRECTOR);
 
@@ -97,7 +94,6 @@ public class DirectorServiceImpl implements DirectorService {
     @Cacheable(value = "directors", key = "#id", unless = "#result.moviesDirected.size() < 2")
     @Override
     public DirectorDto getDirector(Integer id) {
-        log.info(LogMessages.STARTED, "getDirector");
         Director directorInDb = findDirectorById(id);
         return directorDtoConverter.convert(directorInDb);
     }
@@ -105,8 +101,6 @@ public class DirectorServiceImpl implements DirectorService {
     @CacheEvict(value = "directors", allEntries = true)
     @Override
     public DirectorDto updateDirector(Integer id, UpdateDirectorRequest request) {
-        log.info(LogMessages.STARTED, "updateDirector");
-
         Director directorInDb = findDirectorById(id);
 
         directorInDb.setName(request.getName());
@@ -125,8 +119,6 @@ public class DirectorServiceImpl implements DirectorService {
     @CacheEvict(value = "directors", key = "#id")
     @Override
     public String deleteDirector(Integer id) {
-        log.info(LogMessages.STARTED, "deleteDirector");
-
         boolean directorExists = directorRepository.existsById(id);
 
         if (!directorExists) {
@@ -157,8 +149,6 @@ public class DirectorServiceImpl implements DirectorService {
 
     @Override
     public List<DirectorDto> searchDirectors(String fullName) {
-        log.info(LogMessages.STARTED, "searchDirectors");
-
         List<Director> directors = directorRepository.findByFullName(fullName);
         log.info(LogMessages.SAVED, ResourceNames.DIRECTOR);
 
@@ -169,7 +159,6 @@ public class DirectorServiceImpl implements DirectorService {
 
     @Override
     public Director findDirectorById(Integer id) {
-        log.info(LogMessages.STARTED, "findDirectorById");
         Optional<Director> optionalDirector = directorRepository.findById(id);
 
         if (optionalDirector.isEmpty()) {
@@ -183,8 +172,6 @@ public class DirectorServiceImpl implements DirectorService {
 
     @Override
     public Statistics<String, String> calculateStatistics() {
-        log.info(LogMessages.STARTED, LogMessages.CALCULATE_STATISTICS);
-
         Map<String, String> statisticsMap = new HashMap<>();
         List<Director> directorList = directorRepository.findAll();
 

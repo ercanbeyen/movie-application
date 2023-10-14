@@ -29,8 +29,6 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public RoleDto createRole(CreateRoleRequest request) {
-        log.info(LogMessages.STARTED, "createRole");
-
         RoleName roleName = request.getRoleName();
         Optional<Role> roleInDb = roleRepository.findByRoleName(roleName);
 
@@ -47,7 +45,6 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public List<RoleDto> getRoles() {
-        log.info(LogMessages.STARTED, "getRoles");
         return roleRepository.findAll()
                 .stream()
                 .map(roleDtoConverter::convert)
@@ -56,14 +53,12 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public RoleDto getRole(Integer id) {
-        log.info(LogMessages.STARTED, "getRole");
         Role roleInDb = findRoleById(id);
         return roleDtoConverter.convert(roleInDb);
     }
 
     @Override
     public RoleDto updateRole(Integer id, UpdateRoleRequest request) {
-        log.info(LogMessages.STARTED, "updateRole");
         Role roleInDb = findRoleById(id);
         RoleName roleName = request.getRoleName();
         Role updatedRole;
@@ -82,7 +77,6 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public String deleteRole(Integer id) {
-        log.info(LogMessages.STARTED, "deleteRole");
         Role roleInDb = findRoleById(id);
 
         if (!roleInDb.getAudienceSet().isEmpty()) {
@@ -97,13 +91,11 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public Role findRoleByRoleName(RoleName roleName) {
-        log.info(LogMessages.STARTED, "findRoleByRoleName");
         return roleRepository.findByRoleName(roleName)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ROLE)));
     }
 
     private Role findRoleById(Integer id) {
-        log.info(LogMessages.STARTED, "findRoleById");
         return roleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ROLE)));
     }
