@@ -5,8 +5,8 @@ import com.ercanbeyen.movieapplication.constant.defaults.DefaultValues;
 import com.ercanbeyen.movieapplication.document.Cinema;
 import com.ercanbeyen.movieapplication.dto.CinemaDto;
 import com.ercanbeyen.movieapplication.dto.Statistics;
-import com.ercanbeyen.movieapplication.dto.option.filter.CinemaFilteringOptions;
-import com.ercanbeyen.movieapplication.dto.option.search.CinemaSearchOptions;
+import com.ercanbeyen.movieapplication.option.filter.CinemaFilteringOptions;
+import com.ercanbeyen.movieapplication.option.search.CinemaSearchOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateCinemaRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateCinemaRequest;
 import com.ercanbeyen.movieapplication.util.ResponseHandler;
@@ -36,7 +36,7 @@ public class CinemaController {
 
     @LogExecutionTime
     @GetMapping({"", "/filter"})
-    public ResponseEntity<?> filterCinemas(CinemaFilteringOptions filteringOptions, @RequestParam(required = false, defaultValue = DefaultValues.DEFAULT_LIMIT_VALUE) String limit, Pageable pageable, @RequestHeader(name = "Country", required = false) String country) {
+    public ResponseEntity<?> getCinemas(CinemaFilteringOptions filteringOptions, @RequestParam(required = false, defaultValue = DefaultValues.DEFAULT_LIMIT_VALUE) String limit, Pageable pageable, @RequestHeader(name = "Country", required = false) String country) {
         PageDto<Cinema, CinemaDto> cinemaDtoPage = cinemaService.filterCinemas(filteringOptions, limit, pageable, country);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemaDtoPage);
     }

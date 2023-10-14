@@ -5,6 +5,7 @@ import com.ercanbeyen.movieapplication.constant.message.LogMessages;
 import com.ercanbeyen.movieapplication.constant.message.ResponseMessages;
 import com.ercanbeyen.movieapplication.constant.names.ResourceNames;
 import com.ercanbeyen.movieapplication.dto.AudienceDto;
+import com.ercanbeyen.movieapplication.dto.PageDto;
 import com.ercanbeyen.movieapplication.dto.converter.AudienceDtoConverter;
 import com.ercanbeyen.movieapplication.dto.request.auth.RegistrationRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateAudienceRequest;
@@ -17,6 +18,8 @@ import com.ercanbeyen.movieapplication.service.AudienceService;
 import com.ercanbeyen.movieapplication.service.RoleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -65,11 +68,15 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
     }
 
     @Override
-    public List<AudienceDto> getAudiences() {
-        return audienceRepository.findAll()
-                .stream()
+    public PageDto<Audience, AudienceDto> getAudiences(Pageable pageable) {
+        Page<Audience> audiencePage = audienceRepository.findAll(pageable);
+        log.info(LogMessages.FETCHED_ALL, ResourceNames.AUDIENCE);
+
+        List<AudienceDto> audienceDtoList = audiencePage.stream()
                 .map(audienceDtoConverter::convert)
                 .toList();
+
+        return new PageDto<>(audiencePage, audienceDtoList);
     }
 
     @Override

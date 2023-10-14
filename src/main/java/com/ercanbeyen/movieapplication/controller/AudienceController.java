@@ -3,18 +3,20 @@ package com.ercanbeyen.movieapplication.controller;
 import com.ercanbeyen.movieapplication.annotation.SelfAuthentication;
 import com.ercanbeyen.movieapplication.constant.enums.RoleName;
 import com.ercanbeyen.movieapplication.dto.AudienceDto;
+import com.ercanbeyen.movieapplication.dto.PageDto;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateAudienceRequest;
+import com.ercanbeyen.movieapplication.entity.Audience;
 import com.ercanbeyen.movieapplication.service.AudienceService;
 import com.ercanbeyen.movieapplication.util.ResponseHandler;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -30,9 +32,9 @@ public class AudienceController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getAudiences() {
-        List<AudienceDto> audienceDtoList = audienceService.getAudiences();
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, audienceDtoList);
+    public ResponseEntity<?> getAudiences(Pageable pageable) {
+        PageDto<Audience, AudienceDto> audiencePage = audienceService.getAudiences(pageable);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, audiencePage);
     }
 
     @SelfAuthentication

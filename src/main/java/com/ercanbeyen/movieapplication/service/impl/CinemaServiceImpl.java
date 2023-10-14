@@ -5,8 +5,8 @@ import com.ercanbeyen.movieapplication.constant.names.ResourceNames;
 import com.ercanbeyen.movieapplication.dto.CinemaDto;
 import com.ercanbeyen.movieapplication.dto.Statistics;
 import com.ercanbeyen.movieapplication.dto.converter.CinemaDtoConverter;
-import com.ercanbeyen.movieapplication.dto.option.filter.CinemaFilteringOptions;
-import com.ercanbeyen.movieapplication.dto.option.search.CinemaSearchOptions;
+import com.ercanbeyen.movieapplication.option.filter.CinemaFilteringOptions;
+import com.ercanbeyen.movieapplication.option.search.CinemaSearchOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateCinemaRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateCinemaRequest;
 import com.ercanbeyen.movieapplication.document.Cinema;
@@ -66,11 +66,11 @@ public class CinemaServiceImpl implements CinemaService {
     @Override
     public List<CinemaDto> searchCinemasByStatus(CinemaSearchOptions searchOptions) {
         List<Cinema> cinemas = cinemaRepository.findByStatuses(
-                searchOptions.getReservation_with_phone(),
-                searchOptions.getThreeD_animation(),
-                searchOptions.getParking_place(),
-                searchOptions.getAir_conditioning(),
-                searchOptions.getCafe_food());
+                searchOptions.reservation_with_phone(),
+                searchOptions.threeD_animation(),
+                searchOptions.parking_place(),
+                searchOptions.air_conditioning(),
+                searchOptions.cafe_food());
 
         return cinemas.stream()
                 .map(cinemaDtoConverter::convert)

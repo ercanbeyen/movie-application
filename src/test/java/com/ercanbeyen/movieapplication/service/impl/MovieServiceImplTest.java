@@ -6,7 +6,7 @@ import com.ercanbeyen.movieapplication.constant.message.ResponseMessages;
 import com.ercanbeyen.movieapplication.dto.MovieDto;
 import com.ercanbeyen.movieapplication.dto.Statistics;
 import com.ercanbeyen.movieapplication.dto.converter.MovieDtoConverter;
-import com.ercanbeyen.movieapplication.dto.option.filter.MovieFilteringOptions;
+import com.ercanbeyen.movieapplication.option.filter.MovieFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateMovieRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateMovieRequest;
 import com.ercanbeyen.movieapplication.entity.Actor;
@@ -182,7 +182,7 @@ public class MovieServiceImplTest {
     }
 
     @Test
-    @DisplayName("When filterMovies Called With Parameters It Should Return MovieDto List")
+    @DisplayName("When getMovies Called With Parameters It Should Return MovieDto List")
     public void whenFilterMoviesCalledWithParameters_itShouldReturnMovieDto() {
         Pageable pageable = Pageable.ofSize(1).withPage(0);
 
@@ -197,7 +197,7 @@ public class MovieServiceImplTest {
 
         MovieFilteringOptions movieFilteringOptions = new MovieFilteringOptions(movieList.get(0).getLanguage(), null, null);
 
-        PageDto<Movie, MovieDto> actual = movieService.filterMovies(movieFilteringOptions, null, DefaultValues.DEFAULT_LIMIT_VALUE, pageable);
+        PageDto<Movie, MovieDto> actual = movieService.getMovies(movieFilteringOptions, null, DefaultValues.DEFAULT_LIMIT_VALUE, pageable);
 
         assertEquals(expected, actual);
 
