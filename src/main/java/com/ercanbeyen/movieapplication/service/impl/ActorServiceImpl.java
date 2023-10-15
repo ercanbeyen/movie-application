@@ -7,7 +7,7 @@ import com.ercanbeyen.movieapplication.constant.names.ResourceNames;
 import com.ercanbeyen.movieapplication.dto.ActorDto;
 import com.ercanbeyen.movieapplication.dto.Statistics;
 import com.ercanbeyen.movieapplication.dto.converter.ActorDtoConverter;
-import com.ercanbeyen.movieapplication.dto.option.filter.ActorFilteringOptions;
+import com.ercanbeyen.movieapplication.option.filter.ActorFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateActorRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateActorRequest;
 import com.ercanbeyen.movieapplication.entity.Actor;
@@ -53,7 +53,7 @@ public class ActorServiceImpl implements ActorService {
     }
 
     @Override
-    public PageDto<Actor, ActorDto> filterActors(ActorFilteringOptions filteringOptions, OrderBy orderBy, String limit, Pageable pageable) {
+    public PageDto<Actor, ActorDto> getActors(ActorFilteringOptions filteringOptions, OrderBy orderBy, String limit, Pageable pageable) {
         Page<Actor> actorPage = actorRepository.findAll(pageable);
         log.info(LogMessages.FETCHED_ALL, ResourceNames.ACTOR);
 

@@ -1,4 +1,4 @@
-package com.ercanbeyen.movieapplication.constant.annotation;
+package com.ercanbeyen.movieapplication.annotation;
 
 import com.ercanbeyen.movieapplication.validator.ImdbIdValidator;
 import jakarta.validation.Constraint;

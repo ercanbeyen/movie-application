@@ -1,13 +1,16 @@
 package com.ercanbeyen.movieapplication.controller;
 
-import com.ercanbeyen.movieapplication.constant.annotation.SelfAuthentication;
+import com.ercanbeyen.movieapplication.annotation.SelfAuthentication;
 import com.ercanbeyen.movieapplication.constant.enums.RoleName;
 import com.ercanbeyen.movieapplication.dto.AudienceDto;
+import com.ercanbeyen.movieapplication.dto.PageDto;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateAudienceRequest;
+import com.ercanbeyen.movieapplication.entity.Audience;
 import com.ercanbeyen.movieapplication.service.AudienceService;
 import com.ercanbeyen.movieapplication.util.ResponseHandler;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,9 +25,21 @@ import java.util.Set;
 public class AudienceController {
     private final AudienceService audienceService;
 
+    @GetMapping
+    public ResponseEntity<?> getAudiences(Pageable pageable) {
+        PageDto<Audience, AudienceDto> audiencePage = audienceService.getAudiences(pageable);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, audiencePage);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getAudience(@PathVariable Integer id) {
         AudienceDto audienceDto = audienceService.getAudience(id);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, audienceDto);
+    }
+
+    @GetMapping("/find")
+    public ResponseEntity<?> getAudience(@RequestParam(name = "user") String username) {
+        AudienceDto audienceDto = audienceService.getAudience(username);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, audienceDto);
     }
 

@@ -27,7 +27,7 @@ public class SecurityConfig {
                 .csrf().disable()
                 .authorizeHttpRequests()
                 .requestMatchers("/api/v1/registration", "/login").permitAll()
-                .requestMatchers("/api/v1/audience/{id}/roles").hasAnyAuthority(RoleName.ADMIN.name())
+                .requestMatchers("/api/v1/audience/{id}/roles", "/api/v1/audiences").hasAnyAuthority(RoleName.ADMIN.name())
                 .requestMatchers("/api/v1/audiences/**").hasAnyAuthority(RoleName.USER.name())
                 .requestMatchers(HttpMethod.GET, "/api/v1/movies/**", "/api/v1/directors/**", "/api/v1/actors/**", "/api/v1/cinemas/**", "/api/v1/audiences/**").hasAnyAuthority(RoleName.USER.name())
                 .requestMatchers(HttpMethod.POST, "/api/v1/movies/**", "/api/v1/directors/**", "/api/v1/actors/**", "/api/v1/cinemas/**").hasAnyAuthority(RoleName.ADMIN.name())

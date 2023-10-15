@@ -28,7 +28,7 @@ import java.util.Objects;
 public class AspectManagement {
     private final AudienceService audienceService;
 
-    @Around("@annotation(com.ercanbeyen.movieapplication.constant.annotation.SelfAuthentication) && target(bean)")
+    @Around("@annotation(com.ercanbeyen.movieapplication.annotation.SelfAuthentication) && target(bean)")
     public Object checkSelfAuthentication(ProceedingJoinPoint proceedingJoinPoint, Object bean) throws Throwable {
         final String className = getClassName(bean);
         final String methodName = getMethodName(proceedingJoinPoint);
@@ -76,7 +76,7 @@ public class AspectManagement {
         return result;
     }
 
-    @Around("@annotation(com.ercanbeyen.movieapplication.constant.annotation.LogExecutionTime) && target(bean)")
+    @Around("@annotation(com.ercanbeyen.movieapplication.annotation.LogExecutionTime) && target(bean)")
     public Object measureLogPerformance(ProceedingJoinPoint proceedingJoinPoint, Object bean) throws Throwable {
         final String className = getClassName(bean);
         final String methodName = getMethodName(proceedingJoinPoint);
@@ -91,7 +91,7 @@ public class AspectManagement {
         return result;
     }
 
-    @Before("@annotation(com.ercanbeyen.movieapplication.constant.annotation.DMLAllowed)")
+    @Before("@annotation(com.ercanbeyen.movieapplication.annotation.DMLAllowed)")
     public void checkDMLStatementConditions() {
         LocalDate currentDate = LocalDate.now();
         List<DayOfWeek> allowedDayList = List.of(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY);

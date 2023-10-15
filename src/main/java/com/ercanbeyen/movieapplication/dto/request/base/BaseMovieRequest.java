@@ -1,6 +1,6 @@
 package com.ercanbeyen.movieapplication.dto.request.base;
 
-import com.ercanbeyen.movieapplication.constant.annotation.ImdbIdRequest;
+import com.ercanbeyen.movieapplication.annotation.ImdbIdRequest;
 import com.ercanbeyen.movieapplication.constant.enums.Genre;
 import com.ercanbeyen.movieapplication.constant.message.ValidationMessages;
 import jakarta.persistence.MappedSuperclass;

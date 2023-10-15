@@ -1,4 +1,4 @@
-package com.ercanbeyen.movieapplication.dto.option.filter;
+package com.ercanbeyen.movieapplication.option.filter;
 
 public record CinemaFilteringOptions(
         String city, Boolean reservation_with_phone,

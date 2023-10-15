@@ -1,4 +1,4 @@
-package com.ercanbeyen.movieapplication.dto.option.filter;
+package com.ercanbeyen.movieapplication.option.filter;
 
 import com.ercanbeyen.movieapplication.constant.enums.Genre;
 

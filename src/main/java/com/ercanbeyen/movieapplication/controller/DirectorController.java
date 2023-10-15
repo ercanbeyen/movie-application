@@ -1,11 +1,11 @@
 package com.ercanbeyen.movieapplication.controller;
 
-import com.ercanbeyen.movieapplication.constant.annotation.LogExecutionTime;
+import com.ercanbeyen.movieapplication.annotation.LogExecutionTime;
 import com.ercanbeyen.movieapplication.constant.defaults.DefaultValues;
 import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
 import com.ercanbeyen.movieapplication.dto.DirectorDto;
 import com.ercanbeyen.movieapplication.dto.Statistics;
-import com.ercanbeyen.movieapplication.dto.option.filter.DirectorFilteringOptions;
+import com.ercanbeyen.movieapplication.option.filter.DirectorFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateDirectorRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateDirectorRequest;
 import com.ercanbeyen.movieapplication.util.ResponseHandler;
@@ -36,7 +36,7 @@ public class DirectorController {
     @LogExecutionTime
     @GetMapping({"", "/filter"})
     public ResponseEntity<?> getDirectors(DirectorFilteringOptions filteringOptions, @RequestParam(required = false) OrderBy orderBy, @RequestParam(required = false, defaultValue = DefaultValues.DEFAULT_LIMIT_VALUE) String limit, Pageable pageable) {
-        PageDto<Director, DirectorDto> directorDtoPage = directorService.filterDirectors(filteringOptions, orderBy, limit, pageable);
+        PageDto<Director, DirectorDto> directorDtoPage = directorService.getDirectors(filteringOptions, orderBy, limit, pageable);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, directorDtoPage);
     }
 

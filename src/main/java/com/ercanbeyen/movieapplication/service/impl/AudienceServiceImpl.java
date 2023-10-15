@@ -5,6 +5,7 @@ import com.ercanbeyen.movieapplication.constant.message.LogMessages;
 import com.ercanbeyen.movieapplication.constant.message.ResponseMessages;
 import com.ercanbeyen.movieapplication.constant.names.ResourceNames;
 import com.ercanbeyen.movieapplication.dto.AudienceDto;
+import com.ercanbeyen.movieapplication.dto.PageDto;
 import com.ercanbeyen.movieapplication.dto.converter.AudienceDtoConverter;
 import com.ercanbeyen.movieapplication.dto.request.auth.RegistrationRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateAudienceRequest;
@@ -17,6 +18,8 @@ import com.ercanbeyen.movieapplication.service.AudienceService;
 import com.ercanbeyen.movieapplication.service.RoleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -24,6 +27,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -58,9 +62,27 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
     }
 
     @Override
+    public PageDto<Audience, AudienceDto> getAudiences(Pageable pageable) {
+        Page<Audience> audiencePage = audienceRepository.findAll(pageable);
+        log.info(LogMessages.FETCHED_ALL, ResourceNames.AUDIENCE);
+
+        List<AudienceDto> audienceDtoList = audiencePage.stream()
+                .map(audienceDtoConverter::convert)
+                .toList();
+
+        return new PageDto<>(audiencePage, audienceDtoList);
+    }
+
+    @Override
     public AudienceDto getAudience(Integer id) {
         Audience audienceInDb = findAudienceById(id);
         return audienceDtoConverter.convert(audienceInDb);
+    }
+
+    @Override
+    public AudienceDto getAudience(String username) {
+        Audience audienceIndDb = findAudienceByUsername(username);
+        return audienceDtoConverter.convert(audienceIndDb);
     }
 
     @Override
@@ -115,9 +137,7 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Audience audience = audienceRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.AUDIENCE)));
-
+        Audience audience = findAudienceByUsername(username);
         return new User(username, audience.getPassword(), audience.getAuthorities());
     }
 
@@ -131,5 +151,10 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
 
         log.info(LogMessages.RESOURCE_FOUND, ResourceNames.AUDIENCE, id);
         return optionalAudience.get();
+    }
+
+    private Audience findAudienceByUsername(String username) {
+        return audienceRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.AUDIENCE)));
     }
 }
