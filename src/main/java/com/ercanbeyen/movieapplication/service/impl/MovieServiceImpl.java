@@ -2,7 +2,6 @@ package com.ercanbeyen.movieapplication.service.impl;
 
 import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
 import com.ercanbeyen.movieapplication.constant.message.*;
-import com.ercanbeyen.movieapplication.constant.names.ParameterNames;
 import com.ercanbeyen.movieapplication.constant.names.ResourceNames;
 import com.ercanbeyen.movieapplication.dto.MovieDto;
 import com.ercanbeyen.movieapplication.dto.converter.MovieDtoConverter;
@@ -36,6 +35,8 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import static com.ercanbeyen.movieapplication.constant.names.ParameterNames.ORDER_BY;
 
 @Service
 @RequiredArgsConstructor
@@ -88,21 +89,13 @@ public class MovieServiceImpl implements MovieService {
 
         Page<Movie> moviePage;
 
-        if (pageable.getSort().isSorted()) {
-            log.info(LogMessages.ORDER_BY_VALUE, orderBy.getOrderByInfo());
+        String logMessage = (orderBy == null) ? "Request parameter " + ORDER_BY + " is null" :  "Value of orderBy is " + orderBy.getOrderByInfo();
+        log.info(logMessage);
 
-            String sortingProperty = pageable.getSort().toString();
-            Sort sort;
-
-            if (orderBy == OrderBy.ASC) {
-                sort = Sort.by(Sort.Direction.ASC, sortingProperty);
-            } else {
-                sort = Sort.by(Sort.Direction.DESC, sortingProperty);
-            }
-
+        if (pageable.getSort().isSorted() && orderBy == OrderBy.DESC) {
+            Sort sort = pageable.getSort().reverse();
             moviePage = movieRepository.findAll(PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort));
         } else {
-            log.info(LogMessages.REQUEST_PARAMETER_NULL, ParameterNames.ORDER_BY);
             moviePage = movieRepository.findAll(pageable);
         }
 
