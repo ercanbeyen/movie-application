@@ -13,8 +13,9 @@ import java.util.Set;
 
 public interface AudienceService {
     void createAudience(RegistrationRequest request);
-    AudienceDto getAudience(Integer id);
     PageDto<Audience, AudienceDto> getAudiences(Pageable pageable);
+    AudienceDto getAudience(Integer id);
+    AudienceDto getAudience(String username);
     AudienceDto updateAudience(Integer id, UpdateAudienceRequest request, UserDetails userDetails);
     void deleteAudience(Integer id, UserDetails userDetails);
     String updateRolesOfAudience(Integer id, Set<RoleName> roleNames, UserDetails userDetails);

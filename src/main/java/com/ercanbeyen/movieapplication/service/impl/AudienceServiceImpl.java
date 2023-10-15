@@ -62,12 +62,6 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
     }
 
     @Override
-    public AudienceDto getAudience(Integer id) {
-        Audience audienceInDb = findAudienceById(id);
-        return audienceDtoConverter.convert(audienceInDb);
-    }
-
-    @Override
     public PageDto<Audience, AudienceDto> getAudiences(Pageable pageable) {
         Page<Audience> audiencePage = audienceRepository.findAll(pageable);
         log.info(LogMessages.FETCHED_ALL, ResourceNames.AUDIENCE);
@@ -77,6 +71,18 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
                 .toList();
 
         return new PageDto<>(audiencePage, audienceDtoList);
+    }
+
+    @Override
+    public AudienceDto getAudience(Integer id) {
+        Audience audienceInDb = findAudienceById(id);
+        return audienceDtoConverter.convert(audienceInDb);
+    }
+
+    @Override
+    public AudienceDto getAudience(String username) {
+        Audience audienceIndDb = findAudienceByUsername(username);
+        return audienceDtoConverter.convert(audienceIndDb);
     }
 
     @Override
@@ -131,9 +137,7 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Audience audience = audienceRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.AUDIENCE)));
-
+        Audience audience = findAudienceByUsername(username);
         return new User(username, audience.getPassword(), audience.getAuthorities());
     }
 
@@ -147,5 +151,10 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
 
         log.info(LogMessages.RESOURCE_FOUND, ResourceNames.AUDIENCE, id);
         return optionalAudience.get();
+    }
+
+    private Audience findAudienceByUsername(String username) {
+        return audienceRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.AUDIENCE)));
     }
 }

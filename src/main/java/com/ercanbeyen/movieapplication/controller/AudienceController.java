@@ -25,16 +25,22 @@ import java.util.Set;
 public class AudienceController {
     private final AudienceService audienceService;
 
+    @GetMapping
+    public ResponseEntity<?> getAudiences(Pageable pageable) {
+        PageDto<Audience, AudienceDto> audiencePage = audienceService.getAudiences(pageable);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, audiencePage);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getAudience(@PathVariable Integer id) {
         AudienceDto audienceDto = audienceService.getAudience(id);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, audienceDto);
     }
 
-    @GetMapping
-    public ResponseEntity<?> getAudiences(Pageable pageable) {
-        PageDto<Audience, AudienceDto> audiencePage = audienceService.getAudiences(pageable);
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, audiencePage);
+    @GetMapping("/find")
+    public ResponseEntity<?> getAudience(@RequestParam(name = "user") String username) {
+        AudienceDto audienceDto = audienceService.getAudience(username);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, audienceDto);
     }
 
     @SelfAuthentication
