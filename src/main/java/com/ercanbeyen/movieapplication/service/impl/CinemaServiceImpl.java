@@ -143,7 +143,7 @@ public class CinemaServiceImpl implements CinemaService {
     }
 
     @Override
-    public PageDto<Cinema, CinemaDto> filterCinemas(CinemaFilteringOptions filteringOptions, String limit, Pageable pageable, String country) {
+    public PageDto<Cinema, CinemaDto> getCinemas(CinemaFilteringOptions filteringOptions, String limit, Pageable pageable, String country) {
         Page<Cinema> cinemaPage = cinemaRepository.findAll(pageable);
         log.info(LogMessages.FETCHED_ALL, ResourceNames.CINEMA);
 
