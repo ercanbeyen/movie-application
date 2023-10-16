@@ -20,6 +20,7 @@ public class ActorDtoConverter {
                         .stream()
                         .map(Movie::getId)
                         .collect(Collectors.toSet()))
+                .biography(actor.getBiography())
                 .build();
     }
 }
