@@ -15,7 +15,7 @@ import java.util.List;
 
 public interface CinemaService {
     CinemaDto createCinema(CreateCinemaRequest request);
-    PageDto<Cinema, CinemaDto> filterCinemas(CinemaFilteringOptions filteringOptions, String limit, Pageable pageable, String country);
+    PageDto<Cinema, CinemaDto> getCinemas(CinemaFilteringOptions filteringOptions, String limit, Pageable pageable, String country);
     CinemaDto getCinema(String id);
     CinemaDto updateCinema(String id, UpdateCinemaRequest request);
     String deleteCinema(String id);

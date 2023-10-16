@@ -37,7 +37,7 @@ public class CinemaController {
     @LogExecutionTime
     @GetMapping({"", "/filter"})
     public ResponseEntity<?> getCinemas(CinemaFilteringOptions filteringOptions, @RequestParam(required = false, defaultValue = DefaultValues.DEFAULT_LIMIT_VALUE) String limit, Pageable pageable, @RequestHeader(name = "Country", required = false) String country) {
-        PageDto<Cinema, CinemaDto> cinemaDtoPage = cinemaService.filterCinemas(filteringOptions, limit, pageable, country);
+        PageDto<Cinema, CinemaDto> cinemaDtoPage = cinemaService.getCinemas(filteringOptions, limit, pageable, country);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, cinemaDtoPage);
     }
 

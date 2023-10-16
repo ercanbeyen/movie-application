@@ -2,7 +2,6 @@ package com.ercanbeyen.movieapplication.service.impl;
 
 import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
 import com.ercanbeyen.movieapplication.constant.message.*;
-import com.ercanbeyen.movieapplication.constant.names.ParameterNames;
 import com.ercanbeyen.movieapplication.constant.names.ResourceNames;
 import com.ercanbeyen.movieapplication.dto.MovieDto;
 import com.ercanbeyen.movieapplication.dto.converter.MovieDtoConverter;
@@ -28,12 +27,16 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import static com.ercanbeyen.movieapplication.constant.names.ParameterNames.ORDER_BY;
 
 @Service
 @RequiredArgsConstructor
@@ -79,41 +82,31 @@ public class MovieServiceImpl implements MovieService {
     @CacheEvict(value = "movies", allEntries = true)
     @Override
     public PageDto<Movie, MovieDto> getMovies(MovieFilteringOptions filteringOptions, OrderBy orderBy, String limit, Pageable pageable) {
-        Page<Movie> moviePage = movieRepository.findAll(pageable);
-        log.info(LogMessages.FETCHED_ALL, ResourceNames.MOVIE);
-
         Predicate<Movie> moviePredicate = (movie) -> (
                 (filteringOptions.genres() == null || filteringOptions.genres().isEmpty() || filteringOptions.genres().contains(movie.getGenre())) &&
                 (StringUtils.isBlank(filteringOptions.language()) || movie.getLanguage().equals(filteringOptions.language())) &&
                 (filteringOptions.releaseYear() == null || movie.getReleaseYear().intValue() == filteringOptions.releaseYear().intValue()));
 
-        long maximumSize = Long.parseLong(limit);
-        List<MovieDto> movieDtoList;
+        Page<Movie> moviePage;
 
-        if (orderBy == null) {
-            log.info(LogMessages.REQUEST_PARAMETER_NULL, ParameterNames.ORDER_BY);
+        String logMessage = (orderBy == null) ? "Request parameter " + ORDER_BY + " is null" :  "Value of orderBy is " + orderBy.getOrderByInfo();
+        log.info(logMessage);
 
-            movieDtoList = moviePage.stream()
-                    .filter(moviePredicate)
-                    .limit(maximumSize)
-                    .map(movieDtoConverter::convert)
-                    .toList();
+        if (pageable.getSort().isSorted() && orderBy == OrderBy.DESC) {
+            Sort sort = pageable.getSort().reverse();
+            moviePage = movieRepository.findAll(PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort));
         } else {
-            log.info(LogMessages.ORDER_BY_VALUE, orderBy.getOrderByInfo());
-            Comparator<Movie> movieAscendingComparator = Comparator.comparing(Movie::getRating);
-
-            Comparator<Movie> movieComparator = switch (orderBy) {
-                case ASC -> movieAscendingComparator;
-                case DESC -> movieAscendingComparator.reversed();
-            };
-
-            movieDtoList = moviePage.stream()
-                    .filter(moviePredicate)
-                    .sorted(movieComparator)
-                    .limit(maximumSize)
-                    .map(movieDtoConverter::convert)
-                    .toList();
+            moviePage = movieRepository.findAll(pageable);
         }
+
+        log.info(LogMessages.FETCHED_ALL, ResourceNames.MOVIE);
+        long maximumSize = Long.parseLong(limit);
+
+        List<MovieDto> movieDtoList = moviePage.stream()
+                 .filter(moviePredicate)
+                 .limit(maximumSize)
+                 .map(movieDtoConverter::convert)
+                 .toList();
 
         return new PageDto<>(moviePage, movieDtoList);
     }
