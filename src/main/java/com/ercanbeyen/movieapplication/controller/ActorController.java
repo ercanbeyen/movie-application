@@ -30,7 +30,7 @@ public class ActorController {
     private final ActorService actorService;
 
     @PostMapping
-    public ResponseEntity<?> createActor(@RequestBody @Valid CreateActorRequest request) throws JsonProcessingException {
+    public ResponseEntity<?> createActor(@RequestBody @Valid CreateActorRequest request) {
         ActorDto createdActor = actorService.createActor(request);
         Map<String, ?> partialData = ResponseHandler.getFilteredPartialData(createdActor, "moviesPlayed");
         return ResponseHandler.generateResponse(HttpStatus.CREATED, null, partialData);
@@ -38,7 +38,7 @@ public class ActorController {
 
     @LogExecutionTime
     @GetMapping({"", "/filter"})
-    public ResponseEntity<?> getActors(ActorFilteringOptions actorFilteringOptions, @RequestParam(required = false) OrderBy orderBy, @RequestParam(required = false, defaultValue = DefaultValues.DEFAULT_LIMIT_VALUE) String limit, Pageable pageable) throws JsonProcessingException {
+    public ResponseEntity<?> getActors(ActorFilteringOptions actorFilteringOptions, @RequestParam(required = false) OrderBy orderBy, @RequestParam(required = false, defaultValue = DefaultValues.DEFAULT_LIMIT_VALUE) String limit, Pageable pageable) {
         PageDto<Actor, ActorDto> actorDtoPage = actorService.getActors(actorFilteringOptions, orderBy, limit, pageable);
         List<?> partialData = ResponseHandler.getFilteredPartialDataFromList(actorDtoPage.getContent(), "moviesPlayed", "biography");
         return ResponseHandler.generateResponse(HttpStatus.OK, null, partialData);
@@ -73,7 +73,7 @@ public class ActorController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<?> searchActors(@RequestParam String fullName) throws JsonProcessingException {
+    public ResponseEntity<?> searchActors(@RequestParam String fullName) {
         List<ActorDto> actorDtoList = actorService.searchActors(fullName);
         List<?> partialData = ResponseHandler.getFilteredPartialDataFromList(actorDtoList, "moviesPlayed", "summary");
         return ResponseHandler.generateResponse(HttpStatus.OK, null, partialData);

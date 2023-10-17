@@ -42,40 +42,48 @@ public class ResponseHandler {
         return new ResponseEntity<>(response, httpStatus);
     }
 
-    public static Map<String, ?> getSerializedPartialData(Object response, final String ...fields) throws JsonProcessingException {
+    public static Map<String, ?> getSerializedPartialData(Object response, final String ...fields) {
         FilterProvider filterProvider = new SimpleFilterProvider().addFilter(FilterNames.PARTIAL_RESPONSE_FILTER, SimpleBeanPropertyFilter.filterOutAllExcept(fields));
         objectMapper.setFilterProvider(filterProvider);
 
-        String jsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response);
-
-        return gson.fromJson(jsonString, Map.class);
+        String json = getJson(response);
+        return gson.fromJson(json, Map.class);
     }
 
-    public static Map<String, ?> getFilteredPartialData(Object response, final String ...fields) throws JsonProcessingException {
+    public static Map<String, ?> getFilteredPartialData(Object response, final String ...fields) {
         FilterProvider filterProvider = new SimpleFilterProvider().addFilter(FilterNames.PARTIAL_RESPONSE_FILTER, SimpleBeanPropertyFilter.serializeAllExcept(fields));
         objectMapper.setFilterProvider(filterProvider);
 
-        String jsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response);
-
-        return gson.fromJson(jsonString, Map.class);
+        String json = getJson(response);
+        return gson.fromJson(json, Map.class);
     }
 
-    public static Map<String, ?> getAllSerializedData(Object response) throws JsonProcessingException {
+    public static Map<String, ?> getAllSerializedData(Object response) {
         FilterProvider filterProvider = new SimpleFilterProvider().addFilter(FilterNames.PARTIAL_RESPONSE_FILTER, SimpleBeanPropertyFilter.serializeAll());
         objectMapper.setFilterProvider(filterProvider);
 
-        String jsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response);
-
-        return gson.fromJson(jsonString, Map.class);
+        String json = getJson(response);
+        return gson.fromJson(json, Map.class);
     }
 
-    public static List<?> getFilteredPartialDataFromList(List<?> list, final String ...fields) throws JsonProcessingException {
+    public static List<?> getFilteredPartialDataFromList(List<?> response, final String ...fields) {
         FilterProvider filterProvider = new SimpleFilterProvider().addFilter(FilterNames.PARTIAL_RESPONSE_FILTER, SimpleBeanPropertyFilter.serializeAllExcept(fields));
         objectMapper.setFilterProvider(filterProvider);
 
-        String jsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(list);
+        String json = getJson(response);
         Type listType = new TypeToken<List<Object>>(){}.getType();
+        return gson.fromJson(json, listType);
+    }
 
-        return gson.fromJson(jsonString, listType);
+    private static String getJson(Object object) {
+        String json;
+
+        try {
+            json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
+        } catch (JsonProcessingException exception) {
+            throw new RuntimeException(exception.getMessage());
+        }
+
+        return json;
     }
 }
