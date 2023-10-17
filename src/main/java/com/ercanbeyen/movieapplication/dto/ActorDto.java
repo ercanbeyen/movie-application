@@ -1,5 +1,6 @@
 package com.ercanbeyen.movieapplication.dto;
 
+import com.ercanbeyen.movieapplication.constant.names.FilterNames;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -12,7 +13,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Set;
 
-@JsonFilter("nameFilter")
+@JsonFilter(FilterNames.PARTIAL_RESPONSE_FILTER)
 @Builder
 public record ActorDto(
         Integer id, String name, String surname, String nationality,

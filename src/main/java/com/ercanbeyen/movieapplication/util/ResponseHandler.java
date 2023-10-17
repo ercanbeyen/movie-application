@@ -1,5 +1,6 @@
 package com.ercanbeyen.movieapplication.util;
 
+import com.ercanbeyen.movieapplication.constant.names.FilterNames;
 import com.ercanbeyen.movieapplication.constant.names.ParameterNames;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,7 +15,11 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings({"unchecked"})
 public class ResponseHandler {
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final Gson gson = new Gson();
+
     public static ResponseEntity<Object> generateResponse(HttpStatus httpStatus, String message, Object data) {
         Map<String, Object> response = new HashMap<>();
 
@@ -35,46 +40,31 @@ public class ResponseHandler {
     }
 
     public static Map<String, ?> getSerializedPartialData(Object response, final String ...fields) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        FilterProvider filterProvider = new SimpleFilterProvider().addFilter("nameFilter", SimpleBeanPropertyFilter.filterOutAllExcept(fields));
+        FilterProvider filterProvider = new SimpleFilterProvider().addFilter(FilterNames.PARTIAL_RESPONSE_FILTER, SimpleBeanPropertyFilter.filterOutAllExcept(fields));
         objectMapper.setFilterProvider(filterProvider);
 
         String jsonString = objectMapper.writerWithDefaultPrettyPrinter()
                 .writeValueAsString(response);
-
-        Gson gson = new Gson();
 
         return gson.fromJson(jsonString, Map.class);
     }
 
     public static Map<String, ?> getFilteredPartialData(Object response, final String ...fields) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        FilterProvider filterProvider = new SimpleFilterProvider().addFilter("nameFilter", SimpleBeanPropertyFilter.serializeAllExcept(fields));
+        FilterProvider filterProvider = new SimpleFilterProvider().addFilter(FilterNames.PARTIAL_RESPONSE_FILTER, SimpleBeanPropertyFilter.serializeAllExcept(fields));
         objectMapper.setFilterProvider(filterProvider);
 
         String jsonString = objectMapper.writerWithDefaultPrettyPrinter()
                 .writeValueAsString(response);
-
-        Gson gson = new Gson();
-
-        //TypeToken<Object> token = new TypeToken<>() {};
-        //Map<String, ?> map = gson.fromJson(response, token.getType());
 
         return gson.fromJson(jsonString, Map.class);
     }
 
     public static Map<String, ?> getAllSerializedData(Object response) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        FilterProvider filterProvider = new SimpleFilterProvider().addFilter("nameFilter", SimpleBeanPropertyFilter.serializeAll());
+        FilterProvider filterProvider = new SimpleFilterProvider().addFilter(FilterNames.PARTIAL_RESPONSE_FILTER, SimpleBeanPropertyFilter.serializeAll());
         objectMapper.setFilterProvider(filterProvider);
 
         String jsonString = objectMapper.writerWithDefaultPrettyPrinter()
                 .writeValueAsString(response);
-
-        Gson gson = new Gson();
 
         return gson.fromJson(jsonString, Map.class);
     }
