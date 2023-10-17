@@ -8,11 +8,14 @@ import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings({"unchecked"})
@@ -43,8 +46,7 @@ public class ResponseHandler {
         FilterProvider filterProvider = new SimpleFilterProvider().addFilter(FilterNames.PARTIAL_RESPONSE_FILTER, SimpleBeanPropertyFilter.filterOutAllExcept(fields));
         objectMapper.setFilterProvider(filterProvider);
 
-        String jsonString = objectMapper.writerWithDefaultPrettyPrinter()
-                .writeValueAsString(response);
+        String jsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response);
 
         return gson.fromJson(jsonString, Map.class);
     }
@@ -53,8 +55,7 @@ public class ResponseHandler {
         FilterProvider filterProvider = new SimpleFilterProvider().addFilter(FilterNames.PARTIAL_RESPONSE_FILTER, SimpleBeanPropertyFilter.serializeAllExcept(fields));
         objectMapper.setFilterProvider(filterProvider);
 
-        String jsonString = objectMapper.writerWithDefaultPrettyPrinter()
-                .writeValueAsString(response);
+        String jsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response);
 
         return gson.fromJson(jsonString, Map.class);
     }
@@ -63,9 +64,18 @@ public class ResponseHandler {
         FilterProvider filterProvider = new SimpleFilterProvider().addFilter(FilterNames.PARTIAL_RESPONSE_FILTER, SimpleBeanPropertyFilter.serializeAll());
         objectMapper.setFilterProvider(filterProvider);
 
-        String jsonString = objectMapper.writerWithDefaultPrettyPrinter()
-                .writeValueAsString(response);
+        String jsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response);
 
         return gson.fromJson(jsonString, Map.class);
+    }
+
+    public static List<?> getFilteredPartialDataFromList(List<?> list, final String ...fields) throws JsonProcessingException {
+        FilterProvider filterProvider = new SimpleFilterProvider().addFilter(FilterNames.PARTIAL_RESPONSE_FILTER, SimpleBeanPropertyFilter.serializeAllExcept(fields));
+        objectMapper.setFilterProvider(filterProvider);
+
+        String jsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(list);
+        Type listType = new TypeToken<List<Object>>(){}.getType();
+
+        return gson.fromJson(jsonString, listType);
     }
 }

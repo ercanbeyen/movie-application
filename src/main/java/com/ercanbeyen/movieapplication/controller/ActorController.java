@@ -68,14 +68,14 @@ public class ActorController {
     @GetMapping("/popular")
     public ResponseEntity<?> getMostPopularActors() throws JsonProcessingException {
         List<ActorDto> actorDtoList = actorService.getMostPopularActors();
-        Map<String, ?> partialData = ResponseHandler.getFilteredPartialData(actorDtoList, "moviesPlayed", "summary");
+        List<?> partialData = ResponseHandler.getFilteredPartialDataFromList(actorDtoList, "moviesPlayed", "summary");
         return ResponseHandler.generateResponse(HttpStatus.OK, null, partialData);
     }
 
     @GetMapping("/search")
     public ResponseEntity<?> searchActors(@RequestParam String fullName) throws JsonProcessingException {
         List<ActorDto> actorDtoList = actorService.searchActors(fullName);
-        Map<String, ?> partialData = ResponseHandler.getFilteredPartialData(actorDtoList, "moviesPlayed", "summary");
+        List<?> partialData = ResponseHandler.getFilteredPartialDataFromList(actorDtoList, "moviesPlayed", "summary");
         return ResponseHandler.generateResponse(HttpStatus.OK, null, partialData);
     }
 
