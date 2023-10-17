@@ -92,9 +92,7 @@ public class AspectManagement {
     @Before("@annotation(com.ercanbeyen.movieapplication.annotation.DMLAllowed)")
     public void checkDMLStatementConditions() {
         LocalDate currentDate = LocalDate.now();
-        List<DayOfWeek> allowedDayList = List.of(
-                DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY,
-                DayOfWeek.TUESDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
+        List<DayOfWeek> allowedDayList = List.of(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY);
 
         if (!allowedDayList.contains(currentDate.getDayOfWeek())) {
             throw new ResourceConflictException("DML statements can only be applied in " + allowedDayList);

@@ -32,15 +32,15 @@ public class ActorController {
     @PostMapping
     public ResponseEntity<?> createActor(@RequestBody @Valid CreateActorRequest request) throws JsonProcessingException {
         ActorDto createdActor = actorService.createActor(request);
-        Map<String, ?> partialData = ResponseHandler.getAllSerializedData(createdActor);
+        Map<String, ?> partialData = ResponseHandler.getFilteredPartialData(createdActor, "moviesPlayed");
         return ResponseHandler.generateResponse(HttpStatus.CREATED, null, partialData);
     }
 
     @LogExecutionTime
     @GetMapping({"", "/filter"})
     public ResponseEntity<?> getActors(ActorFilteringOptions actorFilteringOptions, @RequestParam(required = false) OrderBy orderBy, @RequestParam(required = false, defaultValue = DefaultValues.DEFAULT_LIMIT_VALUE) String limit, Pageable pageable) throws JsonProcessingException {
-        PageDto<Actor, ActorDto> actorDtoList = actorService.getActors(actorFilteringOptions, orderBy, limit, pageable);
-        Map<String, ?> partialData = ResponseHandler.getSerializedPartialData(actorDtoList, "name", "surname");
+        PageDto<Actor, ActorDto> actorDtoPage = actorService.getActors(actorFilteringOptions, orderBy, limit, pageable);
+        List<?> partialData = ResponseHandler.getFilteredPartialDataFromList(actorDtoPage.getContent(), "moviesPlayed", "biography");
         return ResponseHandler.generateResponse(HttpStatus.OK, null, partialData);
     }
 
