@@ -25,18 +25,19 @@ There are 2 roles among audiences
 ### Requirements
 - Audiences must log in to use the application.
 - Each audience must have a unique username.
-- Each movie must have title, language, genre, release year, rating.
+- Each movie must have title, language, genre, release year and rating.
 - Each director and actor must have name, surname, nationality and birth year.
 - Each role's name must be unique.
 - Each cinema must have a name, country, city, address, contact number, hall amount and statuses (reservation, 3-D animation, parking place, air conditioning and cafe & food)
-- Admins may apply DML statements to movies only in allowed time periods.
+- Only admins may apply DML statement to movies, actors, directors, cinemas and roles.
+- Only admins may update roles of users.
 
 ### Additionals
-- If scheduling is enabled, then cron jobs work.
+- Cron jobs work during runtime.
 - Statistical values can be observed for each entity and document. 
 - Directors and actors may appear in multiple movies.
-- Only admins may apply DML statement to movies, actors, directors and cinemas.
-- Admins may update roles of users.
+- Audiences may have multiple roles.
+- Admins may apply DML statements to movies only in allowed time periods.
 
 ### Tech Stack
 ---
