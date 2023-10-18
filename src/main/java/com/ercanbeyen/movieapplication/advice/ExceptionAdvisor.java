@@ -55,6 +55,6 @@ public class ExceptionAdvisor extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGeneralException(Exception exception) {
-        return ResponseHandler.generateResponse(HttpStatus.EXPECTATION_FAILED, exception.getMessage(), null);
+        return ResponseHandler.generateResponse(HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage(), null);
     }
 }

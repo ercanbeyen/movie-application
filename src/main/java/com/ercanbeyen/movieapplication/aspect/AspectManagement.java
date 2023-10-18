@@ -8,9 +8,7 @@ import com.ercanbeyen.movieapplication.service.AudienceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -94,7 +92,7 @@ public class AspectManagement {
     @Before("@annotation(com.ercanbeyen.movieapplication.annotation.DMLAllowed)")
     public void checkDMLStatementConditions() {
         LocalDate currentDate = LocalDate.now();
-        List<DayOfWeek> allowedDayList = List.of(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY);
+        List<DayOfWeek> allowedDayList = List.of(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY);
 
         if (!allowedDayList.contains(currentDate.getDayOfWeek())) {
             throw new ResourceConflictException("DML statements can only be applied in " + allowedDayList);

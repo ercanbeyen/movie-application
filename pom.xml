@@ -23,6 +23,7 @@
 		<jakson.version>2.15.2</jakson.version>
 		<spring-session-jdbc.version>3.1.2</spring-session-jdbc.version>
 		<spring-aop.version>3.1.4</spring-aop.version>
+		<gson.version>2.10.1</gson.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -119,6 +120,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-aop</artifactId>
 			<version>${spring-aop.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>${gson.version}</version>
 		</dependency>
 
 	</dependencies>

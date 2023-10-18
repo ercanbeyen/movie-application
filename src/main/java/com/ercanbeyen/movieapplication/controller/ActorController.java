@@ -12,6 +12,7 @@ import com.ercanbeyen.movieapplication.util.ResponseHandler;
 import com.ercanbeyen.movieapplication.entity.Actor;
 import com.ercanbeyen.movieapplication.service.ActorService;
 import com.ercanbeyen.movieapplication.dto.PageDto;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/actors")
@@ -30,26 +32,31 @@ public class ActorController {
     @PostMapping
     public ResponseEntity<?> createActor(@RequestBody @Valid CreateActorRequest request) {
         ActorDto createdActor = actorService.createActor(request);
-        return ResponseHandler.generateResponse(HttpStatus.CREATED, null, createdActor);
+        Map<String, ?> partialData = ResponseHandler.getFilteredPartialData(createdActor, "moviesPlayed");
+        return ResponseHandler.generateResponse(HttpStatus.CREATED, null, partialData);
     }
 
     @LogExecutionTime
     @GetMapping({"", "/filter"})
     public ResponseEntity<?> getActors(ActorFilteringOptions actorFilteringOptions, @RequestParam(required = false) OrderBy orderBy, @RequestParam(required = false, defaultValue = DefaultValues.DEFAULT_LIMIT_VALUE) String limit, Pageable pageable) {
-        PageDto<Actor, ActorDto> actorDtoList = actorService.getActors(actorFilteringOptions, orderBy, limit, pageable);
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, actorDtoList);
+        PageDto<Actor, ActorDto> actorDtoPage = actorService.getActors(actorFilteringOptions, orderBy, limit, pageable);
+        List<?> partialData = ResponseHandler.getFilteredPartialDataFromList(actorDtoPage.getContent(), "moviesPlayed", "biography");
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, partialData);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getActor(@PathVariable Integer id) {
+    public ResponseEntity<?> getActor(@PathVariable Integer id, final String... fields) throws JsonProcessingException {
         ActorDto actorDto = actorService.getActor(id);
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, actorDto);
+        Map<String, ?> partialData = ResponseHandler.getSerializedPartialData(actorDto, fields);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, partialData);
+
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateActor(@PathVariable Integer id, @RequestBody @Valid UpdateActorRequest request) {
-        ActorDto actorDto = actorService.updateActor(id, request);
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, actorDto);
+    public ResponseEntity<?> updateActor(@PathVariable Integer id, @RequestBody @Valid UpdateActorRequest request) throws JsonProcessingException {
+        ActorDto updatedActor = actorService.updateActor(id, request);
+        Map<String, ?> partialData = ResponseHandler.getAllSerializedData(updatedActor);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, partialData);
     }
 
     @DeleteMapping("/{id}")
@@ -59,15 +66,17 @@ public class ActorController {
     }
 
     @GetMapping("/popular")
-    public ResponseEntity<?> getMostPopularActors() {
+    public ResponseEntity<?> getMostPopularActors() throws JsonProcessingException {
         List<ActorDto> actorDtoList = actorService.getMostPopularActors();
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, actorDtoList);
+        List<?> partialData = ResponseHandler.getFilteredPartialDataFromList(actorDtoList, "moviesPlayed", "summary");
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, partialData);
     }
 
     @GetMapping("/search")
     public ResponseEntity<?> searchActors(@RequestParam String fullName) {
         List<ActorDto> actorDtoList = actorService.searchActors(fullName);
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, actorDtoList);
+        List<?> partialData = ResponseHandler.getFilteredPartialDataFromList(actorDtoList, "moviesPlayed", "summary");
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, partialData);
     }
 
     @GetMapping("/statistics")
