@@ -3,6 +3,7 @@ package com.ercanbeyen.movieapplication.controller;
 import com.ercanbeyen.movieapplication.annotation.LogExecutionTime;
 import com.ercanbeyen.movieapplication.constant.defaults.DefaultValues;
 import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
+import com.ercanbeyen.movieapplication.constant.names.FieldNames;
 import com.ercanbeyen.movieapplication.dto.ActorDto;
 import com.ercanbeyen.movieapplication.dto.Statistics;
 import com.ercanbeyen.movieapplication.option.filter.ActorFilteringOptions;
@@ -32,7 +33,7 @@ public class ActorController {
     @PostMapping
     public ResponseEntity<?> createActor(@RequestBody @Valid CreateActorRequest request) {
         ActorDto createdActor = actorService.createActor(request);
-        Map<String, ?> partialData = ResponseHandler.getFilteredPartialData(createdActor, "moviesPlayed");
+        Map<String, ?> partialData = ResponseHandler.getFilteredPartialData(createdActor, FieldNames.MOVIES_PLAYED);
         return ResponseHandler.generateResponse(HttpStatus.CREATED, null, partialData);
     }
 
@@ -40,12 +41,12 @@ public class ActorController {
     @GetMapping({"", "/filter"})
     public ResponseEntity<?> getActors(ActorFilteringOptions actorFilteringOptions, @RequestParam(required = false) OrderBy orderBy, @RequestParam(required = false, defaultValue = DefaultValues.DEFAULT_LIMIT_VALUE) String limit, Pageable pageable) {
         PageDto<Actor, ActorDto> actorDtoPage = actorService.getActors(actorFilteringOptions, orderBy, limit, pageable);
-        List<?> partialData = ResponseHandler.getFilteredPartialDataFromList(actorDtoPage.getContent(), "moviesPlayed", "biography");
+        List<?> partialData = ResponseHandler.getFilteredPartialDataFromList(actorDtoPage.getContent(), FieldNames.MOVIES_PLAYED, FieldNames.BIOGRAPHY);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, partialData);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getActor(@PathVariable Integer id, final String... fields) throws JsonProcessingException {
+    public ResponseEntity<?> getActor(@PathVariable Integer id, final String... fields) {
         ActorDto actorDto = actorService.getActor(id);
         Map<String, ?> partialData = ResponseHandler.getSerializedPartialData(actorDto, fields);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, partialData);
@@ -66,16 +67,16 @@ public class ActorController {
     }
 
     @GetMapping("/popular")
-    public ResponseEntity<?> getMostPopularActors() throws JsonProcessingException {
+    public ResponseEntity<?> getMostPopularActors() {
         List<ActorDto> actorDtoList = actorService.getMostPopularActors();
-        List<?> partialData = ResponseHandler.getFilteredPartialDataFromList(actorDtoList, "moviesPlayed", "summary");
+        List<?> partialData = ResponseHandler.getFilteredPartialDataFromList(actorDtoList, FieldNames.MOVIES_PLAYED, FieldNames.BIOGRAPHY);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, partialData);
     }
 
     @GetMapping("/search")
     public ResponseEntity<?> searchActors(@RequestParam String fullName) {
         List<ActorDto> actorDtoList = actorService.searchActors(fullName);
-        List<?> partialData = ResponseHandler.getFilteredPartialDataFromList(actorDtoList, "moviesPlayed", "summary");
+        List<?> partialData = ResponseHandler.getFilteredPartialDataFromList(actorDtoList, FieldNames.MOVIES_PLAYED, FieldNames.BIOGRAPHY);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, partialData);
     }
 
