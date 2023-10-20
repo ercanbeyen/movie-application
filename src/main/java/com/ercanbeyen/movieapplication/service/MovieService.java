@@ -1,6 +1,5 @@
 package com.ercanbeyen.movieapplication.service;
 
-import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
 import com.ercanbeyen.movieapplication.dto.MovieDto;
 import com.ercanbeyen.movieapplication.option.filter.MovieFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateMovieRequest;
@@ -14,7 +13,7 @@ import java.util.List;
 
 public interface MovieService {
     MovieDto createMovie(CreateMovieRequest request);
-    PageDto<Movie, MovieDto> getMovies(MovieFilteringOptions filteringOptions, OrderBy orderBy, String limit, Pageable pageable);
+    PageDto<Movie, MovieDto> getMovies(MovieFilteringOptions filteringOptions, String limit, Pageable pageable);
     MovieDto getMovie(Integer id);
     MovieDto updateMovie(Integer id, UpdateMovieRequest request);
     String deleteMovie(Integer id);
