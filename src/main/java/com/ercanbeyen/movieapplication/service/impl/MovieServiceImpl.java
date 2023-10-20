@@ -13,6 +13,7 @@ import com.ercanbeyen.movieapplication.dto.request.update.UpdateMovieRequest;
 import com.ercanbeyen.movieapplication.entity.Actor;
 import com.ercanbeyen.movieapplication.entity.Director;
 import com.ercanbeyen.movieapplication.entity.Movie;
+import com.ercanbeyen.movieapplication.exception.ResourceConflictException;
 import com.ercanbeyen.movieapplication.exception.ResourceNotFoundException;
 import com.ercanbeyen.movieapplication.option.filter.MovieFilteringOptions;
 import com.ercanbeyen.movieapplication.repository.MovieRepository;
@@ -49,15 +50,6 @@ public class MovieServiceImpl implements MovieService {
     public MovieDto createMovie(CreateMovieRequest request) {
         checkImdbId(null, request.getImdbId());
 
-        Director director = null;
-
-        if (request.getDirectorId() != null) {
-            director = directorService.findDirectorById(request.getDirectorId());
-            log.info(LogMessages.RESOURCE_FOUND, ResourceNames.DIRECTOR, request.getDirectorId());
-        } else {
-            log.warn(LogMessages.SEARCH_SKIPPED, ResourceNames.DIRECTOR);
-        }
-
         Movie newMovie = Movie.builder()
                 .imdbId(request.getImdbId())
                 .title(request.getTitle())
@@ -66,7 +58,7 @@ public class MovieServiceImpl implements MovieService {
                 .releaseYear(request.getReleaseYear())
                 .language(request.getLanguage())
                 .summary(request.getSummary())
-                .director(director)
+                .director(null)
                 .actors(new HashSet<>())
                 .build();
 
@@ -255,7 +247,7 @@ public class MovieServiceImpl implements MovieService {
         }
 
         if (movieRepository.existsByImdbId(newImdbId)) {
-            throw new ResourceNotFoundException(String.format(ResponseMessages.ALREADY_EXISTS, ResourceNames.MOVIE));
+            throw new ResourceConflictException(String.format(ResponseMessages.ALREADY_EXISTS, ResourceNames.MOVIE));
         }
 
         log.info("imdbId check is passed");

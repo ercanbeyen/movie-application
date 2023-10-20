@@ -13,6 +13,7 @@ import com.ercanbeyen.movieapplication.dto.request.update.UpdateMovieRequest;
 import com.ercanbeyen.movieapplication.entity.Actor;
 import com.ercanbeyen.movieapplication.entity.Director;
 import com.ercanbeyen.movieapplication.entity.Movie;
+import com.ercanbeyen.movieapplication.exception.ResourceConflictException;
 import com.ercanbeyen.movieapplication.exception.ResourceNotFoundException;
 import com.ercanbeyen.movieapplication.option.filter.MovieFilteringOptions;
 import com.ercanbeyen.movieapplication.repository.MovieRepository;
@@ -138,7 +139,6 @@ public class MovieServiceImplTest {
     public void whenCreateMovieCalledWithValidRequest_itShouldReturnMovieDto() {
         Movie movie = movieList.get(0);
         MovieDto expected = movieDtoList.get(0);
-        int directorId = expected.directorId();
 
         CreateMovieRequest request = new CreateMovieRequest();
         request.setTitle(movie.getTitle());
@@ -149,7 +149,6 @@ public class MovieServiceImplTest {
         request.setRating(expected.rating());
         request.setSummary(movie.getSummary());
 
-        when(directorService.findDirectorById(directorId)).thenReturn(movie.getDirector());
         when(movieRepository.save(any(Movie.class))).thenReturn(movie);
         when(movieDtoConverter.convert(movie)).thenReturn(expected);
 
@@ -157,7 +156,6 @@ public class MovieServiceImplTest {
 
         assertEquals(expected, actual);
 
-        verify(directorService, times(1)).findDirectorById(directorId);
         verify(movieRepository, times(1)).save(any(Movie.class));
         verify(movieDtoConverter, times(1)).convert(any(Movie.class));
     }
@@ -226,7 +224,6 @@ public class MovieServiceImplTest {
     @Test
     @DisplayName("When getMovies Called With Parameters It Should Return MovieDto List")
     public void whenGetMoviesCalledWithParameters_itShouldReturnMovieDto() {
-        //Pageable pageable = Pageable.ofSize(1).withPage(0);
         Pageable pageable = PageRequest.of(0, 1, Sort.by(Sort.Order.desc("releasedYear")));
 
         List<Movie> fetchedMovieList = Collections.singletonList(movieList.get(0));
@@ -287,8 +284,8 @@ public class MovieServiceImplTest {
     @DisplayName("When Update Movie Called With Existed Id And Valid Request With Non Null DirectorId And Non Null Actor Id It Should Return MovieDto")
     public void whenUpdateMovieCalledWithExistedIdAndValidRequestNonNullDirectorIdAndNonNullActorId_itShouldReturnMovieDto() {
         Movie movie = movieList.get(0);
-        Movie updatedMovie = movieList.get(1);
-        MovieDto expected = movieDtoList.get(1);
+        Movie updatedMovie = movieList.get(0);
+        MovieDto expected = movieDtoList.get(0);
 
         int id = movie.getId();
         Director director = getMockDirector();
@@ -318,6 +315,40 @@ public class MovieServiceImplTest {
         verify(movieRepository, times(1)).findById(id);
         verify(movieRepository, times(1)).save(any(Movie.class));
         verify(movieDtoConverter, times(1)).convert(any(Movie.class));
+    }
+
+    @Test
+    @DisplayName("When updateMovie Called With Existed Other Imdb Id It Should Throw ResourceConflictException")
+    public void whenUpdateMovieCalledWithExistedOtherImdbId_itShouldThrowResourceConflictException() {
+        String imdbId = movieList.get(1).getImdbId();
+        Movie movie = movieList.get(0);
+        int id = movie.getId();
+        Optional<Movie> optionalMovie = Optional.of(movie);
+
+        UpdateMovieRequest request = new UpdateMovieRequest();
+        request.setImdbId(imdbId);
+        request.setTitle(movie.getTitle());
+        request.setGenre(movie.getGenre());
+        request.setReleaseYear(movie.getReleaseYear());
+        request.setLanguage(movie.getLanguage());
+        request.setRating(movie.getRating());
+        request.setSummary(movie.getSummary());
+        request.setDirectorId(movie.getId());
+        request.setActorIds(getMockActorIds());
+
+        String expected = String.format(String.format(ResponseMessages.ALREADY_EXISTS, ResourceNames.MOVIE));
+
+        when(movieRepository.findById(id)).thenReturn(optionalMovie);
+        when(movieRepository.existsByImdbId(imdbId)).thenReturn(true);
+
+        RuntimeException exception = assertThrows(ResourceConflictException.class, () -> movieService.updateMovie(id, request));
+        String actual = exception.getMessage();
+
+        assertEquals(expected, actual);
+
+        verify(movieRepository, times(1)).findById(id);
+        verify(movieRepository, times(1)).existsByImdbId(imdbId);
+        verifyNoMoreInteractions(movieDtoConverter);
     }
 
     @Test
