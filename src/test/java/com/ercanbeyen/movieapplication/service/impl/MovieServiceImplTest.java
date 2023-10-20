@@ -24,9 +24,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -58,7 +56,7 @@ public class MovieServiceImplTest {
                 .id(1)
                 .name("Test-name")
                 .surname("Test-surname")
-                .birthDate(LocalDate.of(2005, 2, 12))
+                .birthDate(LocalDate.of(2012, 5, 12))
                 .nationality("Test-nationality")
                 .biography("Test-biography")
                 .moviesDirected(new ArrayList<>())
@@ -70,7 +68,7 @@ public class MovieServiceImplTest {
                 .id(1)
                 .name("Test-name")
                 .surname("Test-surname")
-                .birthDate(LocalDate.of(2012, 3, 9))
+                .birthDate(LocalDate.of(2005, 3, 9))
                 .nationality("Test-nationality")
                 .biography("Test-biography")
                 .moviesPlayed(new HashSet<>())
@@ -203,6 +201,26 @@ public class MovieServiceImplTest {
         verify(movieRepository, times(1)).findById(id);
         verifyNoMoreInteractions(movieRepository);
         verifyNoInteractions(movieDtoConverter);
+    }
+
+    @Test
+    @DisplayName("When getMovie Called With Existed Imdb Id It Should Return MovieDto")
+    public void whenGetMovieCalledWithExistedImdbId_itShouldReturnMovieDto() {
+        Movie movie = movieList.get(0);
+        String imdbId = movie.getImdbId();
+
+        MovieDto expected = movieDtoList.get(0);
+        Optional<Movie> optionalMovie = Optional.of(movie);
+
+        when(movieRepository.findByImdbId(imdbId)).thenReturn(optionalMovie);
+        when(movieDtoConverter.convert(movie)).thenReturn(expected);
+
+        MovieDto actual = movieService.getMovie(imdbId);
+
+        assertEquals(expected, actual);
+
+        verify(movieRepository, times(1)).findByImdbId(imdbId);
+        verify(movieDtoConverter, times(1)).convert(any(Movie.class));
     }
 
     @Test
