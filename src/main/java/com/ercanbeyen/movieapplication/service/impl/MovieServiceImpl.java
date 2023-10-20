@@ -1,23 +1,24 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
-import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
-import com.ercanbeyen.movieapplication.constant.message.*;
+import com.ercanbeyen.movieapplication.constant.message.LogMessages;
+import com.ercanbeyen.movieapplication.constant.message.ResponseMessages;
+import com.ercanbeyen.movieapplication.constant.message.StatisticsMessages;
 import com.ercanbeyen.movieapplication.constant.names.ResourceNames;
 import com.ercanbeyen.movieapplication.dto.MovieDto;
+import com.ercanbeyen.movieapplication.dto.PageDto;
+import com.ercanbeyen.movieapplication.dto.Statistics;
 import com.ercanbeyen.movieapplication.dto.converter.MovieDtoConverter;
-import com.ercanbeyen.movieapplication.option.filter.MovieFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateMovieRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateMovieRequest;
 import com.ercanbeyen.movieapplication.entity.Actor;
 import com.ercanbeyen.movieapplication.entity.Director;
 import com.ercanbeyen.movieapplication.entity.Movie;
 import com.ercanbeyen.movieapplication.exception.ResourceNotFoundException;
+import com.ercanbeyen.movieapplication.option.filter.MovieFilteringOptions;
 import com.ercanbeyen.movieapplication.repository.MovieRepository;
 import com.ercanbeyen.movieapplication.service.ActorService;
 import com.ercanbeyen.movieapplication.service.DirectorService;
 import com.ercanbeyen.movieapplication.service.MovieService;
-import com.ercanbeyen.movieapplication.dto.PageDto;
-import com.ercanbeyen.movieapplication.dto.Statistics;
 import com.ercanbeyen.movieapplication.util.StatisticsUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -27,16 +28,12 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import static com.ercanbeyen.movieapplication.constant.names.ParameterNames.ORDER_BY;
 
 @Service
 @RequiredArgsConstructor
@@ -81,24 +78,13 @@ public class MovieServiceImpl implements MovieService {
 
     @CacheEvict(value = "movies", allEntries = true)
     @Override
-    public PageDto<Movie, MovieDto> getMovies(MovieFilteringOptions filteringOptions, OrderBy orderBy, String limit, Pageable pageable) {
+    public PageDto<Movie, MovieDto> getMovies(MovieFilteringOptions filteringOptions, String limit, Pageable pageable) {
         Predicate<Movie> moviePredicate = (movie) -> (
                 (filteringOptions.genres() == null || filteringOptions.genres().isEmpty() || filteringOptions.genres().contains(movie.getGenre())) &&
                 (StringUtils.isBlank(filteringOptions.language()) || movie.getLanguage().equals(filteringOptions.language())) &&
                 (filteringOptions.releaseYear() == null || movie.getReleaseYear().intValue() == filteringOptions.releaseYear().intValue()));
 
-        Page<Movie> moviePage;
-
-        String logMessage = (orderBy == null) ? "Request parameter " + ORDER_BY + " is null" :  "Value of orderBy is " + orderBy.getOrderByInfo();
-        log.info(logMessage);
-
-        if (pageable.getSort().isSorted() && orderBy == OrderBy.DESC) {
-            Sort sort = pageable.getSort().reverse();
-            moviePage = movieRepository.findAll(PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort));
-        } else {
-            moviePage = movieRepository.findAll(pageable);
-        }
-
+        Page<Movie> moviePage = movieRepository.findAll(pageable);
         log.info(LogMessages.FETCHED_ALL, ResourceNames.MOVIE);
         long maximumSize = Long.parseLong(limit);
 

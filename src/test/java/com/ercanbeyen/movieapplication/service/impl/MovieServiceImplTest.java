@@ -1,21 +1,21 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
 import com.ercanbeyen.movieapplication.constant.defaults.DefaultValues;
-import com.ercanbeyen.movieapplication.constant.names.ResourceNames;
+import com.ercanbeyen.movieapplication.constant.enums.Genre;
 import com.ercanbeyen.movieapplication.constant.message.ResponseMessages;
+import com.ercanbeyen.movieapplication.constant.names.ResourceNames;
 import com.ercanbeyen.movieapplication.dto.MovieDto;
+import com.ercanbeyen.movieapplication.dto.PageDto;
 import com.ercanbeyen.movieapplication.dto.Statistics;
 import com.ercanbeyen.movieapplication.dto.converter.MovieDtoConverter;
-import com.ercanbeyen.movieapplication.option.filter.MovieFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateMovieRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateMovieRequest;
 import com.ercanbeyen.movieapplication.entity.Actor;
 import com.ercanbeyen.movieapplication.entity.Director;
 import com.ercanbeyen.movieapplication.entity.Movie;
-import com.ercanbeyen.movieapplication.constant.enums.Genre;
 import com.ercanbeyen.movieapplication.exception.ResourceNotFoundException;
+import com.ercanbeyen.movieapplication.option.filter.MovieFilteringOptions;
 import com.ercanbeyen.movieapplication.repository.MovieRepository;
-import com.ercanbeyen.movieapplication.dto.PageDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -225,8 +225,9 @@ public class MovieServiceImplTest {
 
     @Test
     @DisplayName("When getMovies Called With Parameters It Should Return MovieDto List")
-    public void whenFilterMoviesCalledWithParameters_itShouldReturnMovieDto() {
-        Pageable pageable = Pageable.ofSize(1).withPage(0);
+    public void whenGetMoviesCalledWithParameters_itShouldReturnMovieDto() {
+        //Pageable pageable = Pageable.ofSize(1).withPage(0);
+        Pageable pageable = PageRequest.of(0, 1, Sort.by(Sort.Order.desc("releasedYear")));
 
         List<Movie> fetchedMovieList = Collections.singletonList(movieList.get(0));
         List<MovieDto> fetchedMovieDtoList = Collections.singletonList(movieDtoList.get(0));
@@ -239,7 +240,7 @@ public class MovieServiceImplTest {
 
         MovieFilteringOptions movieFilteringOptions = new MovieFilteringOptions(movieList.get(0).getLanguage(), null, null);
 
-        PageDto<Movie, MovieDto> actual = movieService.getMovies(movieFilteringOptions, null, DefaultValues.DEFAULT_LIMIT_VALUE, pageable);
+        PageDto<Movie, MovieDto> actual = movieService.getMovies(movieFilteringOptions, DefaultValues.DEFAULT_LIMIT_VALUE, pageable);
 
         assertEquals(expected, actual);
 
