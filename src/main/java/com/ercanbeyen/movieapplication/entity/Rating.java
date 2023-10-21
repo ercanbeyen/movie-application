@@ -10,7 +10,7 @@ public class Rating {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private Double value;
+    private Double rate;
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Movie movie;
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)

@@ -153,7 +153,7 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
         return optionalAudience.get();
     }
 
-    private Audience findAudienceByUsername(String username) {
+    public Audience findAudienceByUsername(String username) {
         return audienceRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.AUDIENCE)));
     }

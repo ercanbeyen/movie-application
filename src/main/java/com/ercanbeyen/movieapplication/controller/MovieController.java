@@ -17,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -78,6 +80,12 @@ public class MovieController {
     public ResponseEntity<?> getMovie(@RequestParam(name = "imdb") String imdbId) {
         MovieDto movieDto = movieService.getMovie(imdbId);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDto);
+    }
+
+    @PostMapping("/{id}/vote")
+    public ResponseEntity<?> rateMovie(@PathVariable Integer id, @RequestParam Double rate, @AuthenticationPrincipal UserDetails userDetails) {
+        String message = movieService.rateMovie(id, rate, userDetails);
+        return ResponseHandler.generateResponse(HttpStatus.OK, message, null);
     }
 
     @GetMapping("/statistics")

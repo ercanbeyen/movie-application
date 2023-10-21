@@ -11,15 +11,14 @@ import com.ercanbeyen.movieapplication.dto.converter.MovieDtoConverter;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateMovieRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateMovieRequest;
 import com.ercanbeyen.movieapplication.entity.Actor;
+import com.ercanbeyen.movieapplication.entity.Audience;
 import com.ercanbeyen.movieapplication.entity.Director;
 import com.ercanbeyen.movieapplication.entity.Movie;
 import com.ercanbeyen.movieapplication.exception.ResourceConflictException;
 import com.ercanbeyen.movieapplication.exception.ResourceNotFoundException;
 import com.ercanbeyen.movieapplication.option.filter.MovieFilteringOptions;
 import com.ercanbeyen.movieapplication.repository.MovieRepository;
-import com.ercanbeyen.movieapplication.service.ActorService;
-import com.ercanbeyen.movieapplication.service.DirectorService;
-import com.ercanbeyen.movieapplication.service.MovieService;
+import com.ercanbeyen.movieapplication.service.*;
 import com.ercanbeyen.movieapplication.util.StatisticsUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +29,7 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -44,6 +44,8 @@ public class MovieServiceImpl implements MovieService {
     private final MovieDtoConverter movieDtoConverter;
     private final DirectorService directorService;
     private final ActorService actorService;
+    private final AudienceService audienceService;
+    private final RatingService ratingService;
 
     @CachePut(value = "movies", key = "#result.id")
     @Override
@@ -189,6 +191,14 @@ public class MovieServiceImpl implements MovieService {
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE)));
 
         return movieDtoConverter.convert(movie);
+    }
+
+    @Transactional
+    @Override
+    public String rateMovie(Integer id, Double rate, UserDetails userDetails) {
+        Movie movieInDb = findMovieById(id);
+        Audience audienceInDb = audienceService.findAudienceByUsername(userDetails.getUsername());
+        return ratingService.createRating(audienceInDb, movieInDb, rate);
     }
 
     @Override
