@@ -79,7 +79,7 @@ public class RoleServiceImpl implements RoleService {
     public String deleteRole(Integer id) {
         Role roleInDb = findRoleById(id);
 
-        if (!roleInDb.getAudienceSet().isEmpty()) {
+        if (!roleInDb.getAudiences().isEmpty()) {
             log.error("{} {} includes {}s", ResourceNames.ROLE, id, ResourceNames.AUDIENCE);
             throw new ResourceConflictException(ResourceNames.ROLE + " cannot be deleted unless it does not include any " + ResourceNames.AUDIENCE);
         }

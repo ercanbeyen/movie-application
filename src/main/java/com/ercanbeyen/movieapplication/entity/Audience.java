@@ -6,8 +6,7 @@ import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.Set;
+import java.util.*;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,17 +25,18 @@ public non-sealed class Audience extends Base implements UserDetails {
     private String password;
     @Setter
     @Getter
-    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToMany(
+            fetch = FetchType.EAGER,
+            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}
+    )
     @JoinTable(
             name = "audiences_roles",
-            joinColumns = {
-                    @JoinColumn(name = "audience_id")
-            },
-            inverseJoinColumns = {
-                    @JoinColumn(name = "role_id")
-            }
+            joinColumns = {@JoinColumn(name = "audience_id")},
+            inverseJoinColumns = {@JoinColumn(name = "role_id")}
     )
     private Set<Role> roles;
+    @OneToMany(mappedBy = "audience", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Rating> ratings = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -5,8 +5,11 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
 
 @Setter
 @Getter
@@ -30,15 +33,13 @@ public class Movie implements Serializable {
     @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(
             name = "actors_movies",
-            joinColumns = {
-                    @JoinColumn(name = "actor_id")
-            },
-            inverseJoinColumns = {
-                    @JoinColumn(name = "movie_id")
-            }
+            joinColumns = {@JoinColumn(name = "actor_id")},
+            inverseJoinColumns = {@JoinColumn(name = "movie_id")}
     )
     private Set<Actor> actors = new HashSet<>();
     @ManyToOne
     @JoinColumn(name = "director_id", referencedColumnName = "id")
     private Director director;
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Rating> ratings = new ArrayList<>();
 }
