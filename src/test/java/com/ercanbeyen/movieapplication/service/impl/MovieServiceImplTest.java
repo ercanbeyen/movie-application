@@ -1,21 +1,22 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
 import com.ercanbeyen.movieapplication.constant.defaults.DefaultValues;
-import com.ercanbeyen.movieapplication.constant.names.ResourceNames;
+import com.ercanbeyen.movieapplication.constant.enums.Genre;
 import com.ercanbeyen.movieapplication.constant.message.ResponseMessages;
+import com.ercanbeyen.movieapplication.constant.names.ResourceNames;
 import com.ercanbeyen.movieapplication.dto.MovieDto;
+import com.ercanbeyen.movieapplication.dto.PageDto;
 import com.ercanbeyen.movieapplication.dto.Statistics;
 import com.ercanbeyen.movieapplication.dto.converter.MovieDtoConverter;
-import com.ercanbeyen.movieapplication.option.filter.MovieFilteringOptions;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateMovieRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateMovieRequest;
 import com.ercanbeyen.movieapplication.entity.Actor;
 import com.ercanbeyen.movieapplication.entity.Director;
 import com.ercanbeyen.movieapplication.entity.Movie;
-import com.ercanbeyen.movieapplication.constant.enums.Genre;
+import com.ercanbeyen.movieapplication.exception.ResourceConflictException;
 import com.ercanbeyen.movieapplication.exception.ResourceNotFoundException;
+import com.ercanbeyen.movieapplication.option.filter.MovieFilteringOptions;
 import com.ercanbeyen.movieapplication.repository.MovieRepository;
-import com.ercanbeyen.movieapplication.dto.PageDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,12 +25,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -47,6 +47,8 @@ public class MovieServiceImplTest {
     private MovieDtoConverter movieDtoConverter;
     @Mock
     private DirectorServiceImpl directorService;
+    @Mock
+    private ActorServiceImpl actorService;
     private List<Movie> movieList;
     private List<MovieDto> movieDtoList;
 
@@ -55,11 +57,33 @@ public class MovieServiceImplTest {
                 .id(1)
                 .name("Test-name")
                 .surname("Test-surname")
-                .birthDate(LocalDate.of(2005, 2, 12))
+                .birthDate(LocalDate.of(2012, 5, 12))
                 .nationality("Test-nationality")
                 .biography("Test-biography")
                 .moviesDirected(new ArrayList<>())
                 .build();
+    }
+
+    private List<Actor> getMockActors() {
+        Actor actor = Actor.builder()
+                .id(1)
+                .name("Test-name")
+                .surname("Test-surname")
+                .birthDate(LocalDate.of(2005, 3, 9))
+                .nationality("Test-nationality")
+                .biography("Test-biography")
+                .moviesPlayed(new HashSet<>())
+                .build();
+
+        return Collections.singletonList(actor);
+    }
+
+    private Set<Integer> getMockActorIds() {
+        List<Actor> actorList = getMockActors();
+
+        return actorList.stream()
+                .map(Actor::getId)
+                .collect(Collectors.toSet());
     }
 
     private List<Movie> getMockMovieList() {
@@ -68,7 +92,7 @@ public class MovieServiceImplTest {
         Genre genre = Genre.SCIENCE_FICTION;
         String summary = "Test-summary";
         Director director = getMockDirector();
-        Set<Actor> actors = new HashSet<>();
+        Set<Actor> actors = new HashSet<>(getMockActors());
 
         Movie movie1 = Movie.builder()
                 .id(id)
@@ -115,7 +139,6 @@ public class MovieServiceImplTest {
     public void whenCreateMovieCalledWithValidRequest_itShouldReturnMovieDto() {
         Movie movie = movieList.get(0);
         MovieDto expected = movieDtoList.get(0);
-        int directorId = expected.directorId();
 
         CreateMovieRequest request = new CreateMovieRequest();
         request.setTitle(movie.getTitle());
@@ -126,8 +149,6 @@ public class MovieServiceImplTest {
         request.setRating(expected.rating());
         request.setSummary(movie.getSummary());
 
-
-        when(directorService.findDirectorById(directorId)).thenReturn(movie.getDirector());
         when(movieRepository.save(any(Movie.class))).thenReturn(movie);
         when(movieDtoConverter.convert(movie)).thenReturn(expected);
 
@@ -135,7 +156,6 @@ public class MovieServiceImplTest {
 
         assertEquals(expected, actual);
 
-        verify(directorService, times(1)).findDirectorById(directorId);
         verify(movieRepository, times(1)).save(any(Movie.class));
         verify(movieDtoConverter, times(1)).convert(any(Movie.class));
     }
@@ -182,9 +202,29 @@ public class MovieServiceImplTest {
     }
 
     @Test
+    @DisplayName("When getMovie Called With Existed Imdb Id It Should Return MovieDto")
+    public void whenGetMovieCalledWithExistedImdbId_itShouldReturnMovieDto() {
+        Movie movie = movieList.get(0);
+        String imdbId = movie.getImdbId();
+
+        MovieDto expected = movieDtoList.get(0);
+        Optional<Movie> optionalMovie = Optional.of(movie);
+
+        when(movieRepository.findByImdbId(imdbId)).thenReturn(optionalMovie);
+        when(movieDtoConverter.convert(movie)).thenReturn(expected);
+
+        MovieDto actual = movieService.getMovie(imdbId);
+
+        assertEquals(expected, actual);
+
+        verify(movieRepository, times(1)).findByImdbId(imdbId);
+        verify(movieDtoConverter, times(1)).convert(any(Movie.class));
+    }
+
+    @Test
     @DisplayName("When getMovies Called With Parameters It Should Return MovieDto List")
-    public void whenFilterMoviesCalledWithParameters_itShouldReturnMovieDto() {
-        Pageable pageable = Pageable.ofSize(1).withPage(0);
+    public void whenGetMoviesCalledWithParameters_itShouldReturnMovieDto() {
+        Pageable pageable = PageRequest.of(0, 1, Sort.by(Sort.Order.desc("releasedYear")));
 
         List<Movie> fetchedMovieList = Collections.singletonList(movieList.get(0));
         List<MovieDto> fetchedMovieDtoList = Collections.singletonList(movieDtoList.get(0));
@@ -197,7 +237,7 @@ public class MovieServiceImplTest {
 
         MovieFilteringOptions movieFilteringOptions = new MovieFilteringOptions(movieList.get(0).getLanguage(), null, null);
 
-        PageDto<Movie, MovieDto> actual = movieService.getMovies(movieFilteringOptions, null, DefaultValues.DEFAULT_LIMIT_VALUE, pageable);
+        PageDto<Movie, MovieDto> actual = movieService.getMovies(movieFilteringOptions, DefaultValues.DEFAULT_LIMIT_VALUE, pageable);
 
         assertEquals(expected, actual);
 
@@ -206,10 +246,14 @@ public class MovieServiceImplTest {
     }
 
     @Test
-    @DisplayName("When updateMovie Called With Existed Id And Valid Request It Should Return MovieDto")
-    public void whenUpdateMovieCalledWithExistedIdAndValidRequest_itShouldReturnMovieDto() {
+    @DisplayName("When updateMovie Called With Existed Id And Valid Request With Null Director Id and Null Actor Id Set It Should Return MovieDto")
+    public void whenUpdateMovieCalledWithExistedIdAndValidRequestWithNullDirectorIdAndNullActorIdSet_itShouldReturnMovieDto() {
         Movie movie = movieList.get(0);
-        MovieDto expected = movieDtoList.get(1);
+        Movie updatedMovie = movieList.get(1);
+        updatedMovie.setDirector(null);
+        updatedMovie.setActors(new HashSet<>());
+        MovieDtoConverter internalDtoConverter = new MovieDtoConverter();
+        MovieDto expected = internalDtoConverter.convert(updatedMovie);
         int id = movie.getId();
 
         UpdateMovieRequest request = new UpdateMovieRequest();
@@ -220,6 +264,8 @@ public class MovieServiceImplTest {
         request.setLanguage(expected.language());
         request.setRating(expected.rating());
         request.setSummary(expected.summary());
+        request.setDirectorId(expected.directorId());
+        request.setActorIds(null);
 
         when(movieRepository.findById(id)).thenReturn(Optional.of(movie));
         when(movieRepository.save(any(Movie.class))).thenReturn(movie);
@@ -232,6 +278,77 @@ public class MovieServiceImplTest {
         verify(movieRepository, times(1)).findById(id);
         verify(movieRepository, times(1)).save(any(Movie.class));
         verify(movieDtoConverter, times(1)).convert(any(Movie.class));
+    }
+
+    @Test
+    @DisplayName("When Update Movie Called With Existed Id And Valid Request With Non Null DirectorId And Non Null Actor Id It Should Return MovieDto")
+    public void whenUpdateMovieCalledWithExistedIdAndValidRequestNonNullDirectorIdAndNonNullActorId_itShouldReturnMovieDto() {
+        Movie movie = movieList.get(0);
+        Movie updatedMovie = movieList.get(0);
+        MovieDto expected = movieDtoList.get(0);
+
+        int id = movie.getId();
+        Director director = getMockDirector();
+        Actor actor = getMockActors().get(0);
+
+        UpdateMovieRequest request = new UpdateMovieRequest();
+        request.setImdbId(expected.imdbId());
+        request.setTitle(expected.title());
+        request.setGenre(expected.genre());
+        request.setReleaseYear(expected.releaseYear());
+        request.setLanguage(expected.language());
+        request.setRating(expected.rating());
+        request.setSummary(expected.summary());
+        request.setDirectorId(getMockDirector().getId());
+        request.setActorIds(getMockActorIds());
+
+        when(movieRepository.findById(id)).thenReturn(Optional.of(movie));
+        when(directorService.findDirectorById(director.getId())).thenReturn(director);
+        when(actorService.findActorById(actor.getId())).thenReturn(actor);
+        when(movieRepository.save(any(Movie.class))).thenReturn(updatedMovie);
+        when(movieDtoConverter.convert(updatedMovie)).thenReturn(expected);
+
+        MovieDto actual = movieService.updateMovie(id, request);
+
+        assertEquals(expected, actual);
+
+        verify(movieRepository, times(1)).findById(id);
+        verify(movieRepository, times(1)).save(any(Movie.class));
+        verify(movieDtoConverter, times(1)).convert(any(Movie.class));
+    }
+
+    @Test
+    @DisplayName("When updateMovie Called With Existed Other Imdb Id It Should Throw ResourceConflictException")
+    public void whenUpdateMovieCalledWithExistedOtherImdbId_itShouldThrowResourceConflictException() {
+        String imdbId = movieList.get(1).getImdbId();
+        Movie movie = movieList.get(0);
+        int id = movie.getId();
+        Optional<Movie> optionalMovie = Optional.of(movie);
+
+        UpdateMovieRequest request = new UpdateMovieRequest();
+        request.setImdbId(imdbId);
+        request.setTitle(movie.getTitle());
+        request.setGenre(movie.getGenre());
+        request.setReleaseYear(movie.getReleaseYear());
+        request.setLanguage(movie.getLanguage());
+        request.setRating(movie.getRating());
+        request.setSummary(movie.getSummary());
+        request.setDirectorId(movie.getId());
+        request.setActorIds(getMockActorIds());
+
+        String expected = String.format(String.format(ResponseMessages.ALREADY_EXISTS, ResourceNames.MOVIE));
+
+        when(movieRepository.findById(id)).thenReturn(optionalMovie);
+        when(movieRepository.existsByImdbId(imdbId)).thenReturn(true);
+
+        RuntimeException exception = assertThrows(ResourceConflictException.class, () -> movieService.updateMovie(id, request));
+        String actual = exception.getMessage();
+
+        assertEquals(expected, actual);
+
+        verify(movieRepository, times(1)).findById(id);
+        verify(movieRepository, times(1)).existsByImdbId(imdbId);
+        verifyNoMoreInteractions(movieDtoConverter);
     }
 
     @Test
