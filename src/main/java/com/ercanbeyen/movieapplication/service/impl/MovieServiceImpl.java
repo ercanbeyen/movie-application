@@ -202,12 +202,12 @@ public class MovieServiceImpl implements MovieService {
                         rating.getMovie().getId().intValue() == movieInDb.getId().intValue())
                 .findFirst();
 
-        boolean isPresent = optionalRating.isPresent();
-        String logMessage = isPresent ? ResourceNames.RATING + " is created before"
+        boolean isRatingPresent = optionalRating.isPresent();
+        String logMessage = isRatingPresent ? ResourceNames.RATING + " is created before"
                 : ResourceNames.RATING + " has not been created before";
         log.info(logMessage);
 
-        return (isPresent) ? ratingService.updatedRating(optionalRating.get(), rate)
+        return (isRatingPresent) ? ratingService.updatedRating(optionalRating.get(), rate)
                 : ratingService.createRating(audienceInDb, movieInDb, rate);
     }
 

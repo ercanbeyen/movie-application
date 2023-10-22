@@ -14,11 +14,13 @@ import com.ercanbeyen.movieapplication.service.MovieService;
 import com.ercanbeyen.movieapplication.util.ResponseHandler;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.validator.constraints.Range;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,6 +28,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/movies")
 @RequiredArgsConstructor
+@Validated
 public class MovieController {
     private final MovieService movieService;
 
@@ -83,7 +86,7 @@ public class MovieController {
     }
 
     @PostMapping("/{id}/vote")
-    public ResponseEntity<?> rateMovie(@PathVariable Integer id, @RequestParam Double rate, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<?> rateMovie(@PathVariable Integer id, @RequestParam @Range(min = 1, max = 5, message = "Rate should be between {min} and {max}") Double rate, @AuthenticationPrincipal UserDetails userDetails) {
         String message = movieService.rateMovie(id, rate, userDetails);
         return ResponseHandler.generateResponse(HttpStatus.OK, message, null);
     }
