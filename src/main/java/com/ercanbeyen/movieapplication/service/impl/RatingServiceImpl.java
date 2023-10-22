@@ -29,4 +29,11 @@ public class RatingServiceImpl implements RatingService {
 
         return ResponseMessages.SUCCESS;
     }
+
+    @Override
+    public String updatedRating(Rating rating, Double rate) {
+        rating.setRate(rate);
+        ratingRepository.save(rating);
+        return ResponseMessages.SUCCESS;
+    }
 }

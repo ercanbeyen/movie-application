@@ -10,10 +10,7 @@ import com.ercanbeyen.movieapplication.dto.Statistics;
 import com.ercanbeyen.movieapplication.dto.converter.MovieDtoConverter;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateMovieRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateMovieRequest;
-import com.ercanbeyen.movieapplication.entity.Actor;
-import com.ercanbeyen.movieapplication.entity.Audience;
-import com.ercanbeyen.movieapplication.entity.Director;
-import com.ercanbeyen.movieapplication.entity.Movie;
+import com.ercanbeyen.movieapplication.entity.*;
 import com.ercanbeyen.movieapplication.exception.ResourceConflictException;
 import com.ercanbeyen.movieapplication.exception.ResourceNotFoundException;
 import com.ercanbeyen.movieapplication.option.filter.MovieFilteringOptions;
@@ -198,7 +195,20 @@ public class MovieServiceImpl implements MovieService {
     public String rateMovie(Integer id, Double rate, UserDetails userDetails) {
         Movie movieInDb = findMovieById(id);
         Audience audienceInDb = audienceService.findAudienceByUsername(userDetails.getUsername());
-        return ratingService.createRating(audienceInDb, movieInDb, rate);
+
+        Optional<Rating> optionalRating = movieInDb.getRatings()
+                .stream()
+                .filter(rating -> rating.getAudience().getId().intValue() == audienceInDb.getId().intValue() &&
+                        rating.getMovie().getId().intValue() == movieInDb.getId().intValue())
+                .findFirst();
+
+        boolean isPresent = optionalRating.isPresent();
+        String logMessage = isPresent ? ResourceNames.RATING + " is created before"
+                : ResourceNames.RATING + " has not been created before";
+        log.info(logMessage);
+
+        return (isPresent) ? ratingService.updatedRating(optionalRating.get(), rate)
+                : ratingService.createRating(audienceInDb, movieInDb, rate);
     }
 
     @Override
