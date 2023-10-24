@@ -42,8 +42,8 @@ public class MovieController {
     @LogExecutionTime
     @GetMapping({"", "/filter"})
     public ResponseEntity<?> getMovies(MovieFilteringOptions movieFilteringOptions, @RequestParam(required = false, defaultValue = DefaultValues.DEFAULT_LIMIT_VALUE) String limit, Pageable pageable) {
-        PageDto<Movie, MovieDto> movieDtoList = movieService.getMovies(movieFilteringOptions, limit, pageable);
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDtoList);
+        PageDto<Movie, MovieDto> movieDtoPage = movieService.getMovies(movieFilteringOptions, limit, pageable);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDtoPage);
     }
 
     @GetMapping("/{id}")
