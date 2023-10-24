@@ -10,6 +10,6 @@ import org.springframework.data.domain.Pageable;
 public interface RatingService {
     RatingDto createRating(Audience audience, Movie movie, Double rate);
     PageDto<Rating, RatingDto> getRatings(Pageable pageable);
-    RatingDto getRating(Integer id);
+    RatingDto getRating(Integer movieId, Integer audienceId);
     RatingDto updatedRating(Rating rating, Double rate);
 }

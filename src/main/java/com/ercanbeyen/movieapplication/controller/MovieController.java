@@ -86,7 +86,13 @@ public class MovieController {
     }
 
     @PostMapping("/{id}/rating")
-    public ResponseEntity<?> rateMovie(@PathVariable Integer id, @RequestParam @Range(min = DefaultValues.MINIMUM_RATE, max = DefaultValues.MAXIMUM_RATE, message = "Rate should be between {min} and {max}") Double rate, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<?> rateMovie(
+            @PathVariable Integer id,
+            @RequestParam @Range(
+                    min = 1,
+                    max = 5,
+                    message = "Rate should be between {min} and {max}") Double rate,
+            @AuthenticationPrincipal UserDetails userDetails) {
         MovieDto movieDto = movieService.rateMovie(id, rate, userDetails);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDto);
     }

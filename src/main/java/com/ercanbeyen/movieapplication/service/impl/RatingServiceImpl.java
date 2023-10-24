@@ -52,8 +52,8 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
-    public RatingDto getRating(Integer id) {
-        Rating ratingInDb = ratingRepository.findById(id)
+    public RatingDto getRating(Integer movieId, Integer audienceId) {
+        Rating ratingInDb = ratingRepository.findByMovieIdAndAudienceId(movieId, audienceId)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.RATING)));
         return ratingDtoConverter.convert(ratingInDb);
     }
