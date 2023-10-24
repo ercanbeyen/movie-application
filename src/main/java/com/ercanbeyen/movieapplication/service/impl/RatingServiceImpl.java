@@ -1,8 +1,9 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
 import com.ercanbeyen.movieapplication.constant.message.LogMessages;
-import com.ercanbeyen.movieapplication.constant.message.ResponseMessages;
 import com.ercanbeyen.movieapplication.constant.names.ResourceNames;
+import com.ercanbeyen.movieapplication.dto.RatingDto;
+import com.ercanbeyen.movieapplication.dto.converter.RatingDtoConverter;
 import com.ercanbeyen.movieapplication.entity.Audience;
 import com.ercanbeyen.movieapplication.entity.Movie;
 import com.ercanbeyen.movieapplication.entity.Rating;
@@ -17,23 +18,25 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class RatingServiceImpl implements RatingService {
     private final RatingRepository ratingRepository;
+    private final RatingDtoConverter ratingDtoConverter;
     @Override
-    public String createRating(Audience audience, Movie movie, Double rate) {
+    public RatingDto createRating(Audience audience, Movie movie, Double rate) {
         Rating newRating = new Rating();
         newRating.setAudience(audience);
         newRating.setMovie(movie);
         newRating.setRate(rate);
 
-        ratingRepository.save(newRating);
+        Rating savedRating = ratingRepository.save(newRating);
         log.info(LogMessages.SAVED, ResourceNames.RATING);
 
-        return ResponseMessages.SUCCESS;
+        return ratingDtoConverter.convert(savedRating);
     }
 
     @Override
-    public String updatedRating(Rating rating, Double rate) {
+    public RatingDto updatedRating(Rating rating, Double rate) {
         rating.setRate(rate);
-        ratingRepository.save(rating);
-        return ResponseMessages.SUCCESS;
+        Rating savedRating = ratingRepository.save(rating);
+        log.info(LogMessages.SAVED, ResourceNames.RATING);
+        return ratingDtoConverter.convert(savedRating);
     }
 }

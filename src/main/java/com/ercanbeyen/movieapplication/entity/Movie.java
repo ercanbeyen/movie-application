@@ -26,7 +26,7 @@ public class Movie implements Serializable {
     private String title;
     private String language;
     private Integer releaseYear;
-    private Double rating;
+    private Double averageRating;
     @Enumerated(EnumType.STRING)
     private Genre genre;
     private String summary;

@@ -99,7 +99,7 @@ public class MovieServiceImplTest {
                 .imdbId("tt2964641")
                 .title(title)
                 .genre(genre)
-                .rating(3.4)
+                .averageRating(3.4)
                 .releaseYear(2022)
                 .language("English")
                 .summary(summary)
@@ -114,7 +114,7 @@ public class MovieServiceImplTest {
                 .imdbId("tt2964642")
                 .title(title)
                 .genre(genre)
-                .rating(2.7)
+                .averageRating(2.7)
                 .releaseYear(2015)
                 .language("Spanish")
                 .summary(summary)
@@ -331,7 +331,7 @@ public class MovieServiceImplTest {
         request.setGenre(movie.getGenre());
         request.setReleaseYear(movie.getReleaseYear());
         request.setLanguage(movie.getLanguage());
-        request.setRating(movie.getRating());
+        request.setRating(movie.getAverageRating());
         request.setSummary(movie.getSummary());
         request.setDirectorId(movie.getId());
         request.setActorIds(getMockActorIds());

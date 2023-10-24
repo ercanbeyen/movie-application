@@ -8,7 +8,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.validator.constraints.Range;
 
 @Getter
 @Setter
@@ -23,8 +22,6 @@ public abstract class BaseMovieRequest {
     private String language;
     @NotNull(message = "Release year" + ValidationMessages.SHOULD_NOT_NULL)
     private Integer releaseYear;
-    @Range(min = 1, max = 5, message = "Rating should be between {min} and {max}")
-    @NotNull(message = "Rating" + ValidationMessages.SHOULD_NOT_NULL)
     private Double rating;
     private Genre genre;
     private String summary;

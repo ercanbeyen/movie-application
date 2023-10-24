@@ -6,6 +6,7 @@ import com.ercanbeyen.movieapplication.constant.message.StatisticsMessages;
 import com.ercanbeyen.movieapplication.constant.names.ResourceNames;
 import com.ercanbeyen.movieapplication.dto.MovieDto;
 import com.ercanbeyen.movieapplication.dto.PageDto;
+import com.ercanbeyen.movieapplication.dto.RatingDto;
 import com.ercanbeyen.movieapplication.dto.Statistics;
 import com.ercanbeyen.movieapplication.dto.converter.MovieDtoConverter;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateMovieRequest;
@@ -53,7 +54,7 @@ public class MovieServiceImpl implements MovieService {
                 .imdbId(request.getImdbId())
                 .title(request.getTitle())
                 .genre(request.getGenre())
-                .rating(request.getRating())
+                .averageRating(request.getRating())
                 .releaseYear(request.getReleaseYear())
                 .language(request.getLanguage())
                 .summary(request.getSummary())
@@ -132,7 +133,7 @@ public class MovieServiceImpl implements MovieService {
         movieInDb.setGenre(request.getGenre());
         movieInDb.setLanguage(request.getLanguage());
         movieInDb.setReleaseYear(request.getReleaseYear());
-        movieInDb.setRating(request.getRating());
+        movieInDb.setAverageRating(request.getRating());
         movieInDb.setSummary(request.getSummary());
         log.info(LogMessages.FIELDS_SET);
 
@@ -190,9 +191,10 @@ public class MovieServiceImpl implements MovieService {
         return movieDtoConverter.convert(movie);
     }
 
+    @CacheEvict(value = "movies", key = "#id")
     @Transactional
     @Override
-    public String rateMovie(Integer id, Double rate, UserDetails userDetails) {
+    public MovieDto rateMovie(Integer id, Double rate, UserDetails userDetails) {
         Movie movieInDb = findMovieById(id);
         Audience audienceInDb = audienceService.findAudienceByUsername(userDetails.getUsername());
 
@@ -207,8 +209,25 @@ public class MovieServiceImpl implements MovieService {
                 : ResourceNames.RATING + " has not been created before";
         log.info(logMessage);
 
-        return (isRatingPresent) ? ratingService.updatedRating(optionalRating.get(), rate)
+
+        RatingDto ratingDto = (isRatingPresent) ? ratingService.updatedRating(optionalRating.get(), rate)
                 : ratingService.createRating(audienceInDb, movieInDb, rate);
+
+        if (ratingDto == null) {
+            throw new IllegalStateException("Unable to rate " + ResourceNames.MOVIE + " " + movieInDb.getId());
+        }
+
+        Double averageRating = movieInDb.getRatings()
+                .stream()
+                .mapToDouble(Rating::getRate)
+                .average()
+                .orElse(0);
+
+        movieInDb.setAverageRating(averageRating);
+        Movie savedMovie = movieRepository.save(movieInDb);
+        log.info(LogMessages.SAVED, ResourceNames.MOVIE);
+
+        return movieDtoConverter.convert(savedMovie);
     }
 
     @Override
@@ -229,7 +248,7 @@ public class MovieServiceImpl implements MovieService {
         Map<String, String> statisticsMap = new HashMap<>();
         List<Movie> movieList = movieRepository.findAll();
 
-        Comparator<Movie> movieComparator = Comparator.comparing(Movie::getRating);
+        Comparator<Movie> movieComparator = Comparator.comparing(Movie::getAverageRating);
 
         String titleOfMostRatedMovie = movieList.stream()
                 .max(movieComparator)
