@@ -53,8 +53,11 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public RatingDto getRating(Integer movieId, Integer audienceId) {
-        Rating ratingInDb = ratingRepository.findByMovieIdAndAudienceId(movieId, audienceId)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.RATING)));
+        Rating ratingInDb = findRatingByMovieIdAndAudienceId(movieId, audienceId);
+
+        log.info("Movie in rating: {}", ratingInDb.getMovie());
+        log.info("Audience in rating: {}", ratingInDb.getAudience());
+
         return ratingDtoConverter.convert(ratingInDb);
     }
 
@@ -65,4 +68,33 @@ public class RatingServiceImpl implements RatingService {
         log.info(LogMessages.SAVED, ResourceNames.RATING);
         return ratingDtoConverter.convert(savedRating);
     }
+
+    @Override
+    public void deleteRating(Rating rating) {
+        rating.setMovie(null);
+        rating.setAudience(null);
+
+        ratingRepository.delete(rating);
+    }
+
+    @Override
+    public void deleteRating(Integer movieId, Integer audienceId) {
+        Rating ratingInDb = findRatingByMovieIdAndAudienceId(movieId, audienceId);
+        deleteRating(ratingInDb);
+    }
+
+    @Override
+    public Double calculateAverageRating(Movie movie) {
+        return movie.getRatings()
+                .stream()
+                .mapToDouble(Rating::getRate)
+                .average()
+                .orElse(0);
+    }
+
+    private Rating findRatingByMovieIdAndAudienceId(Integer movieId, Integer audienceId) {
+        return ratingRepository.findByMovieIdAndAudienceId(movieId, audienceId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.RATING)));
+    }
+
 }

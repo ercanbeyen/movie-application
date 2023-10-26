@@ -22,6 +22,7 @@ public interface MovieService {
     List<MovieDto> searchMovies(String title);
     MovieDto getMovie(String imdbId);
     MovieDto rateMovie(Integer id, Double rate, UserDetails userDetails);
+    MovieDto deleteRatingOfMovie(Integer id, Integer audienceId);
     Movie findMovieById(Integer id);
     Statistics<String, String> calculateStatistics();
 }

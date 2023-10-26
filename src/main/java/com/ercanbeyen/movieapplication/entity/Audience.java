@@ -35,6 +35,8 @@ public non-sealed class Audience extends Base implements UserDetails {
             inverseJoinColumns = {@JoinColumn(name = "role_id")}
     )
     private Set<Role> roles;
+    @Setter
+    @Getter
     @OneToMany(mappedBy = "audience", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Rating> ratings = new ArrayList<>();
 

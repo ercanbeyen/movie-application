@@ -85,7 +85,7 @@ public class MovieController {
         return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDto);
     }
 
-    @PostMapping("/{id}/rating")
+    @PostMapping("/{id}/ratings")
     public ResponseEntity<?> rateMovie(
             @PathVariable Integer id,
             @RequestParam @Range(
@@ -94,6 +94,12 @@ public class MovieController {
                     message = "Rate should be between {min} and {max}") Double rate,
             @AuthenticationPrincipal UserDetails userDetails) {
         MovieDto movieDto = movieService.rateMovie(id, rate, userDetails);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDto);
+    }
+
+    @DeleteMapping("/{id}/ratings")
+    public ResponseEntity<?> deleteRatingOfMovie(@PathVariable Integer id, @RequestParam(name = "audience") Integer audienceId) {
+        MovieDto movieDto = movieService.deleteRatingOfMovie(id, audienceId);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDto);
     }
 

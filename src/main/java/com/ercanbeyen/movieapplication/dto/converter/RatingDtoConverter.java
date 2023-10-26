@@ -10,8 +10,8 @@ public class RatingDtoConverter {
         return new RatingDto(
                 rating.getId(),
                 rating.getRate(),
-                rating.getAudience().getId(),
-                rating.getMovie().getId()
+                rating.getMovie().getId(),
+                rating.getAudience().getId()
         );
     }
 }

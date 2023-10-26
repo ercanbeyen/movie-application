@@ -93,6 +93,7 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public MovieDto getMovie(Integer id) {
         Movie movieInDb = findMovieById(id);
+        log.info("Ratings in movie: {}", movieInDb.getRatings());
         return movieDtoConverter.convert(movieInDb);
     }
 
@@ -146,13 +147,13 @@ public class MovieServiceImpl implements MovieService {
     @CacheEvict(value = "movies", key = "#id")
     @Override
     public String deleteMovie(Integer id) {
-        boolean movieExists = movieRepository.existsById(id);
+        Movie movieInDb = findMovieById(id);
+        log.info(LogMessages.RESOURCE_FOUND, ResourceNames.MOVIE);
 
-        if (!movieExists) {
-            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE));
+         for (Rating rating : movieInDb.getRatings()) {
+            ratingService.deleteRating(rating);
         }
 
-        log.info(LogMessages.RESOURCE_FOUND, ResourceNames.MOVIE);
         movieRepository.deleteById(id);
         log.info(LogMessages.DELETED, ResourceNames.MOVIE);
 
@@ -217,17 +218,27 @@ public class MovieServiceImpl implements MovieService {
             throw new IllegalStateException("Unable to rate " + ResourceNames.MOVIE + " " + movieInDb.getId());
         }
 
-        Double averageRating = movieInDb.getRatings()
-                .stream()
-                .mapToDouble(Rating::getRate)
-                .average()
-                .orElse(0);
-
+        Double averageRating = ratingService.calculateAverageRating(movieInDb);
         movieInDb.setAverageRating(averageRating);
         Movie savedMovie = movieRepository.save(movieInDb);
         log.info(LogMessages.SAVED, ResourceNames.MOVIE);
 
         return movieDtoConverter.convert(savedMovie);
+    }
+
+    @Override
+    public MovieDto deleteRatingOfMovie(Integer id, Integer audienceId) {
+        Movie movieInDb = findMovieById(id);
+
+        ratingService.deleteRating(id, audienceId);
+        Double averageRating = ratingService.calculateAverageRating(movieInDb);
+        movieInDb.setAverageRating(averageRating);
+        log.info(LogMessages.FIELDS_SET);
+
+        movieRepository.save(movieInDb);
+        log.info(LogMessages.SAVED, ResourceNames.RATING);
+
+        return movieDtoConverter.convert(movieInDb);
     }
 
     @Override
