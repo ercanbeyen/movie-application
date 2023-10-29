@@ -110,6 +110,11 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
     @Override
     public void deleteAudience(Integer id, UserDetails userDetails) {
         Audience audienceInDb = findAudienceById(id);
+
+        audienceInDb.getRatings()
+                .forEach(rating -> rating.setAudience(null));
+        audienceInDb.setRatings(null);
+
         audienceRepository.delete(audienceInDb);
         log.info(LogMessages.DELETED, ResourceNames.AUDIENCE);
     }

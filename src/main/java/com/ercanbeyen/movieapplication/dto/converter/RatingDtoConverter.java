@@ -7,11 +7,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class RatingDtoConverter {
     public RatingDto convert(Rating rating) {
+        Integer audienceId = (rating.getAudience() == null) ? null :
+                rating.getAudience().getId();
+
         return new RatingDto(
                 rating.getId(),
                 rating.getRate(),
                 rating.getMovie().getId(),
-                rating.getAudience().getId()
+                audienceId
         );
     }
 }
