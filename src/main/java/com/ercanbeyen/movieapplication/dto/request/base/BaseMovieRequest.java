@@ -22,7 +22,6 @@ public abstract class BaseMovieRequest {
     private String language;
     @NotNull(message = "Release year" + ValidationMessages.SHOULD_NOT_NULL)
     private Integer releaseYear;
-    private Double rating;
     private Genre genre;
     private String summary;
 }

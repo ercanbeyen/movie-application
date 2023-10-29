@@ -54,7 +54,7 @@ public class MovieServiceImpl implements MovieService {
                 .imdbId(request.getImdbId())
                 .title(request.getTitle())
                 .genre(request.getGenre())
-                .averageRating(request.getRating())
+                .averageRating(0d)
                 .releaseYear(request.getReleaseYear())
                 .language(request.getLanguage())
                 .summary(request.getSummary())
@@ -133,7 +133,6 @@ public class MovieServiceImpl implements MovieService {
         movieInDb.setGenre(request.getGenre());
         movieInDb.setLanguage(request.getLanguage());
         movieInDb.setReleaseYear(request.getReleaseYear());
-        movieInDb.setAverageRating(request.getRating());
         movieInDb.setSummary(request.getSummary());
         log.info(LogMessages.FIELDS_SET);
 
@@ -220,10 +219,13 @@ public class MovieServiceImpl implements MovieService {
     }
 
     public Movie updateRatingOfMovie(Movie movie) {
-        Double averageRating = ratingService.calculateAverageRating(movie);
+        Double averageRating = calculateAverageRating(movie);
         movie.setAverageRating(averageRating);
+        log.info(LogMessages.FIELDS_SET);
+
         Movie savedMovie = movieRepository.save(movie);
         log.info(LogMessages.SAVED, ResourceNames.MOVIE);
+
         return savedMovie;
     }
 
@@ -232,7 +234,7 @@ public class MovieServiceImpl implements MovieService {
         Movie movieInDb = findMovieById(id);
 
         ratingService.deleteRating(id, audienceId);
-        Double averageRating = ratingService.calculateAverageRating(movieInDb);
+        Double averageRating = calculateAverageRating(movieInDb);
         movieInDb.setAverageRating(averageRating);
         log.info(LogMessages.FIELDS_SET);
 
@@ -302,6 +304,14 @@ public class MovieServiceImpl implements MovieService {
         }
 
         log.info("imdbId check is passed");
+    }
+
+    private Double calculateAverageRating(Movie movie) {
+        return movie.getRatings()
+                .stream()
+                .mapToDouble(Rating::getRate)
+                .average()
+                .orElse(0);
     }
 
 }

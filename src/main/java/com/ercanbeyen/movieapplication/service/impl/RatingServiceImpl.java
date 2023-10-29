@@ -70,25 +70,10 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
-    public void deleteRatingsInBatch(Iterable<Rating> ratings) {
-        ratings.forEach(this::removeRatingFromMovieAndAudience);
-        ratingRepository.deleteAllInBatch(ratings);
-    }
-
-    @Override
     public void deleteRating(Integer movieId, Integer audienceId) {
         Rating ratingInDb = findRatingByMovieIdAndAudienceId(movieId, audienceId);
         removeRatingFromMovieAndAudience(ratingInDb);
         ratingRepository.delete(ratingInDb);
-    }
-
-    @Override
-    public Double calculateAverageRating(Movie movie) {
-        return movie.getRatings()
-                .stream()
-                .mapToDouble(Rating::getRate)
-                .average()
-                .orElse(0);
     }
 
     private Rating findRatingByMovieIdAndAudienceId(Integer movieId, Integer audienceId) {
