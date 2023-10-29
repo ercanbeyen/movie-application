@@ -1,5 +1,6 @@
 package com.ercanbeyen.movieapplication.entity;
 
+import com.ercanbeyen.movieapplication.constant.enums.RoleName;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -37,7 +38,7 @@ public non-sealed class Audience extends Base implements UserDetails {
     private Set<Role> roles;
     @Setter
     @Getter
-    @OneToMany(mappedBy = "audience", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "audience", cascade = CascadeType.MERGE)
     private List<Rating> ratings = new ArrayList<>();
 
     @Override
@@ -73,5 +74,25 @@ public non-sealed class Audience extends Base implements UserDetails {
     @Override
     public boolean isEnabled() {
         return false;
+    }
+
+    @Override
+    public String toString() {
+        List<Integer> ratingIdList = ratings.stream()
+                .map(Rating::getId)
+                .toList();
+
+        List<RoleName> roleNameList = roles.stream()
+                .map(Role::getRoleName)
+                .toList();
+
+        return "Audience{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", name='" + getName() + '\'' +
+                ", surname='" + getSurname() + '\'' +
+                ", roles=" + roleNameList +
+                ", ratings=" + ratingIdList +
+                '}';
     }
 }

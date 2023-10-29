@@ -150,8 +150,7 @@ public class MovieServiceImpl implements MovieService {
         Movie movieInDb = findMovieById(id);
         log.info(LogMessages.RESOURCE_FOUND, ResourceNames.MOVIE);
 
-        ratingService.deleteRatingsInBatch(movieInDb.getRatings());
-        movieRepository.deleteById(id);
+        movieRepository.delete(movieInDb);
         log.info(LogMessages.DELETED, ResourceNames.MOVIE);
 
         return ResponseMessages.SUCCESS;

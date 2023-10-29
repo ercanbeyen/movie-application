@@ -99,6 +99,7 @@ public class RatingServiceImpl implements RatingService {
     private void removeRatingFromMovieAndAudience(Rating rating) {
         rating.setMovie(null);
         rating.setAudience(null);
+        ratingRepository.save(rating);
     }
 
 }

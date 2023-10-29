@@ -11,8 +11,8 @@ public class Rating {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private Double rate;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     private Movie movie;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     private Audience audience;
 }

@@ -42,4 +42,31 @@ public class Movie implements Serializable {
     private Director director;
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Rating> ratings = new ArrayList<>();
+
+    @Override
+    public String toString() {
+        Integer directorId = (director != null) ? director.getId() : null;
+
+        List<Integer> actorIdList = actors.stream()
+                .map(Actor::getId)
+                .toList();
+
+        List<Integer> ratingList = ratings.stream()
+                .map(Rating::getId)
+                .toList();
+
+        return "Movie{" +
+                "id=" + id +
+                ", imdbId='" + imdbId + '\'' +
+                ", title='" + title + '\'' +
+                ", language='" + language + '\'' +
+                ", releaseYear=" + releaseYear +
+                ", averageRating=" + averageRating +
+                ", genre=" + genre +
+                ", summary='" + summary + '\'' +
+                ", actors=" + actorIdList +
+                ", director=" + directorId +
+                ", ratings=" +  ratingList +
+                '}';
+    }
 }
