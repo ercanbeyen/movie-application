@@ -12,7 +12,7 @@ public interface RatingService {
     PageDto<Rating, RatingDto> getRatings(Pageable pageable);
     RatingDto getRating(Integer movieId, Integer audienceId);
     RatingDto updatedRating(Rating rating, Double rate);
-    void deleteRating(Rating rating);
+    void deleteRatingsInBatch(Iterable<Rating> ratings);
     void deleteRating(Integer movieId, Integer audienceId);
     Double calculateAverageRating(Movie movie);
 }

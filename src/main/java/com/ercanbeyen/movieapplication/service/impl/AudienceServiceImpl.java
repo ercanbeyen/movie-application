@@ -10,15 +10,13 @@ import com.ercanbeyen.movieapplication.dto.converter.AudienceDtoConverter;
 import com.ercanbeyen.movieapplication.dto.request.auth.RegistrationRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateAudienceRequest;
 import com.ercanbeyen.movieapplication.entity.Audience;
-import com.ercanbeyen.movieapplication.entity.Movie;
-import com.ercanbeyen.movieapplication.entity.Rating;
 import com.ercanbeyen.movieapplication.entity.Role;
 import com.ercanbeyen.movieapplication.exception.ResourceConflictException;
 import com.ercanbeyen.movieapplication.exception.ResourceNotFoundException;
 import com.ercanbeyen.movieapplication.repository.AudienceRepository;
 import com.ercanbeyen.movieapplication.service.AudienceService;
-import com.ercanbeyen.movieapplication.service.RatingService;
 import com.ercanbeyen.movieapplication.service.RoleService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -43,7 +41,6 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
     private final AudienceDtoConverter audienceDtoConverter;
     private final PasswordEncoder passwordEncoder;
     private final RoleService roleService;
-    private final RatingService ratingService;
 
     @Override
     public void createAudience(RegistrationRequest request) {
@@ -109,23 +106,11 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
         return audienceDtoConverter.convert(savedAudience);
     }
 
+    @Transactional
     @Override
     public void deleteAudience(Integer id, UserDetails userDetails) {
         Audience audienceInDb = findAudienceById(id);
-
-        List<Rating> ratings = audienceInDb.getRatings();
-
-        List<Movie> movieList = ratings.stream()
-                .map(Rating::getMovie)
-                .toList();
-
-        for (Rating rating : ratings) {
-            ratingService.deleteRating(rating);
-        }
-
-        movieList.forEach(ratingService::calculateAverageRating);
-
-        audienceRepository.deleteById(id);
+        audienceRepository.delete(audienceInDb);
         log.info(LogMessages.DELETED, ResourceNames.AUDIENCE);
     }
 

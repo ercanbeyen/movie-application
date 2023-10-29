@@ -70,17 +70,16 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
-    public void deleteRating(Rating rating) {
-        rating.setMovie(null);
-        rating.setAudience(null);
-
-        ratingRepository.delete(rating);
+    public void deleteRatingsInBatch(Iterable<Rating> ratings) {
+        ratings.forEach(this::removeRatingFromMovieAndAudience);
+        ratingRepository.deleteAllInBatch(ratings);
     }
 
     @Override
     public void deleteRating(Integer movieId, Integer audienceId) {
         Rating ratingInDb = findRatingByMovieIdAndAudienceId(movieId, audienceId);
-        deleteRating(ratingInDb);
+        removeRatingFromMovieAndAudience(ratingInDb);
+        ratingRepository.delete(ratingInDb);
     }
 
     @Override
@@ -95,6 +94,11 @@ public class RatingServiceImpl implements RatingService {
     private Rating findRatingByMovieIdAndAudienceId(Integer movieId, Integer audienceId) {
         return ratingRepository.findByMovieIdAndAudienceId(movieId, audienceId)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.RATING)));
+    }
+
+    private void removeRatingFromMovieAndAudience(Rating rating) {
+        rating.setMovie(null);
+        rating.setAudience(null);
     }
 
 }

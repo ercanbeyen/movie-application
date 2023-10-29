@@ -93,7 +93,6 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public MovieDto getMovie(Integer id) {
         Movie movieInDb = findMovieById(id);
-        log.info("Ratings in movie: {}", movieInDb.getRatings());
         return movieDtoConverter.convert(movieInDb);
     }
 
@@ -145,15 +144,13 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @CacheEvict(value = "movies", key = "#id")
+    @Transactional
     @Override
     public String deleteMovie(Integer id) {
         Movie movieInDb = findMovieById(id);
         log.info(LogMessages.RESOURCE_FOUND, ResourceNames.MOVIE);
 
-         for (Rating rating : movieInDb.getRatings()) {
-            ratingService.deleteRating(rating);
-        }
-
+        ratingService.deleteRatingsInBatch(movieInDb.getRatings());
         movieRepository.deleteById(id);
         log.info(LogMessages.DELETED, ResourceNames.MOVIE);
 
@@ -218,12 +215,17 @@ public class MovieServiceImpl implements MovieService {
             throw new IllegalStateException("Unable to rate " + ResourceNames.MOVIE + " " + movieInDb.getId());
         }
 
-        Double averageRating = ratingService.calculateAverageRating(movieInDb);
-        movieInDb.setAverageRating(averageRating);
-        Movie savedMovie = movieRepository.save(movieInDb);
-        log.info(LogMessages.SAVED, ResourceNames.MOVIE);
+        Movie savedMovie = updateRatingOfMovie(movieInDb);
 
         return movieDtoConverter.convert(savedMovie);
+    }
+
+    public Movie updateRatingOfMovie(Movie movie) {
+        Double averageRating = ratingService.calculateAverageRating(movie);
+        movie.setAverageRating(averageRating);
+        Movie savedMovie = movieRepository.save(movie);
+        log.info(LogMessages.SAVED, ResourceNames.MOVIE);
+        return savedMovie;
     }
 
     @Override
