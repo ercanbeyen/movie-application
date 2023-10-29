@@ -7,4 +7,5 @@ public class ResourceNames {
     public static final String CINEMA = "Cinema";
     public static final String AUDIENCE = "Audience";
     public static final String ROLE = "Role";
+    public static final String RATING = "Rating";
 }

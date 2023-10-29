@@ -6,20 +6,17 @@ import com.ercanbeyen.movieapplication.constant.message.StatisticsMessages;
 import com.ercanbeyen.movieapplication.constant.names.ResourceNames;
 import com.ercanbeyen.movieapplication.dto.MovieDto;
 import com.ercanbeyen.movieapplication.dto.PageDto;
+import com.ercanbeyen.movieapplication.dto.RatingDto;
 import com.ercanbeyen.movieapplication.dto.Statistics;
 import com.ercanbeyen.movieapplication.dto.converter.MovieDtoConverter;
 import com.ercanbeyen.movieapplication.dto.request.create.CreateMovieRequest;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateMovieRequest;
-import com.ercanbeyen.movieapplication.entity.Actor;
-import com.ercanbeyen.movieapplication.entity.Director;
-import com.ercanbeyen.movieapplication.entity.Movie;
+import com.ercanbeyen.movieapplication.entity.*;
 import com.ercanbeyen.movieapplication.exception.ResourceConflictException;
 import com.ercanbeyen.movieapplication.exception.ResourceNotFoundException;
 import com.ercanbeyen.movieapplication.option.filter.MovieFilteringOptions;
 import com.ercanbeyen.movieapplication.repository.MovieRepository;
-import com.ercanbeyen.movieapplication.service.ActorService;
-import com.ercanbeyen.movieapplication.service.DirectorService;
-import com.ercanbeyen.movieapplication.service.MovieService;
+import com.ercanbeyen.movieapplication.service.*;
 import com.ercanbeyen.movieapplication.util.StatisticsUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +27,7 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -44,6 +42,8 @@ public class MovieServiceImpl implements MovieService {
     private final MovieDtoConverter movieDtoConverter;
     private final DirectorService directorService;
     private final ActorService actorService;
+    private final AudienceService audienceService;
+    private final RatingService ratingService;
 
     @CachePut(value = "movies", key = "#result.id")
     @Override
@@ -54,7 +54,7 @@ public class MovieServiceImpl implements MovieService {
                 .imdbId(request.getImdbId())
                 .title(request.getTitle())
                 .genre(request.getGenre())
-                .rating(request.getRating())
+                .averageRating(0d)
                 .releaseYear(request.getReleaseYear())
                 .language(request.getLanguage())
                 .summary(request.getSummary())
@@ -133,7 +133,6 @@ public class MovieServiceImpl implements MovieService {
         movieInDb.setGenre(request.getGenre());
         movieInDb.setLanguage(request.getLanguage());
         movieInDb.setReleaseYear(request.getReleaseYear());
-        movieInDb.setRating(request.getRating());
         movieInDb.setSummary(request.getSummary());
         log.info(LogMessages.FIELDS_SET);
 
@@ -144,16 +143,13 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @CacheEvict(value = "movies", key = "#id")
+    @Transactional
     @Override
     public String deleteMovie(Integer id) {
-        boolean movieExists = movieRepository.existsById(id);
-
-        if (!movieExists) {
-            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE));
-        }
-
+        Movie movieInDb = findMovieById(id);
         log.info(LogMessages.RESOURCE_FOUND, ResourceNames.MOVIE);
-        movieRepository.deleteById(id);
+
+        movieRepository.delete(movieInDb);
         log.info(LogMessages.DELETED, ResourceNames.MOVIE);
 
         return ResponseMessages.SUCCESS;
@@ -191,6 +187,63 @@ public class MovieServiceImpl implements MovieService {
         return movieDtoConverter.convert(movie);
     }
 
+    @CacheEvict(value = "movies", key = "#id")
+    @Transactional
+    @Override
+    public MovieDto rateMovie(Integer id, Double rate, UserDetails userDetails) {
+        Movie movieInDb = findMovieById(id);
+        Audience audienceInDb = audienceService.findAudienceByUsername(userDetails.getUsername());
+
+        Optional<Rating> optionalRating = movieInDb.getRatings()
+                .stream()
+                .filter(rating -> rating.getAudience().getId().intValue() == audienceInDb.getId().intValue() &&
+                        rating.getMovie().getId().intValue() == movieInDb.getId().intValue())
+                .findFirst();
+
+        boolean isRatingPresent = optionalRating.isPresent();
+        String logMessage = isRatingPresent ? ResourceNames.RATING + " is created before"
+                : ResourceNames.RATING + " has not been created before";
+        log.info(logMessage);
+
+
+        RatingDto ratingDto = (isRatingPresent) ? ratingService.updatedRating(optionalRating.get(), rate)
+                : ratingService.createRating(audienceInDb, movieInDb, rate);
+
+        if (ratingDto == null) {
+            throw new IllegalStateException("Unable to rate " + ResourceNames.MOVIE + " " + movieInDb.getId());
+        }
+
+        Movie savedMovie = updateRatingOfMovie(movieInDb);
+
+        return movieDtoConverter.convert(savedMovie);
+    }
+
+    public Movie updateRatingOfMovie(Movie movie) {
+        Double averageRating = calculateAverageRating(movie);
+        movie.setAverageRating(averageRating);
+        log.info(LogMessages.FIELDS_SET);
+
+        Movie savedMovie = movieRepository.save(movie);
+        log.info(LogMessages.SAVED, ResourceNames.MOVIE);
+
+        return savedMovie;
+    }
+
+    @Override
+    public MovieDto deleteRatingOfMovie(Integer id, Integer audienceId) {
+        Movie movieInDb = findMovieById(id);
+
+        ratingService.deleteRating(id, audienceId);
+        Double averageRating = calculateAverageRating(movieInDb);
+        movieInDb.setAverageRating(averageRating);
+        log.info(LogMessages.FIELDS_SET);
+
+        movieRepository.save(movieInDb);
+        log.info(LogMessages.SAVED, ResourceNames.RATING);
+
+        return movieDtoConverter.convert(movieInDb);
+    }
+
     @Override
     public Movie findMovieById(Integer id) {
         Optional<Movie> optionalMovie = movieRepository.findById(id);
@@ -209,7 +262,7 @@ public class MovieServiceImpl implements MovieService {
         Map<String, String> statisticsMap = new HashMap<>();
         List<Movie> movieList = movieRepository.findAll();
 
-        Comparator<Movie> movieComparator = Comparator.comparing(Movie::getRating);
+        Comparator<Movie> movieComparator = Comparator.comparing(Movie::getAverageRating);
 
         String titleOfMostRatedMovie = movieList.stream()
                 .max(movieComparator)
@@ -251,6 +304,14 @@ public class MovieServiceImpl implements MovieService {
         }
 
         log.info("imdbId check is passed");
+    }
+
+    private Double calculateAverageRating(Movie movie) {
+        return movie.getRatings()
+                .stream()
+                .mapToDouble(Rating::getRate)
+                .average()
+                .orElse(0);
     }
 
 }

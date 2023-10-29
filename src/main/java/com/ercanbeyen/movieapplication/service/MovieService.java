@@ -8,6 +8,7 @@ import com.ercanbeyen.movieapplication.entity.Movie;
 import com.ercanbeyen.movieapplication.dto.PageDto;
 import com.ercanbeyen.movieapplication.dto.Statistics;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
 
@@ -20,6 +21,9 @@ public interface MovieService {
     List<MovieDto> getLatestMovies();
     List<MovieDto> searchMovies(String title);
     MovieDto getMovie(String imdbId);
+    MovieDto rateMovie(Integer id, Double rate, UserDetails userDetails);
+    MovieDto deleteRatingOfMovie(Integer id, Integer audienceId);
+    Movie updateRatingOfMovie(Movie movie);
     Movie findMovieById(Integer id);
     Statistics<String, String> calculateStatistics();
 }

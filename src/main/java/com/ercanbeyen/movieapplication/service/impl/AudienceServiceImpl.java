@@ -16,6 +16,7 @@ import com.ercanbeyen.movieapplication.exception.ResourceNotFoundException;
 import com.ercanbeyen.movieapplication.repository.AudienceRepository;
 import com.ercanbeyen.movieapplication.service.AudienceService;
 import com.ercanbeyen.movieapplication.service.RoleService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -76,6 +77,7 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
     @Override
     public AudienceDto getAudience(Integer id) {
         Audience audienceInDb = findAudienceById(id);
+        log.info("Ratings in audience: {}", audienceInDb.getRatings());
         return audienceDtoConverter.convert(audienceInDb);
     }
 
@@ -104,9 +106,16 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
         return audienceDtoConverter.convert(savedAudience);
     }
 
+    @Transactional
     @Override
     public void deleteAudience(Integer id, UserDetails userDetails) {
-        audienceRepository.deleteById(id);
+        Audience audienceInDb = findAudienceById(id);
+
+        audienceInDb.getRatings()
+                .forEach(rating -> rating.setAudience(null));
+        audienceInDb.setRatings(null);
+
+        audienceRepository.delete(audienceInDb);
         log.info(LogMessages.DELETED, ResourceNames.AUDIENCE);
     }
 
@@ -153,7 +162,7 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
         return optionalAudience.get();
     }
 
-    private Audience findAudienceByUsername(String username) {
+    public Audience findAudienceByUsername(String username) {
         return audienceRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.AUDIENCE)));
     }

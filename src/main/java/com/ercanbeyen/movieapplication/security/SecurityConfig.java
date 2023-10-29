@@ -31,7 +31,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/v1/movies/**", "/api/v1/directors/**", "/api/v1/actors/**", "/api/v1/cinemas/**").hasAnyAuthority(RoleName.ADMIN.name())
                 .requestMatchers(HttpMethod.PUT, "/api/v1/movies/**", "/api/v1/directors/**", "/api/v1/actors/**", "/api/v1/cinemas/**").hasAnyAuthority(RoleName.ADMIN.name())
                 .requestMatchers(HttpMethod.DELETE, "/api/v1/movies/**", "/api/v1/directors/**", "/api/v1/actors/**", "/api/v1/cinemas/**").hasAnyAuthority(RoleName.ADMIN.name())
-                .requestMatchers("/api/v1/roles/**").hasAnyAuthority(RoleName.ADMIN.name())
+                .requestMatchers("/api/v1/roles/**", "/api/v1/ratings/**").hasAnyAuthority(RoleName.ADMIN.name())
                 .anyRequest().authenticated()
                 .and()
                 .formLogin().defaultSuccessUrl("/api/v1/movies", true)

@@ -27,8 +27,8 @@ public class AudienceController {
 
     @GetMapping
     public ResponseEntity<?> getAudiences(Pageable pageable) {
-        PageDto<Audience, AudienceDto> audiencePage = audienceService.getAudiences(pageable);
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, audiencePage);
+        PageDto<Audience, AudienceDto> audienceDtoPage = audienceService.getAudiences(pageable);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, audienceDtoPage);
     }
 
     @GetMapping("/{id}")

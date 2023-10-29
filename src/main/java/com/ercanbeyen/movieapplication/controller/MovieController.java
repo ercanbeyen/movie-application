@@ -14,9 +14,13 @@ import com.ercanbeyen.movieapplication.service.MovieService;
 import com.ercanbeyen.movieapplication.util.ResponseHandler;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.validator.constraints.Range;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +28,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/movies")
 @RequiredArgsConstructor
+@Validated
 public class MovieController {
     private final MovieService movieService;
 
@@ -37,8 +42,8 @@ public class MovieController {
     @LogExecutionTime
     @GetMapping({"", "/filter"})
     public ResponseEntity<?> getMovies(MovieFilteringOptions movieFilteringOptions, @RequestParam(required = false, defaultValue = DefaultValues.DEFAULT_LIMIT_VALUE) String limit, Pageable pageable) {
-        PageDto<Movie, MovieDto> movieDtoList = movieService.getMovies(movieFilteringOptions, limit, pageable);
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDtoList);
+        PageDto<Movie, MovieDto> movieDtoPage = movieService.getMovies(movieFilteringOptions, limit, pageable);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDtoPage);
     }
 
     @GetMapping("/{id}")
@@ -77,6 +82,24 @@ public class MovieController {
     @GetMapping("/find")
     public ResponseEntity<?> getMovie(@RequestParam(name = "imdb") String imdbId) {
         MovieDto movieDto = movieService.getMovie(imdbId);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDto);
+    }
+
+    @PostMapping("/{id}/ratings")
+    public ResponseEntity<?> rateMovie(
+            @PathVariable Integer id,
+            @RequestParam @Range(
+                    min = 1,
+                    max = 5,
+                    message = "Rate should be between {min} and {max}") Double rate,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        MovieDto movieDto = movieService.rateMovie(id, rate, userDetails);
+        return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDto);
+    }
+
+    @DeleteMapping("/{id}/ratings")
+    public ResponseEntity<?> deleteRatingOfMovie(@PathVariable Integer id, @RequestParam(name = "audience") Integer audienceId) {
+        MovieDto movieDto = movieService.deleteRatingOfMovie(id, audienceId);
         return ResponseHandler.generateResponse(HttpStatus.OK, null, movieDto);
     }
 
