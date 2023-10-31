@@ -1,9 +1,9 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
-import com.ercanbeyen.movieapplication.constant.enums.RoleName;
 import com.ercanbeyen.movieapplication.constant.message.LogMessages;
 import com.ercanbeyen.movieapplication.constant.message.ResponseMessages;
 import com.ercanbeyen.movieapplication.constant.names.ResourceNames;
+import com.ercanbeyen.movieapplication.constant.names.RoleNames;
 import com.ercanbeyen.movieapplication.dto.AudienceDto;
 import com.ercanbeyen.movieapplication.dto.PageDto;
 import com.ercanbeyen.movieapplication.dto.converter.AudienceDtoConverter;
@@ -44,7 +44,7 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
 
     @Override
     public void createAudience(RegistrationRequest request) {
-        Role role = roleService.findRoleByRoleName(RoleName.USER);
+        Role role = roleService.findRoleByRoleName(RoleNames.USER);
         Set<Role> roleSet = Set.of(role);
 
         Audience newAudience = Audience.builder()
@@ -120,15 +120,15 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
     }
 
     @Override
-    public String updateRolesOfAudience(Integer id, Set<RoleName> roleNames, UserDetails userDetails) {
-        if (!roleNames.contains(RoleName.USER)) {
-            throw new ResourceConflictException(ResourceNames.ROLE + " " + RoleName.USER + " is mandatory");
+    public String updateRolesOfAudience(Integer id, Set<String> roleNames, UserDetails userDetails) {
+        if (!roleNames.contains(RoleNames.USER)) {
+            throw new ResourceConflictException(ResourceNames.ROLE + " " + RoleNames.USER + " is mandatory");
         }
 
         Audience audienceInDb = findAudienceById(id);
 
-        if (audienceInDb.getUsername().equals(userDetails.getUsername()) && !roleNames.contains(RoleName.ADMIN)) {
-            throw new ResourceConflictException("You cannot remove your " + RoleName.ADMIN + " " + ResourceNames.ROLE.toLowerCase());
+        if (audienceInDb.getUsername().equals(userDetails.getUsername()) && !roleNames.contains(RoleNames.ADMIN)) {
+            throw new ResourceConflictException("You cannot remove your " + RoleNames.ADMIN + " " + ResourceNames.ROLE.toLowerCase());
         }
 
         Set<Role> roleSet = roleNames.stream()

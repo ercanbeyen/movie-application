@@ -1,6 +1,5 @@
 package com.ercanbeyen.movieapplication.dto.request.base;
 
-import com.ercanbeyen.movieapplication.constant.enums.RoleName;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,5 +8,5 @@ import lombok.Setter;
 @Setter
 @MappedSuperclass
 public class BaseRoleRequest {
-    private RoleName roleName;
+    private String roleName;
 }

@@ -1,6 +1,5 @@
 package com.ercanbeyen.movieapplication.entity;
 
-import com.ercanbeyen.movieapplication.constant.enums.RoleName;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -82,7 +81,7 @@ public non-sealed class Audience extends Base implements UserDetails {
                 .map(Rating::getId)
                 .toList();
 
-        List<RoleName> roleNameList = roles.stream()
+        List<String> roleNameList = roles.stream()
                 .map(Role::getRoleName)
                 .toList();
 

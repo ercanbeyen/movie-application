@@ -1,6 +1,5 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
-import com.ercanbeyen.movieapplication.constant.enums.RoleName;
 import com.ercanbeyen.movieapplication.constant.message.LogMessages;
 import com.ercanbeyen.movieapplication.constant.message.ResponseMessages;
 import com.ercanbeyen.movieapplication.constant.names.ResourceNames;
@@ -13,6 +12,7 @@ import com.ercanbeyen.movieapplication.exception.ResourceConflictException;
 import com.ercanbeyen.movieapplication.exception.ResourceNotFoundException;
 import com.ercanbeyen.movieapplication.repository.RoleRepository;
 import com.ercanbeyen.movieapplication.service.RoleService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,8 +28,8 @@ public class RoleServiceImpl implements RoleService {
     private final RoleDtoConverter roleDtoConverter;
 
     @Override
-    public RoleDto createRole(CreateRoleRequest request) {
-        RoleName roleName = request.getRoleName();
+    public String createRole(CreateRoleRequest request) {
+        String roleName = request.getRoleName();
         Optional<Role> roleInDb = roleRepository.findByRoleName(roleName);
 
         if (roleInDb.isPresent()) {
@@ -38,9 +38,9 @@ public class RoleServiceImpl implements RoleService {
 
         Role newRole = new Role();
         newRole.setRoleName(roleName);
-        Role createdRole = roleRepository.save(newRole);
+        roleRepository.save(newRole);
 
-        return roleDtoConverter.convert(createdRole);
+        return ResponseMessages.SUCCESS;
     }
 
     @Override
@@ -57,22 +57,15 @@ public class RoleServiceImpl implements RoleService {
         return roleDtoConverter.convert(roleInDb);
     }
 
+    @Transactional
     @Override
-    public RoleDto updateRole(Integer id, UpdateRoleRequest request) {
-        Role roleInDb = findRoleById(id);
-        RoleName roleName = request.getRoleName();
-        Role updatedRole;
+    public String updateRole(Integer id, UpdateRoleRequest request) {
+        String roleName = request.getRoleName();
 
-        try {
-            roleInDb.setRoleName(roleName);
-            updatedRole = roleRepository.save(roleInDb);
-            log.info(LogMessages.SAVED, ResourceNames.ROLE);
-        } catch (Exception exception) {
-            log.error("{} {} is not found", ResourceNames.ROLE, request.getRoleName());
-            throw new ResourceConflictException(String.format(ResponseMessages.ALREADY_EXISTS, ResourceNames.ROLE));
-        }
+        roleRepository.updateRole(id, roleName);
+        log.info(LogMessages.SAVED, ResourceNames.ROLE);
 
-        return roleDtoConverter.convert(updatedRole);
+        return ResponseMessages.SUCCESS;
     }
 
     @Override
@@ -90,7 +83,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public Role findRoleByRoleName(RoleName roleName) {
+    public Role findRoleByRoleName(String roleName) {
         return roleRepository.findByRoleName(roleName)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ROLE)));
     }

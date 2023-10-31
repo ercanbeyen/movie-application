@@ -1,6 +1,6 @@
 package com.ercanbeyen.movieapplication.security;
 
-import com.ercanbeyen.movieapplication.constant.enums.RoleName;
+import com.ercanbeyen.movieapplication.constant.names.RoleNames;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -25,13 +25,13 @@ public class SecurityConfig {
                 .csrf().disable()
                 .authorizeHttpRequests()
                 .requestMatchers("/api/v1/registration", "/login").permitAll()
-                .requestMatchers("/api/v1/audience/{id}/roles", "/api/v1/audiences").hasAnyAuthority(RoleName.ADMIN.name())
-                .requestMatchers("/api/v1/audiences/**").hasAnyAuthority(RoleName.USER.name())
-                .requestMatchers(HttpMethod.GET, "/api/v1/movies/**", "/api/v1/directors/**", "/api/v1/actors/**", "/api/v1/cinemas/**", "/api/v1/audiences/**").hasAnyAuthority(RoleName.USER.name())
-                .requestMatchers(HttpMethod.POST, "/api/v1/movies/**", "/api/v1/directors/**", "/api/v1/actors/**", "/api/v1/cinemas/**").hasAnyAuthority(RoleName.ADMIN.name())
-                .requestMatchers(HttpMethod.PUT, "/api/v1/movies/**", "/api/v1/directors/**", "/api/v1/actors/**", "/api/v1/cinemas/**").hasAnyAuthority(RoleName.ADMIN.name())
-                .requestMatchers(HttpMethod.DELETE, "/api/v1/movies/**", "/api/v1/directors/**", "/api/v1/actors/**", "/api/v1/cinemas/**").hasAnyAuthority(RoleName.ADMIN.name())
-                .requestMatchers("/api/v1/roles/**", "/api/v1/ratings/**").hasAnyAuthority(RoleName.ADMIN.name())
+                .requestMatchers("/api/v1/audience/{id}/roles", "/api/v1/audiences").hasAnyAuthority(RoleNames.ADMIN)
+                .requestMatchers("/api/v1/audiences/**").hasAnyAuthority(RoleNames.USER)
+                .requestMatchers(HttpMethod.GET, "/api/v1/movies/**", "/api/v1/directors/**", "/api/v1/actors/**", "/api/v1/cinemas/**", "/api/v1/audiences/**").hasAnyAuthority(RoleNames.USER)
+                .requestMatchers(HttpMethod.POST, "/api/v1/movies/**", "/api/v1/directors/**", "/api/v1/actors/**", "/api/v1/cinemas/**").hasAnyAuthority(RoleNames.ADMIN)
+                .requestMatchers(HttpMethod.PUT, "/api/v1/movies/**", "/api/v1/directors/**", "/api/v1/actors/**", "/api/v1/cinemas/**").hasAnyAuthority(RoleNames.ADMIN)
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/movies/**", "/api/v1/directors/**", "/api/v1/actors/**", "/api/v1/cinemas/**").hasAnyAuthority(RoleNames.ADMIN)
+                .requestMatchers("/api/v1/roles/**", "/api/v1/ratings/**").hasAnyAuthority(RoleNames.ADMIN)
                 .anyRequest().authenticated()
                 .and()
                 .formLogin().defaultSuccessUrl("/api/v1/movies", true)
