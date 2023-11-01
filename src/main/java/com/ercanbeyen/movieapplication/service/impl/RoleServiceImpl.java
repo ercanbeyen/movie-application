@@ -18,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,15 +29,15 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public String createRole(CreateRoleRequest request) {
         String roleName = request.getRoleName();
-        Optional<Role> roleInDb = roleRepository.findByRoleName(roleName);
 
-        if (roleInDb.isPresent()) {
-            throw new ResourceConflictException(String.format(ResponseMessages.ALREADY_EXISTS, ResourceNames.ROLE));
-        }
-
-        Role newRole = new Role();
-        newRole.setRoleName(roleName);
-        roleRepository.save(newRole);
+        roleRepository.findByRoleName(roleName)
+                .ifPresentOrElse(role -> {
+                    throw new ResourceConflictException(String.format(ResponseMessages.ALREADY_EXISTS, ResourceNames.ROLE));
+                    }, () -> {
+                    Role newRole = new Role();
+                    newRole.setRoleName(roleName);
+                    roleRepository.save(newRole);
+                });
 
         return ResponseMessages.SUCCESS;
     }
@@ -53,7 +52,8 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public RoleDto getRole(Integer id) {
-        Role roleInDb = findRoleById(id);
+        Role roleInDb =  roleRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ROLE)));
         return roleDtoConverter.convert(roleInDb);
     }
 
@@ -70,26 +70,23 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public String deleteRole(Integer id) {
-        Role roleInDb = findRoleById(id);
-
-        if (!roleInDb.getAudiences().isEmpty()) {
-            log.error("{} {} includes {}s", ResourceNames.ROLE, id, ResourceNames.AUDIENCE);
-            throw new ResourceConflictException(ResourceNames.ROLE + " cannot be deleted unless it does not include any " + ResourceNames.AUDIENCE);
-        }
-
-        roleRepository.deleteById(id);
+        roleRepository.findById(id)
+                .ifPresentOrElse(role -> {
+                    if (!role.getAudiences().isEmpty()) {
+                        log.error("{} {} includes {}s", ResourceNames.ROLE, id, ResourceNames.AUDIENCE);
+                        throw new ResourceConflictException(ResourceNames.ROLE + " cannot be deleted unless it does not include any " + ResourceNames.AUDIENCE);
+                    }
+                    roleRepository.delete(role);
+                    }, () ->  {
+                    throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ROLE));
+                });
 
         return ResponseMessages.SUCCESS;
     }
 
     @Override
-    public Role findRoleByRoleName(String roleName) {
+    public Role findRole(String roleName) {
         return roleRepository.findByRoleName(roleName)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ROLE)));
-    }
-
-    private Role findRoleById(Integer id) {
-        return roleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ROLE)));
     }
 }

@@ -19,5 +19,5 @@ public interface AudienceService {
     void deleteAudience(Integer id, UserDetails userDetails);
     String updateRolesOfAudience(Integer id, Set<String> roleNames, UserDetails userDetails);
     Audience findAudienceById(Integer id);
-    Audience findAudienceByUsername(String username);
+    Audience findAudience(String username);
 }

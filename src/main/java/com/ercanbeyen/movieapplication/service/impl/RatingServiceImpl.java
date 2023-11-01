@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 @Service
 @RequiredArgsConstructor
@@ -53,11 +54,8 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public RatingDto getRating(Integer movieId, Integer audienceId) {
-        Rating ratingInDb = findRatingByMovieIdAndAudienceId(movieId, audienceId);
-
-        log.info("Movie in rating: {}", ratingInDb.getMovie());
-        log.info("Audience in rating: {}", ratingInDb.getAudience());
-
+        Rating ratingInDb = ratingRepository.findByMovieIdAndAudienceId(movieId, audienceId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.RATING)));
         return ratingDtoConverter.convert(ratingInDb);
     }
 
@@ -71,20 +69,18 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public void deleteRating(Integer movieId, Integer audienceId) {
-        Rating ratingInDb = findRatingByMovieIdAndAudienceId(movieId, audienceId);
-        removeRatingFromMovieAndAudience(ratingInDb);
-        ratingRepository.delete(ratingInDb);
+        ratingRepository.findByMovieIdAndAudienceId(movieId, audienceId)
+                .ifPresentOrElse(rating -> {
+                    removeRatingFromMovieAndAudience.accept(rating);
+                    ratingRepository.save(rating);
+                    ratingRepository.delete(rating);
+                    }, () -> {
+                    throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.RATING));
+                });
     }
 
-    private Rating findRatingByMovieIdAndAudienceId(Integer movieId, Integer audienceId) {
-        return ratingRepository.findByMovieIdAndAudienceId(movieId, audienceId)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.RATING)));
-    }
-
-    private void removeRatingFromMovieAndAudience(Rating rating) {
+    private final Consumer<Rating> removeRatingFromMovieAndAudience = rating -> {
         rating.setMovie(null);
         rating.setAudience(null);
-        ratingRepository.save(rating);
-    }
-
+    };
 }

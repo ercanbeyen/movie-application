@@ -300,8 +300,8 @@ public class MovieServiceImplTest {
         request.setActorIds(getMockActorIds());
 
         when(movieRepository.findById(id)).thenReturn(Optional.of(movie));
-        when(directorService.findDirectorById(director.getId())).thenReturn(director);
-        when(actorService.findActorById(actor.getId())).thenReturn(actor);
+        when(directorService.findDirector(director.getId())).thenReturn(director);
+        when(actorService.findActor(actor.getId())).thenReturn(actor);
         when(movieRepository.save(any(Movie.class))).thenReturn(updatedMovie);
         when(movieDtoConverter.convert(updatedMovie)).thenReturn(expected);
 

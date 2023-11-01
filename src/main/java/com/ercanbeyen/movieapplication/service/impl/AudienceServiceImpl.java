@@ -29,7 +29,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -44,7 +43,7 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
 
     @Override
     public void createAudience(RegistrationRequest request) {
-        Role role = roleService.findRoleByRoleName(RoleNames.USER);
+        Role role = roleService.findRole(RoleNames.USER);
         Set<Role> roleSet = Set.of(role);
 
         Audience newAudience = Audience.builder()
@@ -109,14 +108,15 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
     @Transactional
     @Override
     public void deleteAudience(Integer id, UserDetails userDetails) {
-        Audience audienceInDb = findAudienceById(id);
-
-        audienceInDb.getRatings()
-                .forEach(rating -> rating.setAudience(null));
-        audienceInDb.setRatings(null);
-
-        audienceRepository.delete(audienceInDb);
-        log.info(LogMessages.DELETED, ResourceNames.AUDIENCE);
+        audienceRepository.findById(id)
+                .ifPresentOrElse(audience -> {
+                    audience.getRatings().forEach(rating -> rating.setAudience(null));
+                    audience.setRatings(null);
+                    audienceRepository.delete(audience);
+                    log.info(LogMessages.DELETED, ResourceNames.AUDIENCE);
+                    }, () -> {
+                    throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.AUDIENCE));
+                });
     }
 
     @Override
@@ -132,7 +132,7 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
         }
 
         Set<Role> roleSet = roleNames.stream()
-                .map(roleService::findRoleByRoleName)
+                .map(roleService::findRole)
                 .collect(Collectors.toSet());
 
         audienceInDb.setRoles(roleSet);
@@ -150,19 +150,18 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
         return new User(username, audience.getPassword(), audience.getAuthorities());
     }
 
+    @Override
     public Audience findAudienceById(Integer id) {
-        Optional<Audience> optionalAudience = audienceRepository.findById(id);
-
-        if (optionalAudience.isEmpty()) {
-            log.error(LogMessages.RESOURCE_NOT_FOUND, ResourceNames.AUDIENCE, id);
-            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.AUDIENCE));
-        }
-
-        log.info(LogMessages.RESOURCE_FOUND, ResourceNames.AUDIENCE, id);
-        return optionalAudience.get();
+        return audienceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.AUDIENCE)));
     }
 
-    public Audience findAudienceByUsername(String username) {
+    @Override
+    public Audience findAudience(String username) {
+        return findAudienceByUsername(username);
+    }
+
+    private Audience findAudienceByUsername(String username) {
         return audienceRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.AUDIENCE)));
     }

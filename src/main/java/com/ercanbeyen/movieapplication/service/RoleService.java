@@ -13,5 +13,5 @@ public interface RoleService {
     RoleDto getRole(Integer id);
     String updateRole(Integer id, UpdateRoleRequest request);
     String deleteRole(Integer id);
-    Role findRoleByRoleName(String roleName);
+    Role findRole(String roleName);
 }

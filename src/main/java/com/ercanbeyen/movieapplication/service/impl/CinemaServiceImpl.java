@@ -108,16 +108,12 @@ public class CinemaServiceImpl implements CinemaService {
 
     @Override
     public String deleteCinema(String id) {
-        boolean cinemaExists = cinemaRepository.existsById(id);
+        cinemaRepository.findById(id)
+                .ifPresentOrElse(cinemaRepository::delete, () -> {
+                    throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.CINEMA));
+                });
 
-        if (!cinemaExists) {
-            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE));
-        }
-
-        log.info(LogMessages.RESOURCE_FOUND, ResourceNames.CINEMA);
-        cinemaRepository.deleteById(id);
         log.info(LogMessages.DELETED, ResourceNames.CINEMA);
-
         return ResponseMessages.SUCCESS;
     }
 
@@ -258,14 +254,7 @@ public class CinemaServiceImpl implements CinemaService {
     }
 
     private Cinema findCinemaById(String id) {
-        Optional<Cinema> optionalCinema = cinemaRepository.findById(id);
-
-        if (optionalCinema.isEmpty()) {
-            log.error(LogMessages.RESOURCE_NOT_FOUND, ResourceNames.CINEMA, id);
-            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.CINEMA));
-        }
-
-        log.info(LogMessages.RESOURCE_FOUND, ResourceNames.CINEMA, id);
-        return optionalCinema.get();
+        return cinemaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.CINEMA)));
     }
 }

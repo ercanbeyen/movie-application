@@ -24,6 +24,5 @@ public interface MovieService {
     MovieDto rateMovie(Integer id, Double rate, UserDetails userDetails);
     MovieDto deleteRatingOfMovie(Integer id, Integer audienceId);
     Movie updateRatingOfMovie(Movie movie);
-    Movie findMovieById(Integer id);
     Statistics<String, String> calculateStatistics();
 }
