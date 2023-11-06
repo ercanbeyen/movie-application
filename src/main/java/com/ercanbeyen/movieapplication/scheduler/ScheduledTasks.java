@@ -82,7 +82,6 @@ public class ScheduledTasks {
         request.setTitle("Test-movie");
         request.setGenre(Genre.ACTION);
         request.setDirectorId(null);
-        request.setRating(3d);
         request.setLanguage("English");
         request.setReleaseYear(2005);
 
@@ -140,7 +139,6 @@ public class ScheduledTasks {
         request.setTitle("Test-movie");
         request.setImdbId("tt2964642");
         request.setGenre(Genre.ACTION);
-        request.setRating(3d);
         request.setLanguage("English");
         request.setReleaseYear(2005);
 

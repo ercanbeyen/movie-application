@@ -24,7 +24,7 @@ public class SecurityConfig {
         return httpSecurity.cors().and()
                 .csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/v1/registration", "/login").permitAll()
+                .requestMatchers("/api/v1/registration", "/login", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/api/v1/audience/{id}/roles", "/api/v1/audiences").hasAnyAuthority(RoleNames.ADMIN)
                 .requestMatchers("/api/v1/audiences/**").hasAnyAuthority(RoleNames.USER)
                 .requestMatchers(HttpMethod.GET, "/api/v1/movies/**", "/api/v1/directors/**", "/api/v1/actors/**", "/api/v1/cinemas/**", "/api/v1/audiences/**").hasAnyAuthority(RoleNames.USER)
