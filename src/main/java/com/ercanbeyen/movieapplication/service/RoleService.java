@@ -6,6 +6,7 @@ import com.ercanbeyen.movieapplication.dto.request.update.UpdateRoleRequest;
 import com.ercanbeyen.movieapplication.entity.Role;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public interface RoleService {
     String createRole(CreateRoleRequest request);
@@ -14,4 +15,5 @@ public interface RoleService {
     String updateRole(Integer id, UpdateRoleRequest request);
     String deleteRole(Integer id);
     Role findRole(String roleName);
+    CompletableFuture<Role> findRoleAsync(String roleName);
 }

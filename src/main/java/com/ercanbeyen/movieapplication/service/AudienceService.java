@@ -18,6 +18,6 @@ public interface AudienceService {
     AudienceDto updateAudience(Integer id, UpdateAudienceRequest request, UserDetails userDetails);
     void deleteAudience(Integer id, UserDetails userDetails);
     String updateRolesOfAudience(Integer id, Set<String> roleNames, UserDetails userDetails);
-    Audience findAudienceById(Integer id);
+    Audience findAudience(Integer id);
     Audience findAudience(String username);
 }

@@ -15,9 +15,11 @@ import com.ercanbeyen.movieapplication.service.RoleService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +32,7 @@ public class RoleServiceImpl implements RoleService {
     public String createRole(CreateRoleRequest request) {
         String roleName = request.getRoleName();
 
-        roleRepository.findByRoleName(roleName)
+        roleRepository.findRole(roleName)
                 .ifPresentOrElse(role -> {
                     throw new ResourceConflictException(String.format(ResponseMessages.ALREADY_EXISTS, ResourceNames.ROLE));
                     }, () -> {
@@ -86,7 +88,20 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public Role findRole(String roleName) {
-        return roleRepository.findByRoleName(roleName)
+        return roleRepository.findRole(roleName)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ROLE)));
+    }
+
+    @Async
+    @Override
+    public CompletableFuture<Role> findRoleAsync(String roleName) {
+        return roleRepository.findByRoleName(roleName)
+                .handle((result, exception) -> {
+                    if (exception != null) {
+                        throw new ResourceNotFoundException(String.format(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ROLE)));
+                    }
+
+                    return result;
+                });
     }
 }

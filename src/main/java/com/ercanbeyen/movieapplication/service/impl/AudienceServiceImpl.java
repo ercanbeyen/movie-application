@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,13 +44,12 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
 
     @Override
     public void createAudience(RegistrationRequest request) {
-        Role role = roleService.findRole(RoleNames.USER);
-        Set<Role> roleSet = Set.of(role);
+        CompletableFuture<Role> roleFuture = roleService.findRoleAsync(RoleNames.USER);
 
         Audience newAudience = Audience.builder()
                 .username(request.username())
                 .password(passwordEncoder.encode(request.password()))
-                .roles(roleSet)
+                .roles(Set.of(roleFuture.join()))
                 .name(request.name())
                 .surname(request.surname())
                 .nationality(request.nationality())
@@ -90,7 +90,6 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
     public AudienceDto updateAudience(Integer id, UpdateAudienceRequest request, UserDetails userDetails) {
         Audience audienceInDb = findAudienceById(id);
 
-        audienceInDb.setUsername(request.getUsername());
         audienceInDb.setPassword(passwordEncoder.encode(request.getPassword()));
         audienceInDb.setName(request.getName());
         audienceInDb.setSurname(request.getSurname());
@@ -151,14 +150,18 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
     }
 
     @Override
-    public Audience findAudienceById(Integer id) {
-        return audienceRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.AUDIENCE)));
+    public Audience findAudience(Integer id) {
+        return findAudienceById(id);
     }
 
     @Override
     public Audience findAudience(String username) {
         return findAudienceByUsername(username);
+    }
+
+    private Audience findAudienceById(Integer id) {
+        return audienceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.AUDIENCE)));
     }
 
     private Audience findAudienceByUsername(String username) {
