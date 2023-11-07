@@ -1,11 +1,14 @@
 package com.ercanbeyen.movieapplication.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 @Entity
 @Table(name = "ratings")
-@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
+@EqualsAndHashCode
 public class Rating {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,4 +18,14 @@ public class Rating {
     private Movie movie;
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     private Audience audience;
+
+    @Override
+    public String toString() {
+        return "Rating{" +
+                "id=" + id +
+                ", rate=" + rate +
+                ", movie=" + movie.getId() +
+                ", audience=" + audience.getId() +
+                '}';
+    }
 }

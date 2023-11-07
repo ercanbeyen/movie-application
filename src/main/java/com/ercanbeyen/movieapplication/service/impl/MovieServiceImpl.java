@@ -31,6 +31,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -192,31 +194,25 @@ public class MovieServiceImpl implements MovieService {
     @Transactional
     @Override
     public MovieDto rateMovie(Integer id, Double rate, UserDetails userDetails) {
-        Movie movieInDb = findMovieById(id);
-        Audience audienceInDb = audienceService.findAudience(userDetails.getUsername());
+        Movie movie = findMovieById(id);
+        CompletableFuture<Audience> audienceFuture = audienceService.findAudienceAsync(userDetails.getUsername());
 
-        Optional<Rating> optionalRating = movieInDb.getRatings()
-                .stream()
-                .filter(rating -> rating.getAudience().getId().intValue() == audienceInDb.getId().intValue() &&
-                        rating.getMovie().getId().intValue() == movieInDb.getId().intValue())
-                .findFirst();
+        return findRatingByMovieAndAudience.andThen(optionalRating -> {
+            boolean isRatingPresent = optionalRating.isPresent();
+            String logMessage = isRatingPresent ? ResourceNames.RATING + " is created before"
+                    : ResourceNames.RATING + " has not been created before";
+            log.info(logMessage);
 
-        boolean isRatingPresent = optionalRating.isPresent();
-        String logMessage = isRatingPresent ? ResourceNames.RATING + " is created before"
-                : ResourceNames.RATING + " has not been created before";
-        log.info(logMessage);
+            RatingDto ratingDto = (isRatingPresent) ? ratingService.updatedRating(optionalRating.get(), rate)
+                    : ratingService.createRating(audienceFuture.join(), movie, rate);
 
+            if (ratingDto == null) {
+                throw new IllegalStateException("Unable to rate " + ResourceNames.MOVIE + " " + movie.getId());
+            }
 
-        RatingDto ratingDto = (isRatingPresent) ? ratingService.updatedRating(optionalRating.get(), rate)
-                : ratingService.createRating(audienceInDb, movieInDb, rate);
-
-        if (ratingDto == null) {
-            throw new IllegalStateException("Unable to rate " + ResourceNames.MOVIE + " " + movieInDb.getId());
-        }
-
-        Movie savedMovie = updateRatingOfMovie(movieInDb);
-
-        return movieDtoConverter.convert(savedMovie);
+            Movie savedMovie = updateRatingOfMovie(movie);
+            return movieDtoConverter.convert(savedMovie);
+        }).apply(movie, audienceFuture);
     }
 
     public Movie updateRatingOfMovie(Movie movie) {
@@ -293,6 +289,12 @@ public class MovieServiceImpl implements MovieService {
 
         log.info("imdbId check is passed");
     }
+
+    private static final BiFunction<Movie, CompletableFuture<Audience>, Optional<Rating>> findRatingByMovieAndAudience = (movie, audienceFuture) -> movie.getRatings()
+            .stream()
+            .filter(rating -> rating.getAudience().getId().intValue() == audienceFuture.join().getId().intValue() &&
+                    rating.getMovie().getId().intValue() == movie.getId().intValue())
+            .findFirst();
 
     private Movie findMovieById(Integer id) {
         return movieRepository.findById(id)

@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -154,9 +155,10 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
         return findAudienceById(id);
     }
 
+    @Async
     @Override
-    public Audience findAudience(String username) {
-        return findAudienceByUsername(username);
+    public CompletableFuture<Audience> findAudienceAsync(String username) {
+        return audienceRepository.findByUsername(username);
     }
 
     private Audience findAudienceById(Integer id) {
@@ -165,7 +167,7 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
     }
 
     private Audience findAudienceByUsername(String username) {
-        return audienceRepository.findByUsername(username)
+        return audienceRepository.findAudience(username)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.AUDIENCE)));
     }
 }

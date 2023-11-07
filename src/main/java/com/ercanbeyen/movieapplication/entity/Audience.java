@@ -37,7 +37,7 @@ public non-sealed class Audience extends Base implements UserDetails {
     private Set<Role> roles;
     @Setter
     @Getter
-    @OneToMany(mappedBy = "audience", cascade = CascadeType.MERGE)
+    @OneToMany(mappedBy = "audience", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private List<Rating> ratings = new ArrayList<>();
 
     @Override

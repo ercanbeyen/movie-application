@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 public interface AudienceService {
     void createAudience(RegistrationRequest request);
@@ -19,5 +20,5 @@ public interface AudienceService {
     void deleteAudience(Integer id, UserDetails userDetails);
     String updateRolesOfAudience(Integer id, Set<String> roleNames, UserDetails userDetails);
     Audience findAudience(Integer id);
-    Audience findAudience(String username);
+    CompletableFuture<Audience> findAudienceAsync(String username);
 }
