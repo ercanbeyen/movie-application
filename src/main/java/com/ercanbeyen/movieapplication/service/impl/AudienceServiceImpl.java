@@ -76,15 +76,14 @@ public class AudienceServiceImpl implements AudienceService, UserDetailsService 
 
     @Override
     public AudienceDto getAudience(Integer id) {
-        Audience audienceInDb = findAudienceById(id);
-        log.info("Ratings in audience: {}", audienceInDb.getRatings());
-        return audienceDtoConverter.convert(audienceInDb);
+        return audienceRepository.findAudienceDtoById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.AUDIENCE)));
     }
 
     @Override
     public AudienceDto getAudience(String username) {
-        Audience audienceIndDb = findAudienceByUsername(username);
-        return audienceDtoConverter.convert(audienceIndDb);
+        return audienceRepository.findAudienceDtoByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.AUDIENCE)));
     }
 
     @Override

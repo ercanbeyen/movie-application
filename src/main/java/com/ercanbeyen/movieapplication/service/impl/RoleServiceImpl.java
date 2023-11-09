@@ -54,9 +54,8 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public RoleDto getRole(Integer id) {
-        Role roleInDb =  roleRepository.findById(id)
+        return roleRepository.findRoleDtoById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ROLE)));
-        return roleDtoConverter.convert(roleInDb);
     }
 
     @Transactional
