@@ -21,8 +21,8 @@ public class RoleController {
 
     @PostMapping
     public ResponseEntity<?> createRole(@RequestBody CreateRoleRequest request) {
-        RoleDto roleDto = roleService.createRole(request);
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, roleDto);
+        String message = roleService.createRole(request);
+        return ResponseHandler.generateResponse(HttpStatus.OK, message, null);
     }
 
     @LogExecutionTime
@@ -40,8 +40,8 @@ public class RoleController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateRole(@PathVariable Integer id, @RequestBody UpdateRoleRequest request) {
-        RoleDto roleDto = roleService.updateRole(id, request);
-        return ResponseHandler.generateResponse(HttpStatus.OK, null, roleDto);
+        String message = roleService.updateRole(id, request);
+        return ResponseHandler.generateResponse(HttpStatus.OK, message, null);
     }
 
     @DeleteMapping("/{id}")

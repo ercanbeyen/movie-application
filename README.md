@@ -13,10 +13,11 @@ Entities:
 - Director
 - Actor
 - Audience
+- Rating
 - Role
 
- Documents:
- - Cinema
+Documents:
+- Cinema
 
 There are 2 roles among audiences
 - Admin
@@ -24,8 +25,8 @@ There are 2 roles among audiences
 
 ### Requirements
 - Audiences must log in to use the application.
-- Each audience must have a unique username.
-- Each movie must have title, language, genre, release year and rating.
+- Each audience must have an unique username.
+- Each movie must have imdb id, title, language, genre, release year and rating.
 - Each director and actor must have name, surname, nationality and birth year.
 - Each role's name must be unique.
 - Each cinema must have a name, country, city, address, contact number, hall amount and statuses (reservation, 3-D animation, parking place, air conditioning and cafe & food)
@@ -34,9 +35,11 @@ There are 2 roles among audiences
 
 ### Additionals
 - Cron jobs work during runtime.
-- Statistical values can be observed for each entity and document. 
+- Statistical values can be observed for each entity and document.
 - Directors and actors may appear in multiple movies.
+- Audiences may retrieve partial response from requests related with actors.
 - Audiences may have multiple roles.
+- Audiences may rate each movie between 1 and 5.
 - Admins may apply DML statements to movies only in allowed time periods.
 
 ### Tech Stack

@@ -1,6 +1,5 @@
 package com.ercanbeyen.movieapplication.entity;
 
-import com.ercanbeyen.movieapplication.constant.enums.RoleName;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -28,7 +27,7 @@ public non-sealed class Audience extends Base implements UserDetails {
     @Getter
     @ManyToMany(
             fetch = FetchType.EAGER,
-            cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}
+            cascade = CascadeType.MERGE
     )
     @JoinTable(
             name = "audiences_roles",
@@ -38,7 +37,7 @@ public non-sealed class Audience extends Base implements UserDetails {
     private Set<Role> roles;
     @Setter
     @Getter
-    @OneToMany(mappedBy = "audience", cascade = CascadeType.MERGE)
+    @OneToMany(mappedBy = "audience", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private List<Rating> ratings = new ArrayList<>();
 
     @Override
@@ -82,7 +81,7 @@ public non-sealed class Audience extends Base implements UserDetails {
                 .map(Rating::getId)
                 .toList();
 
-        List<RoleName> roleNameList = roles.stream()
+        List<String> roleNameList = roles.stream()
                 .map(Role::getRoleName)
                 .toList();
 

@@ -16,8 +16,8 @@ import org.springframework.util.StopWatch;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Slf4j
 @Aspect
@@ -36,7 +36,7 @@ public class AspectManagement {
 
         Integer id = (Integer) args[1];
         UserDetails userDetails = (UserDetails) args[0];
-        Audience audience = audienceService.findAudienceById(id);
+        Audience audience = audienceService.findAudience(id);
         StringBuilder message = new StringBuilder("User in database and logged in user are ");
 
         if (!audience.getUsername().equals(userDetails.getUsername())) {
@@ -92,10 +92,13 @@ public class AspectManagement {
     @Before("@annotation(com.ercanbeyen.movieapplication.annotation.DMLAllowed)")
     public void checkDMLStatementConditions() {
         LocalDate currentDate = LocalDate.now();
-        List<DayOfWeek> allowedDayList = List.of(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY);
+        Set<DayOfWeek> allowedDaySet = Set.of(
+                DayOfWeek.MONDAY, DayOfWeek.TUESDAY,
+                DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY
+        );
 
-        if (!allowedDayList.contains(currentDate.getDayOfWeek())) {
-            throw new ResourceConflictException("DML statements can only be applied in " + allowedDayList);
+        if (!allowedDaySet.contains(currentDate.getDayOfWeek())) {
+            throw new ResourceConflictException("DML statements can only be applied in " + allowedDaySet);
         }
     }
 

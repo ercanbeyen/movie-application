@@ -1,5 +1,6 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
+import com.ercanbeyen.movieapplication.constant.defaults.DefaultValues;
 import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
 import com.ercanbeyen.movieapplication.constant.message.*;
 import com.ercanbeyen.movieapplication.constant.names.ParameterNames;
@@ -26,7 +27,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -119,16 +119,12 @@ public class ActorServiceImpl implements ActorService {
     @CacheEvict(value = "actors", key = "#id")
     @Override
     public String deleteActor(Integer id) {
-        boolean actorExists = actorRepository.existsById(id);
+        actorRepository.findById(id)
+                .ifPresentOrElse(actorRepository::delete, () -> {
+                    throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ACTOR));
+                });
 
-        if (!actorExists) {
-            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ACTOR));
-        }
-
-        log.info(LogMessages.RESOURCE_FOUND, ResourceNames.ACTOR);
-        actorRepository.deleteById(id);
         log.info(LogMessages.DELETED, ResourceNames.ACTOR);
-
         return ResponseMessages.SUCCESS;
     }
 
@@ -137,12 +133,11 @@ public class ActorServiceImpl implements ActorService {
     public List<ActorDto> getMostPopularActors() {
         List<Actor> actors = actorRepository.findAll();
         log.info(LogMessages.FETCHED_ALL, ResourceNames.ACTOR);
-        int numberOfMovies = 2;
 
         return actors.stream()
-                .filter(actor -> actor.getMoviesPlayed().size() >= numberOfMovies)
+                .filter(actor -> actor.getMoviesPlayed().size() >= DefaultValues.MINIMUM_NUMBER_OF_MOVIES_TO_BECOME_POPULAR)
                 .map(actorDtoConverter::convert)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -156,16 +151,8 @@ public class ActorServiceImpl implements ActorService {
     }
 
     @Override
-    public Actor findActorById(Integer id) {
-        Optional<Actor> optionalActor = actorRepository.findById(id);
-
-        if (optionalActor.isEmpty()) {
-            log.error(LogMessages.RESOURCE_NOT_FOUND, ResourceNames.ACTOR, id);
-            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ACTOR));
-        }
-
-        log.info(LogMessages.RESOURCE_FOUND, ResourceNames.ACTOR, id);
-        return optionalActor.get();
+    public Actor findActor(Integer id) {
+        return findActorById(id);
     }
 
     @Override
@@ -186,4 +173,8 @@ public class ActorServiceImpl implements ActorService {
         return new Statistics<>(ResourceNames.ACTOR, statisticsMap);
     }
 
+    private Actor findActorById(Integer id) {
+        return actorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.ACTOR)));
+    }
 }

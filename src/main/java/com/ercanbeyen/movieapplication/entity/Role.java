@@ -1,6 +1,5 @@
 package com.ercanbeyen.movieapplication.entity;
 
-import com.ercanbeyen.movieapplication.constant.enums.RoleName;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,9 +20,8 @@ public class Role implements GrantedAuthority, Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @Enumerated(EnumType.STRING)
     @Column(unique = true, nullable = false)
-    private RoleName roleName;
+    private String roleName;
     @ManyToMany(
             mappedBy = "roles",
             cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}
@@ -32,6 +30,6 @@ public class Role implements GrantedAuthority, Serializable {
 
     @Override
     public String getAuthority() {
-        return roleName.name();
+        return roleName;
     }
 }

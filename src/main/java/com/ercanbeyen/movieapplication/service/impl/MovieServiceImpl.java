@@ -31,6 +31,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -106,7 +109,7 @@ public class MovieServiceImpl implements MovieService {
         movieInDb.setImdbId(request.getImdbId());
 
         if (request.getDirectorId() != null) {
-            Director director = directorService.findDirectorById(request.getDirectorId());
+            Director director = directorService.findDirector(request.getDirectorId());
             movieInDb.setDirector(director);
             log.info(LogMessages.RESOURCE_FOUND, ResourceNames.DIRECTOR, id);
         } else {
@@ -118,7 +121,7 @@ public class MovieServiceImpl implements MovieService {
         if (request.getActorIds() != null) {
             Set<Actor> actorSet = new HashSet<>();
             for (Integer actorId : request.getActorIds()) {
-                Actor actorInDb = actorService.findActorById(actorId);
+                Actor actorInDb = actorService.findActor(actorId);
                 actorInDb.getMoviesPlayed().add(movieInDb);
                 actorSet.add(actorInDb);
                 log.info(LogMessages.RESOURCE_FOUND, ResourceNames.ACTOR, id);
@@ -146,12 +149,12 @@ public class MovieServiceImpl implements MovieService {
     @Transactional
     @Override
     public String deleteMovie(Integer id) {
-        Movie movieInDb = findMovieById(id);
-        log.info(LogMessages.RESOURCE_FOUND, ResourceNames.MOVIE);
+        movieRepository.findById(id)
+                .ifPresentOrElse(movieRepository::delete, () -> {
+                    throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE));
+                });
 
-        movieRepository.delete(movieInDb);
         log.info(LogMessages.DELETED, ResourceNames.MOVIE);
-
         return ResponseMessages.SUCCESS;
     }
 
@@ -191,35 +194,29 @@ public class MovieServiceImpl implements MovieService {
     @Transactional
     @Override
     public MovieDto rateMovie(Integer id, Double rate, UserDetails userDetails) {
-        Movie movieInDb = findMovieById(id);
-        Audience audienceInDb = audienceService.findAudienceByUsername(userDetails.getUsername());
+        Movie movie = findMovieById(id);
+        CompletableFuture<Audience> audienceFuture = audienceService.findAudienceAsync(userDetails.getUsername());
 
-        Optional<Rating> optionalRating = movieInDb.getRatings()
-                .stream()
-                .filter(rating -> rating.getAudience().getId().intValue() == audienceInDb.getId().intValue() &&
-                        rating.getMovie().getId().intValue() == movieInDb.getId().intValue())
-                .findFirst();
+        return findRatingByMovieAndAudience.andThen(optionalRating -> {
+            boolean isRatingPresent = optionalRating.isPresent();
+            String logMessage = isRatingPresent ? ResourceNames.RATING + " is created before"
+                    : ResourceNames.RATING + " has not been created before";
+            log.info(logMessage);
 
-        boolean isRatingPresent = optionalRating.isPresent();
-        String logMessage = isRatingPresent ? ResourceNames.RATING + " is created before"
-                : ResourceNames.RATING + " has not been created before";
-        log.info(logMessage);
+            RatingDto ratingDto = (isRatingPresent) ? ratingService.updatedRating(optionalRating.get(), rate)
+                    : ratingService.createRating(audienceFuture.join(), movie, rate);
 
+            if (ratingDto == null) {
+                throw new IllegalStateException("Unable to rate " + ResourceNames.MOVIE + " " + movie.getId());
+            }
 
-        RatingDto ratingDto = (isRatingPresent) ? ratingService.updatedRating(optionalRating.get(), rate)
-                : ratingService.createRating(audienceInDb, movieInDb, rate);
-
-        if (ratingDto == null) {
-            throw new IllegalStateException("Unable to rate " + ResourceNames.MOVIE + " " + movieInDb.getId());
-        }
-
-        Movie savedMovie = updateRatingOfMovie(movieInDb);
-
-        return movieDtoConverter.convert(savedMovie);
+            Movie savedMovie = updateRatingOfMovie(movie);
+            return movieDtoConverter.convert(savedMovie);
+        }).apply(movie, audienceFuture);
     }
 
     public Movie updateRatingOfMovie(Movie movie) {
-        Double averageRating = calculateAverageRating(movie);
+        Double averageRating = calculateAverageRating.apply(movie);
         movie.setAverageRating(averageRating);
         log.info(LogMessages.FIELDS_SET);
 
@@ -234,7 +231,7 @@ public class MovieServiceImpl implements MovieService {
         Movie movieInDb = findMovieById(id);
 
         ratingService.deleteRating(id, audienceId);
-        Double averageRating = calculateAverageRating(movieInDb);
+        Double averageRating = calculateAverageRating.apply(movieInDb);
         movieInDb.setAverageRating(averageRating);
         log.info(LogMessages.FIELDS_SET);
 
@@ -242,19 +239,6 @@ public class MovieServiceImpl implements MovieService {
         log.info(LogMessages.SAVED, ResourceNames.RATING);
 
         return movieDtoConverter.convert(movieInDb);
-    }
-
-    @Override
-    public Movie findMovieById(Integer id) {
-        Optional<Movie> optionalMovie = movieRepository.findById(id);
-
-        if (optionalMovie.isEmpty()) {
-            log.error(LogMessages.RESOURCE_NOT_FOUND, ResourceNames.MOVIE, id);
-            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE));
-        }
-
-        log.info(LogMessages.RESOURCE_FOUND, ResourceNames.MOVIE, id);
-        return optionalMovie.get();
     }
 
     @Override
@@ -306,12 +290,20 @@ public class MovieServiceImpl implements MovieService {
         log.info("imdbId check is passed");
     }
 
-    private Double calculateAverageRating(Movie movie) {
-        return movie.getRatings()
+    private static final BiFunction<Movie, CompletableFuture<Audience>, Optional<Rating>> findRatingByMovieAndAudience = (movie, audienceFuture) -> movie.getRatings()
+            .stream()
+            .filter(rating -> rating.getAudience().getId().intValue() == audienceFuture.join().getId().intValue() &&
+                    rating.getMovie().getId().intValue() == movie.getId().intValue())
+            .findFirst();
+
+    private Movie findMovieById(Integer id) {
+        return movieRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE)));
+    }
+
+    private final Function<Movie, Double> calculateAverageRating = movie -> movie.getRatings()
                 .stream()
                 .mapToDouble(Rating::getRate)
                 .average()
                 .orElse(0);
-    }
-
 }

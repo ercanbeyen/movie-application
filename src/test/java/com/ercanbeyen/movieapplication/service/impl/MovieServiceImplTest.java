@@ -146,7 +146,6 @@ public class MovieServiceImplTest {
         request.setReleaseYear(movie.getReleaseYear());
         request.setLanguage(movie.getLanguage());
         request.setDirectorId(expected.directorId());
-        request.setRating(expected.rating());
         request.setSummary(movie.getSummary());
 
         when(movieRepository.save(any(Movie.class))).thenReturn(movie);
@@ -262,7 +261,6 @@ public class MovieServiceImplTest {
         request.setGenre(expected.genre());
         request.setReleaseYear(expected.releaseYear());
         request.setLanguage(expected.language());
-        request.setRating(expected.rating());
         request.setSummary(expected.summary());
         request.setDirectorId(expected.directorId());
         request.setActorIds(null);
@@ -297,14 +295,13 @@ public class MovieServiceImplTest {
         request.setGenre(expected.genre());
         request.setReleaseYear(expected.releaseYear());
         request.setLanguage(expected.language());
-        request.setRating(expected.rating());
         request.setSummary(expected.summary());
         request.setDirectorId(getMockDirector().getId());
         request.setActorIds(getMockActorIds());
 
         when(movieRepository.findById(id)).thenReturn(Optional.of(movie));
-        when(directorService.findDirectorById(director.getId())).thenReturn(director);
-        when(actorService.findActorById(actor.getId())).thenReturn(actor);
+        when(directorService.findDirector(director.getId())).thenReturn(director);
+        when(actorService.findActor(actor.getId())).thenReturn(actor);
         when(movieRepository.save(any(Movie.class))).thenReturn(updatedMovie);
         when(movieDtoConverter.convert(updatedMovie)).thenReturn(expected);
 
@@ -331,7 +328,6 @@ public class MovieServiceImplTest {
         request.setGenre(movie.getGenre());
         request.setReleaseYear(movie.getReleaseYear());
         request.setLanguage(movie.getLanguage());
-        request.setRating(movie.getAverageRating());
         request.setSummary(movie.getSummary());
         request.setDirectorId(movie.getId());
         request.setActorIds(getMockActorIds());
@@ -360,7 +356,6 @@ public class MovieServiceImplTest {
         UpdateMovieRequest request = new UpdateMovieRequest();
         request.setTitle("Test-title");
         request.setLanguage("Test-language");
-        request.setRating(2d);
         request.setSummary("Test-summary");
 
         String expected = String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE);
@@ -382,34 +377,35 @@ public class MovieServiceImplTest {
     public void whenDeleteMovieCalledWithExistedId_itShouldReturnMessage() {
         Movie movie = movieList.get(0);
         int id = movie.getId();
+        Optional<Movie> optionalMovie = Optional.of(movie);
 
         String expected = ResponseMessages.SUCCESS;
 
-        when(movieRepository.existsById(id)).thenReturn(true);
+        when(movieRepository.findById(id)).thenReturn(optionalMovie);
 
         String actual = movieService.deleteMovie(id);
 
         assertEquals(expected, actual);
 
-        verify(movieRepository, times(1)).existsById(id);
-        verify(movieRepository, times(1)).deleteById(id);
+        verify(movieRepository, times(1)).findById(id);
+        verify(movieRepository, times(1)).delete(any(Movie.class));
     }
 
     @Test
     @DisplayName("When deleteMovie Called With Not Existed Id It_Should Throw ResourceNotFoundException")
     public void whenDeleteMovieCalledWithNotExistedId_itShouldThrowResourceNotFoundException() {
         int id = 15;
-
+        Optional<Movie> optionalMovie = Optional.empty();
         String expected = String.format(ResponseMessages.NOT_FOUND, ResourceNames.MOVIE);
 
-        when(movieRepository.existsById(id)).thenReturn(false);
+        when(movieRepository.findById(id)).thenReturn(optionalMovie);
 
         RuntimeException exception = assertThrows(ResourceNotFoundException.class, () -> movieService.deleteMovie(id));
         String actual = exception.getMessage();
 
         assertEquals(expected, actual);
 
-        verify(movieRepository, times(1)).existsById(id);
+        verify(movieRepository, times(1)).findById(id);
         verifyNoMoreInteractions(movieRepository);
     }
 

@@ -1,6 +1,5 @@
 package com.ercanbeyen.movieapplication.service;
 
-import com.ercanbeyen.movieapplication.constant.enums.RoleName;
 import com.ercanbeyen.movieapplication.dto.AudienceDto;
 import com.ercanbeyen.movieapplication.dto.PageDto;
 import com.ercanbeyen.movieapplication.dto.request.auth.RegistrationRequest;
@@ -10,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 public interface AudienceService {
     void createAudience(RegistrationRequest request);
@@ -18,7 +18,7 @@ public interface AudienceService {
     AudienceDto getAudience(String username);
     AudienceDto updateAudience(Integer id, UpdateAudienceRequest request, UserDetails userDetails);
     void deleteAudience(Integer id, UserDetails userDetails);
-    String updateRolesOfAudience(Integer id, Set<RoleName> roleNames, UserDetails userDetails);
-    Audience findAudienceById(Integer id);
-    Audience findAudienceByUsername(String username);
+    String updateRolesOfAudience(Integer id, Set<String> roleNames, UserDetails userDetails);
+    Audience findAudience(Integer id);
+    CompletableFuture<Audience> findAudienceAsync(String username);
 }

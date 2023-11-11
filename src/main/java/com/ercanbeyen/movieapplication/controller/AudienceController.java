@@ -1,7 +1,6 @@
 package com.ercanbeyen.movieapplication.controller;
 
 import com.ercanbeyen.movieapplication.annotation.SelfAuthentication;
-import com.ercanbeyen.movieapplication.constant.enums.RoleName;
 import com.ercanbeyen.movieapplication.dto.AudienceDto;
 import com.ercanbeyen.movieapplication.dto.PageDto;
 import com.ercanbeyen.movieapplication.dto.request.update.UpdateAudienceRequest;
@@ -58,7 +57,7 @@ public class AudienceController {
     }
 
     @PatchMapping("/{id}/roles")
-    public ResponseEntity<?> updateRolesOfAudience(@PathVariable Integer id, @RequestBody Set<RoleName> roleNames, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<?> updateRolesOfAudience(@PathVariable Integer id, @RequestBody Set<String> roleNames, @AuthenticationPrincipal UserDetails userDetails) {
         String message = audienceService.updateRolesOfAudience(id, roleNames, userDetails);
         return ResponseHandler.generateResponse(HttpStatus.OK, message, null);
     }

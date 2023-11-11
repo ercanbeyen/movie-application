@@ -36,7 +36,7 @@ public class ScheduledTasks {
     private static final String ID = "id";
     private static final String ELEMENT_URI = COLLECTION_URI + "/{" + ID + "}";
 
-    @Scheduled(fixedRate = 25_000) // Every 25 seconds
+    @Scheduled(fixedRate = 150_000) // Every 150 seconds
     public void checkForFilterMovies() {
         final String checkedMethod = "filterMovies";
         log.info(LogMessages.TASK_STARTED, checkedMethod);
@@ -70,7 +70,7 @@ public class ScheduledTasks {
         log.info(LogMessages.TASK_COMPLETED, checkedMethod);
     }
 
-    @Scheduled(fixedRate = 30_000) // Every 30 seconds
+    @Scheduled(cron = "0 0 9 1 * *") // 9:00 PM on the first day of every month
     public void checkForCreateMovie() {
         final String checkedMethod = "createMethod";
         log.info(LogMessages.STARTED, checkedMethod);
@@ -82,7 +82,6 @@ public class ScheduledTasks {
         request.setTitle("Test-movie");
         request.setGenre(Genre.ACTION);
         request.setDirectorId(null);
-        request.setRating(3d);
         request.setLanguage("English");
         request.setReleaseYear(2005);
 
@@ -102,7 +101,7 @@ public class ScheduledTasks {
         log.info(LogMessages.TASK_COMPLETED, checkedMethod);
     }
 
-    @Scheduled(cron = "*/15 * * * * *") // Every 15 seconds
+    @Scheduled(cron = "0 0 18 * * MON-FRI") // Every weekday at 6:00 PM
     public void checkForGetMovie() {
         final String checkedMethod = "getMovie";
         log.info(LogMessages.TASK_STARTED, checkedMethod);
@@ -128,7 +127,7 @@ public class ScheduledTasks {
         log.info(LogMessages.TASK_COMPLETED, checkedMethod);
     }
 
-    @Scheduled(cron = "0 * * * * *") // Every minute
+    @Scheduled(cron = "0 0 8-10 * * *") // 8, 9 and 10 o'clock of every day
     public void checkForUpdateMovie() {
         final String checkedMethod = "updateMovie";
         log.info(LogMessages.TASK_STARTED, checkedMethod);
@@ -140,7 +139,6 @@ public class ScheduledTasks {
         request.setTitle("Test-movie");
         request.setImdbId("tt2964642");
         request.setGenre(Genre.ACTION);
-        request.setRating(3d);
         request.setLanguage("English");
         request.setReleaseYear(2005);
 
@@ -161,8 +159,8 @@ public class ScheduledTasks {
         log.info(LogMessages.TASK_COMPLETED, checkedMethod);
     }
 
-    @Scheduled(cron = "0 */2 * * * *") // Every 2 minutes
-    public void checkForDelete() {
+    @Scheduled(cron = "0 0 */8 * * *") // Every 8 hours on the hour
+    public void checkForDeleteMovie() {
         final String checkedMethod = "deleteMovie";
         log.info(LogMessages.TASK_STARTED, checkedMethod);
 
@@ -186,7 +184,7 @@ public class ScheduledTasks {
         log.info(LogMessages.TASK_COMPLETED, checkedMethod);
     }
 
-    @Scheduled(cron = "0 0 0 1 * ?") // Every first day of the month
+    @Scheduled(cron = "0 0 0 25 12 ?") // Every Christmas Day
     public void checkForCalculateStatistics() {
         final String checkedMethod = "calculateStatistics";
         log.info(LogMessages.TASK_STARTED, checkedMethod);

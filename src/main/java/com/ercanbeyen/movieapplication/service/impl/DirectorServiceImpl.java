@@ -1,5 +1,6 @@
 package com.ercanbeyen.movieapplication.service.impl;
 
+import com.ercanbeyen.movieapplication.constant.defaults.DefaultValues;
 import com.ercanbeyen.movieapplication.constant.enums.OrderBy;
 import com.ercanbeyen.movieapplication.constant.message.*;
 import com.ercanbeyen.movieapplication.constant.names.ParameterNames;
@@ -119,16 +120,12 @@ public class DirectorServiceImpl implements DirectorService {
     @CacheEvict(value = "directors", key = "#id")
     @Override
     public String deleteDirector(Integer id) {
-        boolean directorExists = directorRepository.existsById(id);
+        directorRepository.findById(id)
+                .ifPresentOrElse(directorRepository::delete, () -> {
+                    throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.DIRECTOR));
+                });
 
-        if (!directorExists) {
-            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.DIRECTOR));
-        }
-
-        log.info(LogMessages.RESOURCE_FOUND, ResourceNames.DIRECTOR);
-        directorRepository.deleteById(id);
         log.info(LogMessages.DELETED, ResourceNames.DIRECTOR);
-
         return ResponseMessages.SUCCESS;
     }
 
@@ -139,10 +136,9 @@ public class DirectorServiceImpl implements DirectorService {
 
         List<Director> directors = directorRepository.findAll();
         log.info(LogMessages.FETCHED_ALL, ResourceNames.DIRECTOR);
-        int numberOfMovies = 2;
 
         return directors.stream()
-                .filter(director -> director.getMoviesDirected().size() >= numberOfMovies)
+                .filter(director -> director.getMoviesDirected().size() >= DefaultValues.MINIMUM_NUMBER_OF_MOVIES_TO_BECOME_POPULAR)
                 .map(directorDtoConverter::convert)
                 .collect(Collectors.toList());
     }
@@ -158,16 +154,8 @@ public class DirectorServiceImpl implements DirectorService {
     }
 
     @Override
-    public Director findDirectorById(Integer id) {
-        Optional<Director> optionalDirector = directorRepository.findById(id);
-
-        if (optionalDirector.isEmpty()) {
-            log.error(LogMessages.RESOURCE_NOT_FOUND, ResourceNames.DIRECTOR, id);
-            throw new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.DIRECTOR));
-        }
-
-        log.info(LogMessages.RESOURCE_FOUND, ResourceNames.DIRECTOR, id);
-        return optionalDirector.get();
+    public Director findDirector(Integer id) {
+        return findDirectorById(id);
     }
 
     @Override
@@ -188,4 +176,8 @@ public class DirectorServiceImpl implements DirectorService {
         return new Statistics<>(ResourceNames.DIRECTOR, statisticsMap);
     }
 
+    private Director findDirectorById(Integer id) {
+        return directorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ResponseMessages.NOT_FOUND, ResourceNames.DIRECTOR)));
+    }
 }
